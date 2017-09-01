@@ -13,27 +13,39 @@
           <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="Customers">
+        <EntityType Name="CustomerCampaigns">
           <Key>
-            <PropertyRef Name="Email" />
+            <PropertyRef Name="CustomerID" />
             <PropertyRef Name="NicheID" />
           </Key>
-          <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CustomerID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="CampaignID" Type="int" Nullable="false" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="CurrentCampaignID" Type="int" Nullable="false" />
           <Property Name="CurrentCampaignDay" Type="int" Nullable="false" />
-          <Property Name="EmailSendDate" Type="datetime" Nullable="false" />
+          <Property Name="Subscribed" Type="bit" Nullable="false" />
+          <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
+          <Property Name="DateUnsubscribed" Type="datetime" />
         </EntityType>
-        <EntityType Name="Emails">
+        <EntityType Name="Customers">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="Body" Type="varchar(max)" Nullable="false" />
+          <Property Name="ID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="EmailSendDate" Type="datetime" Nullable="false" />
+          <Property Name="EmailFrequency" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Emails">
+          <Key>
+            <PropertyRef Name="CampaignID" />
+            <PropertyRef Name="Day" />
+          </Key>
           <Property Name="CampaignID" Type="int" Nullable="false" />
           <Property Name="Day" Type="int" Nullable="false" />
+          <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Body" Type="varchar(max)" Nullable="false" />
         </EntityType>
         <EntityType Name="Niches">
           <Key>
@@ -55,31 +67,43 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Customers__Campa__47DBAE45">
+        <Association Name="FK__CustomerC__Curre__797309D9">
           <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="1" />
-          <End Role="Customers" Type="Self.Customers" Multiplicity="*" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaigns" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Campaigns">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Customers">
-              <PropertyRef Name="CampaignID" />
+            <Dependent Role="CustomerCampaigns">
+              <PropertyRef Name="CurrentCampaignID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Customers__Niche__46E78A0C">
+        <Association Name="FK__CustomerC__Custo__05D8E0BE">
+          <End Role="Customers" Type="Self.Customers" Multiplicity="1" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaigns" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customers">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CustomerCampaigns">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CustomerC__Niche__787EE5A0">
           <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
-          <End Role="Customers" Type="Self.Customers" Multiplicity="*" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaigns" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Niches">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Customers">
+            <Dependent Role="CustomerCampaigns">
               <PropertyRef Name="NicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Emails__Campaign__4AB81AF0">
+        <Association Name="FK__Emails__Campaign__08B54D69">
           <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="1" />
           <End Role="Emails" Type="Self.Emails" Multiplicity="*" />
           <ReferentialConstraint>
@@ -93,6 +117,7 @@
         </Association>
         <EntityContainer Name="MarketingModelStoreContainer">
           <EntitySet Name="Campaigns" EntityType="Self.Campaigns" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CustomerCampaigns" EntityType="Self.CustomerCampaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Emails" EntityType="Self.Emails" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
@@ -100,15 +125,19 @@
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Campaigns" EntitySet="Campaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__Customers__Campa__47DBAE45" Association="Self.FK__Customers__Campa__47DBAE45">
+          <AssociationSet Name="FK__CustomerC__Curre__797309D9" Association="Self.FK__CustomerC__Curre__797309D9">
             <End Role="Campaigns" EntitySet="Campaigns" />
-            <End Role="Customers" EntitySet="Customers" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__Customers__Niche__46E78A0C" Association="Self.FK__Customers__Niche__46E78A0C">
+          <AssociationSet Name="FK__CustomerC__Custo__05D8E0BE" Association="Self.FK__CustomerC__Custo__05D8E0BE">
+            <End Role="Customers" EntitySet="Customers" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CustomerC__Niche__787EE5A0" Association="Self.FK__CustomerC__Niche__787EE5A0">
             <End Role="Niches" EntitySet="Niches" />
-            <End Role="Customers" EntitySet="Customers" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__Emails__Campaign__4AB81AF0" Association="Self.FK__Emails__Campaign__4AB81AF0">
+          <AssociationSet Name="FK__Emails__Campaign__08B54D69" Association="Self.FK__Emails__Campaign__08B54D69">
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
           </AssociationSet>
@@ -126,33 +155,47 @@
           <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Campaigns" ToRole="Niches" />
-          <NavigationProperty Name="Customers" Relationship="Self.FK__Customers__Campa__47DBAE45" FromRole="Campaigns" ToRole="Customers" />
-          <NavigationProperty Name="Emails" Relationship="Self.FK__Emails__Campaign__4AB81AF0" FromRole="Campaigns" ToRole="Emails" />
+          <NavigationProperty Name="CustomerCampaigns" Relationship="Self.FK__CustomerC__Curre__797309D9" FromRole="Campaigns" ToRole="CustomerCampaigns" />
+          <NavigationProperty Name="Emails" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Campaigns" ToRole="Emails" />
+        </EntityType>
+        <EntityType Name="CustomerCampaign">
+          <Key>
+            <PropertyRef Name="CustomerID" />
+            <PropertyRef Name="NicheID" />
+          </Key>
+          <Property Name="CustomerID" Type="Guid" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="CurrentCampaignID" Type="Int32" Nullable="false" />
+          <Property Name="CurrentCampaignDay" Type="Int32" Nullable="false" />
+          <Property Name="Subscribed" Type="Boolean" Nullable="false" />
+          <Property Name="DateSubscribed" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DateUnsubscribed" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Campaign" Relationship="Self.FK__CustomerC__Curre__797309D9" FromRole="CustomerCampaigns" ToRole="Campaigns" />
+          <NavigationProperty Name="Customer" Relationship="Self.FK__CustomerC__Custo__05D8E0BE" FromRole="CustomerCampaigns" ToRole="Customers" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__CustomerC__Niche__787EE5A0" FromRole="CustomerCampaigns" ToRole="Niches" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
-            <PropertyRef Name="Email" />
-            <PropertyRef Name="NicheID" />
+            <PropertyRef Name="ID" />
           </Key>
-          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="ID" Type="Guid" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CampaignID" Type="Int32" Nullable="false" />
-          <Property Name="CurrentCampaignDay" Type="Int32" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSendDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Campaign" Relationship="Self.FK__Customers__Campa__47DBAE45" FromRole="Customers" ToRole="Campaigns" />
-          <NavigationProperty Name="Nich" Relationship="Self.FK__Customers__Niche__46E78A0C" FromRole="Customers" ToRole="Niches" />
+          <Property Name="EmailFrequency" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="CustomerCampaigns" Relationship="Self.FK__CustomerC__Custo__05D8E0BE" FromRole="Customers" ToRole="CustomerCampaigns" />
         </EntityType>
         <EntityType Name="Email">
           <Key>
-            <PropertyRef Name="ID" />
+            <PropertyRef Name="CampaignID" />
+            <PropertyRef Name="Day" />
           </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Subject" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="CampaignID" Type="Int32" Nullable="false" />
           <Property Name="Day" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Campaign" Relationship="Self.FK__Emails__Campaign__4AB81AF0" FromRole="Emails" ToRole="Campaigns" />
+          <Property Name="Subject" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Campaign" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Emails" ToRole="Campaigns" />
         </EntityType>
         <EntityType Name="Nich">
           <Key>
@@ -162,7 +205,7 @@
           <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Campaigns" />
-          <NavigationProperty Name="Customers" Relationship="Self.FK__Customers__Niche__46E78A0C" FromRole="Niches" ToRole="Customers" />
+          <NavigationProperty Name="CustomerCampaigns" Relationship="Self.FK__CustomerC__Niche__787EE5A0" FromRole="Niches" ToRole="CustomerCampaigns" />
         </EntityType>
         <Association Name="FK__Campaigns__Niche__440B1D61">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
@@ -176,19 +219,19 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Customers__Campa__47DBAE45">
+        <Association Name="FK__CustomerC__Curre__797309D9">
           <End Role="Campaigns" Type="Self.Campaign" Multiplicity="1" />
-          <End Role="Customers" Type="Self.Customer" Multiplicity="*" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaign" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Campaigns">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Customers">
-              <PropertyRef Name="CampaignID" />
+            <Dependent Role="CustomerCampaigns">
+              <PropertyRef Name="CurrentCampaignID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Emails__Campaign__4AB81AF0">
+        <Association Name="FK__Emails__Campaign__08B54D69">
           <End Role="Campaigns" Type="Self.Campaign" Multiplicity="1" />
           <End Role="Emails" Type="Self.Email" Multiplicity="*" />
           <ReferentialConstraint>
@@ -200,20 +243,33 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Customers__Niche__46E78A0C">
+        <Association Name="FK__CustomerC__Custo__05D8E0BE">
+          <End Role="Customers" Type="Self.Customer" Multiplicity="1" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaign" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customers">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CustomerCampaigns">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CustomerC__Niche__787EE5A0">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
-          <End Role="Customers" Type="Self.Customer" Multiplicity="*" />
+          <End Role="CustomerCampaigns" Type="Self.CustomerCampaign" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Niches">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Customers">
+            <Dependent Role="CustomerCampaigns">
               <PropertyRef Name="NicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="Campaigns" EntityType="Self.Campaign" />
+          <EntitySet Name="CustomerCampaigns" EntityType="Self.CustomerCampaign" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="Emails" EntityType="Self.Email" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
@@ -221,17 +277,21 @@
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Campaigns" EntitySet="Campaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__Customers__Campa__47DBAE45" Association="Self.FK__Customers__Campa__47DBAE45">
+          <AssociationSet Name="FK__CustomerC__Curre__797309D9" Association="Self.FK__CustomerC__Curre__797309D9">
             <End Role="Campaigns" EntitySet="Campaigns" />
-            <End Role="Customers" EntitySet="Customers" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__Emails__Campaign__4AB81AF0" Association="Self.FK__Emails__Campaign__4AB81AF0">
+          <AssociationSet Name="FK__Emails__Campaign__08B54D69" Association="Self.FK__Emails__Campaign__08B54D69">
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
           </AssociationSet>
-          <AssociationSet Name="FK__Customers__Niche__46E78A0C" Association="Self.FK__Customers__Niche__46E78A0C">
-            <End Role="Niches" EntitySet="Niches" />
+          <AssociationSet Name="FK__CustomerC__Custo__05D8E0BE" Association="Self.FK__CustomerC__Custo__05D8E0BE">
             <End Role="Customers" EntitySet="Customers" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CustomerC__Niche__787EE5A0" Association="Self.FK__CustomerC__Niche__787EE5A0">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="CustomerCampaigns" EntitySet="CustomerCampaigns" />
           </AssociationSet>
         </EntityContainer>
       </Schema>
@@ -249,26 +309,38 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="CustomerCampaigns">
+            <EntityTypeMapping TypeName="MarketingModel.CustomerCampaign">
+              <MappingFragment StoreEntitySet="CustomerCampaigns">
+                <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="CurrentCampaignID" ColumnName="CurrentCampaignID" />
+                <ScalarProperty Name="CurrentCampaignDay" ColumnName="CurrentCampaignDay" />
+                <ScalarProperty Name="Subscribed" ColumnName="Subscribed" />
+                <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
+                <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Customers">
             <EntityTypeMapping TypeName="MarketingModel.Customer">
               <MappingFragment StoreEntitySet="Customers">
-                <ScalarProperty Name="Email" ColumnName="Email" />
-                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+                <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="CampaignID" ColumnName="CampaignID" />
-                <ScalarProperty Name="CurrentCampaignDay" ColumnName="CurrentCampaignDay" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailSendDate" ColumnName="EmailSendDate" />
+                <ScalarProperty Name="EmailFrequency" ColumnName="EmailFrequency" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Emails">
             <EntityTypeMapping TypeName="MarketingModel.Email">
               <MappingFragment StoreEntitySet="Emails">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="Subject" ColumnName="Subject" />
-                <ScalarProperty Name="Body" ColumnName="Body" />
                 <ScalarProperty Name="CampaignID" ColumnName="CampaignID" />
                 <ScalarProperty Name="Day" ColumnName="Day" />
+                <ScalarProperty Name="Subject" ColumnName="Subject" />
+                <ScalarProperty Name="Body" ColumnName="Body" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -14,14 +14,19 @@ namespace MarketingServer
     
     public partial class Customer
     {
-        public string Email { get; set; }
-        public int NicheID { get; set; }
-        public string Name { get; set; }
-        public int CampaignID { get; set; }
-        public int CurrentCampaignDay { get; set; }
-        public System.DateTime EmailSendDate { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Customer()
+        {
+            this.CustomerCampaigns = new HashSet<CustomerCampaign>();
+        }
     
-        public virtual Campaign Campaign { get; set; }
-        public virtual Nich Nich { get; set; }
+        public System.Guid ID { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public System.DateTime EmailSendDate { get; set; }
+        public int EmailFrequency { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CustomerCampaign> CustomerCampaigns { get; set; }
     }
 }

@@ -12,13 +12,19 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class Email
+    public partial class CustomerCampaign
     {
-        public int CampaignID { get; set; }
-        public int Day { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
+        public System.Guid CustomerID { get; set; }
+        public int NicheID { get; set; }
+        public bool Active { get; set; }
+        public int CurrentCampaignID { get; set; }
+        public int CurrentCampaignDay { get; set; }
+        public bool Subscribed { get; set; }
+        public System.DateTime DateSubscribed { get; set; }
+        public Nullable<System.DateTime> DateUnsubscribed { get; set; }
     
         public virtual Campaign Campaign { get; set; }
+        public virtual Customer Customer { get; set; }
+        public virtual Nich Nich { get; set; }
     }
 }
