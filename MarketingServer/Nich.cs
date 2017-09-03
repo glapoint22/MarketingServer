@@ -18,7 +18,7 @@ namespace MarketingServer
         public Nich()
         {
             this.Campaigns = new HashSet<Campaign>();
-            this.CustomerCampaigns = new HashSet<CustomerCampaign>();
+            this.Subscriptions = new HashSet<Subscription>();
         }
     
         public int ID { get; set; }
@@ -28,6 +28,6 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Campaign> Campaigns { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CustomerCampaign> CustomerCampaigns { get; set; }
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

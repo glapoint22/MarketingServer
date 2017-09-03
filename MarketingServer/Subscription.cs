@@ -12,13 +12,13 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class CustomerCampaign
+    public partial class Subscription
     {
-        public System.Guid CustomerID { get; set; }
+        public string CustomerID { get; set; }
         public int NicheID { get; set; }
-        public bool Active { get; set; }
         public int CurrentCampaignID { get; set; }
-        public int CurrentCampaignDay { get; set; }
+        public int CurrentEmailDay { get; set; }
+        public bool Active { get; set; }
         public bool Subscribed { get; set; }
         public System.DateTime DateSubscribed { get; set; }
         public Nullable<System.DateTime> DateUnsubscribed { get; set; }

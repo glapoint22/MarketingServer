@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Net.Mail;
 using System.Data;
 using System.Data.Entity;
+using System;
+using System.Data.Entity.SqlServer;
 
 namespace MarketingServer
 {
@@ -16,12 +18,11 @@ namespace MarketingServer
         protected async void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
-            await Run();
+            //await Run();
         }
 
         public async Task Run()
         {
-
             //TimeSpan span = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 0, 28, 0) - DateTime.Now;
 
             //DateTime dateTime = DateTime.Parse("8:23 PM");
@@ -36,75 +37,83 @@ namespace MarketingServer
 
             while (true)
             {
-                await Task.Delay(5000);
+                //await Task.Delay(5000);
 
                 //Get a list of customers that we will be sending emails to
                 List<Customer> customers = await db.Customers
-                    .Where(c => c.CustomerCampaigns.Where(x => x.Active && x.Subscribed).Count() != 0
-                    //&& c.EmailSendDate == DateTime.Today
+                    .Where(c => c.Subscriptions.Where(x => x.Active && x.Subscribed).Count() != 0
+                    && SqlFunctions.DateDiff("day", c.EmailSentDate, DateTime.Today) >= c.EmailSendFrequency
                     )
                     .Select(c => c).ToListAsync();
 
                 //Iterate through each customer
                 foreach (Customer customer in customers)
                 {
-                    //Get a list of campaigns this customer is subscribed to
-                    List<CustomerCampaign> campaigns = customer.CustomerCampaigns
+                    //Get a list of subscriptions this customer is subscribed to
+                    List<Subscription> subscriptions = customer.Subscriptions
                         .Where(c => c.Active && c.Subscribed)
                         .Select(c => c)
                         .ToList();
 
-                    //Iterate through each campaign
-                    foreach (CustomerCampaign campaign in campaigns)
+                    //Iterate through each subscription
+                    foreach (Subscription subscription in subscriptions)
                     {
                         //Compose the email and send
-                        var email = await db.Emails.Where(e => e.CampaignID == campaign.CurrentCampaignID && e.Day == campaign.CurrentCampaignDay).Select(e => new
+                        var email = await db.Emails.Where(e => e.CampaignID == subscription.CurrentCampaignID && e.Day == subscription.CurrentEmailDay).Select(e => new
                         {
                             subject = e.Subject,
                             body = e.Body
                         }).AsNoTracking().SingleAsync();
 
-                        MailMessage mailMessage = new MailMessage("glapoint22@gmail.com", customer.Email, email.subject, email.body);
+                        MailMessage mailMessage = new MailMessage("glapoint22@gmail.com", customer.ID, email.subject, email.body);
                         //smtpClient.Send(mailMessage);
 
 
                         //Get the next email day
-                        int nextDay = await db.Emails.Where(e => e.Day > campaign.CurrentCampaignDay && e.CampaignID == campaign.CurrentCampaignID)
+                        int nextDay = await db.Emails.Where(e => e.Day > subscription.CurrentEmailDay && e.CampaignID == subscription.CurrentCampaignID)
                                     .Select(e => e.Day).FirstOrDefaultAsync();
 
 
-                        //If there is a next email for this campaign
+                        //If there another email day for this campaign
                         if (nextDay != 0)
                         {
-                            campaign.CurrentCampaignDay = nextDay;
+                            subscription.CurrentEmailDay = nextDay;
                         }
                         else
                         {
                             //There were no more emails for the current campaign, so lets grab another campaign id
-                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == campaign.NicheID && c.ID > campaign.CurrentCampaignID).Select(c => c.ID).FirstOrDefaultAsync();
+                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > subscription.CurrentCampaignID).Select(c => c.ID).FirstOrDefaultAsync();
 
                             //If there are no more campaigns left to this niche, set inactive
                             if (nextCampaignId == 0)
                             {
-                                campaign.Active = false;
+                                subscription.Active = false;
                                 continue;
                             }
 
                             //Set the next campaign id and day
-                            campaign.CurrentCampaignDay = 1;
-                            campaign.CurrentCampaignID = nextCampaignId;
+                            subscription.CurrentEmailDay = 1;
+                            subscription.CurrentCampaignID = nextCampaignId;
                         }
-
-                        //Set when this customer will be receiving their next email
-                        customer.EmailSendDate = customer.EmailSendDate.AddDays(customer.EmailFrequency);
                     }
+
+                    //Mark the date when the email(s) has been sent
+                    customer.EmailSentDate = DateTime.Today;
 
                 }
 
                 //Update the database
                 if (db.ChangeTracker.HasChanges())
                 {
-                    await db.SaveChangesAsync();
+                    try
+                    {
+                        await db.SaveChangesAsync();
+                    }
+                    catch
+                    {
+                        throw;
+                    }
+                    
                 }
             }
             

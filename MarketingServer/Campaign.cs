@@ -17,8 +17,8 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Campaign()
         {
-            this.CustomerCampaigns = new HashSet<CustomerCampaign>();
             this.Emails = new HashSet<Email>();
+            this.Subscriptions = new HashSet<Subscription>();
         }
     
         public int ID { get; set; }
@@ -27,8 +27,8 @@ namespace MarketingServer
     
         public virtual Nich Nich { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CustomerCampaign> CustomerCampaigns { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Email> Emails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

@@ -26,9 +26,9 @@ namespace MarketingServer
         }
     
         public virtual DbSet<Campaign> Campaigns { get; set; }
-        public virtual DbSet<CustomerCampaign> CustomerCampaigns { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Email> Emails { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
+        public virtual DbSet<Subscription> Subscriptions { get; set; }
     }
 }

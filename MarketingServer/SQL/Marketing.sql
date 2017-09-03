@@ -12,40 +12,49 @@ CREATE TABLE Campaigns(
 );
 
 CREATE TABLE Customers(
-	ID uniqueidentifier default newid() PRIMARY KEY,
-	Name varchar(50) NOT NULL,
 	Email varchar(50) NOT NULL,
-	EmailSendDate datetime NOT NULL,
-	EmailFrequency int default 1 NOT NULL,
+	NicheID int NOT NULL,
+	Name varchar(50) NOT NULL,
+	CurrentCampaignID int NOT NULL,
+	CurrentCampaignDay int NOT NULL,
+	Active bit DEFAULT 1 NOT NULL,
+	Subscribed bit DEFAULT 1 NOT NULL,
+	DateSubscribed datetime DEFAULT GETDATE() NOT NULL,
+	DateUnsubscribed datetime,
+	EmailSentDate datetime NOT NULL,
+	EmailSendFrequency int default 1 NOT NULL,
 );
 
 ALTER TABLE Customers DROP constraint PK__Customer__3214EC2701B7CE82
 ALTER TABLE Customers DROP COLUMN id
 alter table CustomerCampaigns add primary key(CustomerID, NicheID)
 alter table CustomerCampaigns alter column customerID uniqueidentifier not null
-alter table customercampaigns add FOREIGN KEY (CustomerID) REFERENCES Customers(ID)
+alter table customercampaigns add FOREIGN KEY (CustomerID) REFERENCES Customers(Email)
+alter table Customers add primary key(Email)
 
-CREATE TABLE CustomerCampaigns(
-	CustomerID uniqueidentifier NOT NULL,
+CREATE TABLE Subscriptions(
+	CustomerID varchar(50) NOT NULL,
 	NicheID int NOT NULL,
-	Active bit NOT NULL,
 	CurrentCampaignID int NOT NULL,
-	CurrentCampaignDay int NOT NULL,
-	Subscribed bit DEFAULT 1 NOT NULL,
-	DateSubscribed datetime DEFAULT GETDATE() NOT NULL,
+	CurrentEmailDay int NOT NULL,
+	Active bit NOT NULL,
+	Subscribed bit NOT NULL,
+	DateSubscribed datetime NOT NULL,
 	DateUnsubscribed datetime,
 	PRIMARY KEY(CustomerID, NicheID),
-	FOREIGN KEY (CustomerID) REFERENCES Customers(ID),
+	FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE ON UPDATE CASCADE,
 	FOREIGN KEY (NicheID) REFERENCES Niches(ID),
 	FOREIGN KEY (CurrentCampaignID) REFERENCES Campaigns(ID)
 );
+
+
 
 alter table CustomerCampaigns add CustomerID uniqueidentifier
 alter table Customers add Unsubscribed bit
 
 alter table customers add EmailFrequency int default 1 not null
 
-alter table Customers alter column Unsubscribed bit not null
+alter table CustomerCampaigns alter column CustomerID varchar(50) not null
 
 CREATE TABLE Emails(
 	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
@@ -58,7 +67,7 @@ CREATE TABLE Emails(
 
 Create NonClustered Index Customers_EmailSendDate on Customers(EmailSendDate)
 
-Create NonClustered Index Emails_CampaignID_Day on Emails(CampaignID, Day)
+Create NonClustered Index IX_Active_Subscribed on CustomerCampaigns(Active, Subscribed)
 
 
 
@@ -77,16 +86,30 @@ WHERE CampaignID = 13 AND Day = 2
 
  
 select * from campaigns
-select * from customers
 select * from niches
-select * from CustomerCampaigns
+select * from customers
+select * from Subscriptions
 select * from emails
+
+delete customers
 
 select ID from campaigns where nicheID = 1 and ID > 1
 
 insert into emails values(16, 4, 'Gaming Campaign 4 day 4', 'Gaming Campaign 4 day 4')
 
-
+select count(customerid) from subscriptions where nicheid = 4 and customerid = 'asdf@asdf'
 
 alter table emails drop column id
 alter table emails add primary key(campaignID, Day)
+
+
+
+delete CustomerCampaigns where customerid in (select id from Customers where Email = 'sam@dasf.com')
+
+alter table CustomerCampaigns add CustomerID varchar(50)
+ALTER TABLE CustomerCampaigns DROP constraint [FK__CustomerC__Custo__1DB06A4F]
+
+ALTER TABLE CustomerCampaigns
+   ADD CONSTRAINT FK_CustomerCampaigns_CustomerID
+   FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE
+
