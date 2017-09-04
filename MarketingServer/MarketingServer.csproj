@@ -120,6 +120,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Global.asax" />
+    <Content Include="Images\header.jpg" />
+    <Content Include="Images\ubt_ebook_600.jpg" />
     <Content Include="Marketing.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>Marketing.edmx</DependentUpon>
@@ -131,6 +133,7 @@
       <LastGenOutput>Marketing.cs</LastGenOutput>
     </Content>
     <Content Include="SQL\Marketing.sql" />
+    <Content Include="UltimateBodyTransformationEmail.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -150,6 +153,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Mail.cs" />
     <Compile Include="Marketing.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

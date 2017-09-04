@@ -77,6 +77,7 @@ namespace MarketingServer.Controllers
         {
             //Get the niche ID based on the lead page that was passed in
             int nicheID = await db.Niches.Where(x => x.LeadPage == body.leadPage).Select(x => x.ID).SingleAsync();
+            Mail mail = new Mail();
 
             //Set the customer object
             Customer customer = new Customer()
@@ -106,6 +107,9 @@ namespace MarketingServer.Controllers
             //Subscribe the customer to this niche
             Subscription subscription = await GetSubscription(customer.ID, nicheID);
             db.Subscriptions.Add(subscription);
+
+            mail.Send(customer.ID, "Test", "This is a test!");
+
 
 
             try

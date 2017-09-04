@@ -9,6 +9,8 @@ using System.Data.Entity;
 using System;
 using System.Data.Entity.SqlServer;
 
+
+
 namespace MarketingServer
 {
     public class WebApiApplication : HttpApplication
@@ -17,22 +19,18 @@ namespace MarketingServer
 
         protected async void Application_Start()
         {
+
             GlobalConfiguration.Configure(WebApiConfig.Register);
+            
             //await Run();
         }
 
         public async Task Run()
         {
+            Mail mail = new Mail();
             //TimeSpan span = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 0, 28, 0) - DateTime.Now;
 
             //DateTime dateTime = DateTime.Parse("8:23 PM");
-            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
-            smtpClient.Credentials = new System.Net.NetworkCredential()
-            {
-                UserName = "glapoint22@gmail.com",
-                Password = "Cyb668622"
-            };
-            smtpClient.EnableSsl = true;
 
 
             while (true)
@@ -65,9 +63,7 @@ namespace MarketingServer
                             body = e.Body
                         }).AsNoTracking().SingleAsync();
 
-                        MailMessage mailMessage = new MailMessage("glapoint22@gmail.com", customer.ID, email.subject, email.body);
-                        //smtpClient.Send(mailMessage);
-
+                        mail.Send(customer.ID, email.subject, email.body);
 
                         //Get the next email day
                         int nextDay = await db.Emails.Where(e => e.Day > subscription.CurrentEmailDay && e.CampaignID == subscription.CurrentCampaignID)
