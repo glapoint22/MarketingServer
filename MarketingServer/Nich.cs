@@ -24,7 +24,7 @@ namespace MarketingServer
         public int ID { get; set; }
         public string Name { get; set; }
         public string LeadPage { get; set; }
-        public Nullable<System.Guid> EmailID { get; set; }
+        public System.Guid EmailID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Campaign> Campaigns { get; set; }

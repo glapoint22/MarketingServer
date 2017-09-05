@@ -89,7 +89,11 @@ select * from campaigns
 select * from niches
 select * from customers
 select * from Subscriptions
-select * from emails
+select * from emails where id = '0858A9A9-8DE4-4201-864E-5B18162FD3D8'
+
+Create NonClustered Index IX_CampainID_Day on emails(campaignID, day)
+
+alter table niches alter column emailid uniqueidentifier not null
 
 delete Subscriptions
 alter table niches add FOREIGN KEY (emailid) REFERENCES emails(ID)

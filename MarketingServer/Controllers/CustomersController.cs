@@ -75,10 +75,14 @@ namespace MarketingServer.Controllers
         [ResponseType(typeof(Customer))]
         public async Task<IHttpActionResult> PostCustomer(Body body)
         {
-            //Get the niche ID based on the lead page that was passed in
-            int nicheID = await db.Niches.Where(x => x.LeadPage == body.leadPage).Select(x => x.ID).SingleAsync();
-            Mail mail = new Mail();
-
+            //Get the niche based on the lead page that was passed in
+            var niche = await db.Niches.Where(x => x.LeadPage == body.leadPage).Select(x => new
+                {
+                    nicheId = x.ID,
+                    emailId = x.EmailID
+                }
+            ).SingleAsync();
+            
             //Set the customer object
             Customer customer = new Customer()
             {
@@ -97,32 +101,43 @@ namespace MarketingServer.Controllers
                 //Add the new customer to the database
                 db.Customers.Add(customer);
             }
-            else //This customer DOES exist in the database
+            
+            //Check to see if this customer is subscribed to this niche
+            if (!IsSubscribed(customer.ID, niche.nicheId))
             {
-                //If this customer is already subscribed to this niche
-                if (IsSubscribed(customer.ID, nicheID))
+                //Subscribe the customer to this niche
+                Subscription subscription = await GetSubscription(customer.ID, niche.nicheId);
+                db.Subscriptions.Add(subscription);
+            }
+
+
+            //Get the email and send
+            var email = await db.Emails.Where(x => x.ID == niche.emailId).Select(x => new 
+            {
+                subject = x.Subject,
+                body = x.Body
+            }
+            ).SingleAsync();
+
+            Mail mail = new Mail(niche.emailId, customer, email.subject, email.body);
+
+            mail.Send();
+
+
+            //If there are any changes, update the database
+            if (db.ChangeTracker.HasChanges())
+            {
+                try
                 {
-                    return StatusCode(HttpStatusCode.NoContent);
+                    await db.SaveChangesAsync();
+                    customer.Subscriptions = new Subscription[0];
+                }
+                catch (DbUpdateException)
+                {
+                    throw;
                 }
             }
-
-            //Subscribe the customer to this niche
-            Subscription subscription = await GetSubscription(customer.ID, nicheID);
-            db.Subscriptions.Add(subscription);
-
-            //mail.Send(customer.ID, "Test", "This is a test!");
-
-
-
-            try
-            {
-                await db.SaveChangesAsync();
-                customer.Subscriptions = new Subscription[0];
-            }
-            catch (DbUpdateException)
-            {
-                throw;
-            }
+                
 
             return CreatedAtRoute("DefaultApi", new { id = customer.ID }, customer);
         }

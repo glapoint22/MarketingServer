@@ -22,12 +22,11 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            await Run();
+            //await Run();
         }
 
         public async Task Run()
         {
-            Mail mail = new Mail();
             //TimeSpan span = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.Today.Day, 0, 28, 0) - DateTime.Now;
 
             //DateTime dateTime = DateTime.Parse("8:23 PM");
@@ -63,13 +62,11 @@ namespace MarketingServer
                             body = e.Body
                         }).AsNoTracking().SingleAsync();
 
-                        //mail.Send(customer.ID, email.subject, email.body);
-
-                        ////Get the next email day
-                        //int nextDay = await db.Emails.Where(e => e.Day > subscription.CurrentEmailDay && e.CampaignID == subscription.CurrentCampaignID)
-                        //            .Select(e => e.Day).FirstOrDefaultAsync();
+                        Mail mail = new Mail(subscription.NextEmailToSend, customer, email.subject, email.body);
+                        mail.Send();
 
 
+                        //Get the next email to send
                         var currentCampaign = await db.Emails.Where(x => x.ID == subscription.NextEmailToSend).Select(x => new
                         {
                             campaignId = x.CampaignID,
@@ -77,11 +74,6 @@ namespace MarketingServer
                         }).SingleAsync();
 
                         var nextEmail =  await db.Emails.Where(x => x.CampaignID == currentCampaign.campaignId && x.Day > currentCampaign.day).OrderBy(x => x.Day).Select(x => x.ID).FirstOrDefaultAsync();
-
-
-
-
-
 
 
                         //If there is another email day for this campaign
