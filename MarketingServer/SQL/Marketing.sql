@@ -49,7 +49,7 @@ CREATE TABLE Subscriptions(
 
 
 
-alter table CustomerCampaigns add CustomerID uniqueidentifier
+
 alter table Customers add Unsubscribed bit
 
 alter table customers add EmailFrequency int default 1 not null
@@ -91,7 +91,16 @@ select * from customers
 select * from Subscriptions
 select * from emails
 
-delete customers
+delete Subscriptions
+alter table niches add FOREIGN KEY (emailid) REFERENCES emails(ID)
+alter table subscriptions drop column currentemailday
+alter table subscriptions alter column customerid uniqueidentifier not null
+
+alter table niches add EmailID uniqueidentifier
+
+alter table subscriptions add NextEmailToSend uniqueidentifier not null
+
+ALTER TABLE subscriptions ADD CONSTRAINT UQ_Email UNIQUE (Email)
 
 select ID from campaigns where nicheID = 1 and ID > 1
 
@@ -100,7 +109,15 @@ insert into emails values(16, 4, 'Gaming Campaign 4 day 4', 'Gaming Campaign 4 d
 select count(customerid) from subscriptions where nicheid = 4 and customerid = 'asdf@asdf'
 
 alter table emails drop column id
-alter table emails add primary key(campaignID, Day)
+alter table emails add primary key(ID)
+
+alter table customers add primary key(id)
+
+alter table customers drop column email
+alter table customers drop constraint PK__Customer__A9D1053581025809
+alter table Customers add Email varchar(50) not null
+
+delete customers
 
 
 
@@ -113,3 +130,12 @@ ALTER TABLE CustomerCampaigns
    ADD CONSTRAINT FK_CustomerCampaigns_CustomerID
    FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE
 
+   select day from emails where id = '69FDADB1-FBC0-450B-81E7-00F1620074D0'
+
+   select id from emails where campaignid = 6 and day > 2
+
+   select id from emails where campaignid = 6 and day > 2
+
+   select id from emails, (select campaignid, day from emails where id = '69FDADB1-FBC0-450B-81E7-00F1620074D0') as a 
+   where emails.CampaignID = a.CampaignID and emails.Day > a.Day
+   

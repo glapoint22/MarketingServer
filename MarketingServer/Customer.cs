@@ -20,8 +20,9 @@ namespace MarketingServer
             this.Subscriptions = new HashSet<Subscription>();
         }
     
-        public string ID { get; set; }
+        public System.Guid ID { get; set; }
         public string Name { get; set; }
+        public string Email { get; set; }
         public System.DateTime EmailSentDate { get; set; }
         public int EmailSendFrequency { get; set; }
     

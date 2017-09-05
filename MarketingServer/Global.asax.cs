@@ -22,7 +22,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            //await Run();
+            await Run();
         }
 
         public async Task Run()
@@ -57,28 +57,42 @@ namespace MarketingServer
                     foreach (Subscription subscription in subscriptions)
                     {
                         //Compose the email and send
-                        var email = await db.Emails.Where(e => e.CampaignID == subscription.CurrentCampaignID && e.Day == subscription.CurrentEmailDay).Select(e => new
+                        var email = await db.Emails.Where(e => e.ID == subscription.NextEmailToSend).Select(e => new
                         {
                             subject = e.Subject,
                             body = e.Body
                         }).AsNoTracking().SingleAsync();
 
-                        mail.Send(customer.ID, email.subject, email.body);
+                        //mail.Send(customer.ID, email.subject, email.body);
 
-                        //Get the next email day
-                        int nextDay = await db.Emails.Where(e => e.Day > subscription.CurrentEmailDay && e.CampaignID == subscription.CurrentCampaignID)
-                                    .Select(e => e.Day).FirstOrDefaultAsync();
+                        ////Get the next email day
+                        //int nextDay = await db.Emails.Where(e => e.Day > subscription.CurrentEmailDay && e.CampaignID == subscription.CurrentCampaignID)
+                        //            .Select(e => e.Day).FirstOrDefaultAsync();
 
 
-                        //If there another email day for this campaign
-                        if (nextDay != 0)
+                        var currentCampaign = await db.Emails.Where(x => x.ID == subscription.NextEmailToSend).Select(x => new
                         {
-                            subscription.CurrentEmailDay = nextDay;
+                            campaignId = x.CampaignID,
+                            day = x.Day
+                        }).SingleAsync();
+
+                        var nextEmail =  await db.Emails.Where(x => x.CampaignID == currentCampaign.campaignId && x.Day > currentCampaign.day).OrderBy(x => x.Day).Select(x => x.ID).FirstOrDefaultAsync();
+
+
+
+
+
+
+
+                        //If there is another email day for this campaign
+                        if (nextEmail != Guid.Empty)
+                        {
+                            subscription.NextEmailToSend = nextEmail;
                         }
                         else
                         {
                             //There were no more emails for the current campaign, so lets grab another campaign id
-                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > subscription.CurrentCampaignID).Select(c => c.ID).FirstOrDefaultAsync();
+                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > currentCampaign.campaignId).Select(c => c.ID).FirstOrDefaultAsync();
 
                             //If there are no more campaigns left to this niche, set inactive
                             if (nextCampaignId == 0)
@@ -87,9 +101,8 @@ namespace MarketingServer
                                 continue;
                             }
 
-                            //Set the next campaign id and day
-                            subscription.CurrentEmailDay = 1;
-                            subscription.CurrentCampaignID = nextCampaignId;
+                            //Set the next email to send out
+                            subscription.NextEmailToSend = await db.Emails.Where(x => x.CampaignID == nextCampaignId && x.Day == 1).Select(x => x.ID).FirstOrDefaultAsync();
                         }
                     }
 

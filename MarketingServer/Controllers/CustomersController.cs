@@ -25,7 +25,7 @@ namespace MarketingServer.Controllers
 
         // GET: api/Customers/5
         [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> GetCustomer(string id)
+        public async Task<IHttpActionResult> GetCustomer(Guid id)
         {
             Customer customer = await db.Customers.FindAsync(id);
             if (customer == null)
@@ -38,7 +38,7 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Customers/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutCustomer(string id, Customer customer)
+        public async Task<IHttpActionResult> PutCustomer(Guid id, Customer customer)
         {
             if (!ModelState.IsValid)
             {
@@ -82,7 +82,8 @@ namespace MarketingServer.Controllers
             //Set the customer object
             Customer customer = new Customer()
             {
-                ID = body.email,
+                ID = await db.Customers.Where(c => c.Email == body.email).Select(c => c.ID).FirstOrDefaultAsync(),
+                Email = body.email,
                 Name = body.name,
                 EmailSentDate = DateTime.Today,
                 EmailSendFrequency = 3
@@ -90,8 +91,9 @@ namespace MarketingServer.Controllers
 
 
             //If the customer DOES NOT exist in the database
-            if (!CustomerExists(customer.ID))
+            if (customer.ID == Guid.Empty)
             {
+                customer.ID = Guid.NewGuid();
                 //Add the new customer to the database
                 db.Customers.Add(customer);
             }
@@ -108,7 +110,7 @@ namespace MarketingServer.Controllers
             Subscription subscription = await GetSubscription(customer.ID, nicheID);
             db.Subscriptions.Add(subscription);
 
-            mail.Send(customer.ID, "Test", "This is a test!");
+            //mail.Send(customer.ID, "Test", "This is a test!");
 
 
 
@@ -127,7 +129,7 @@ namespace MarketingServer.Controllers
 
         // DELETE: api/Customers/5
         [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> DeleteCustomer(string id)
+        public async Task<IHttpActionResult> DeleteCustomer(Guid id)
         {
             Customer customer = await db.Customers.FindAsync(id);
             if (customer == null)
@@ -150,26 +152,25 @@ namespace MarketingServer.Controllers
             base.Dispose(disposing);
         }
 
-        private bool CustomerExists(string id)
+        private bool CustomerExists(Guid id)
         {
             return db.Customers.Count(e => e.ID == id) > 0;
         }
 
-        private bool IsSubscribed(string customerId, int nicheId)
+        private bool IsSubscribed(Guid id, int nicheId)
         {
-            return db.Subscriptions.Count(x => x.NicheID == nicheId && x.CustomerID == customerId) > 0;
+            return db.Subscriptions.Count(x => x.CustomerID == id && x.NicheID == nicheId) > 0;
         }
 
-        private async Task<Subscription> GetSubscription(string email, int nicheId)
+        private async Task<Subscription> GetSubscription(Guid id, int nicheId)
         {
             int currentCampaignID = await db.Campaigns.Where(x => x.NicheID == nicheId).Select(x => x.ID).FirstOrDefaultAsync();
 
             Subscription subscription = new Subscription()
             {
-                CustomerID = email,
+                CustomerID = id,
                 NicheID = nicheId,
-                CurrentCampaignID = currentCampaignID,
-                CurrentEmailDay = 1,
+                NextEmailToSend = await db.Emails.Where(x => x.Day == 1 && x.CampaignID == db.Campaigns.Where(c => c.NicheID == nicheId).Select(c => c.ID).FirstOrDefault()).Select(x => x.ID).SingleAsync(),
                 Active = true,
                 Subscribed = true,
                 DateSubscribed = DateTime.Today

@@ -17,18 +17,19 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="EmailSentDate" Type="datetime" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Emails">
           <Key>
-            <PropertyRef Name="CampaignID" />
-            <PropertyRef Name="Day" />
+            <PropertyRef Name="ID" />
           </Key>
-          <Property Name="CampaignID" Type="int" Nullable="false" />
-          <Property Name="Day" Type="int" Nullable="false" />
+          <Property Name="ID" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="CampaignID" Type="int" />
+          <Property Name="Day" Type="int" />
           <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Body" Type="varchar(max)" Nullable="false" />
         </EntityType>
@@ -39,16 +40,16 @@
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="LeadPage" Type="varchar" MaxLength="255" />
+          <Property Name="EmailID" Type="uniqueidentifier" />
         </EntityType>
         <EntityType Name="Subscriptions">
           <Key>
             <PropertyRef Name="CustomerID" />
             <PropertyRef Name="NicheID" />
           </Key>
-          <Property Name="CustomerID" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CustomerID" Type="uniqueidentifier" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
-          <Property Name="CurrentCampaignID" Type="int" Nullable="false" />
-          <Property Name="CurrentEmailDay" Type="int" Nullable="false" />
+          <Property Name="NextEmailToSend" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Active" Type="bit" Nullable="false" />
           <Property Name="Subscribed" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
@@ -67,7 +68,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Emails__Campaign__08B54D69">
-          <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="1" />
+          <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="0..1" />
           <End Role="Emails" Type="Self.Emails" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Campaigns">
@@ -78,19 +79,19 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Curre__2B0A656D">
-          <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="1" />
-          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
+        <Association Name="FK__Niches__EmailID__531856C7">
+          <End Role="Emails" Type="Self.Emails" Multiplicity="0..1" />
+          <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Campaigns">
+            <Principal Role="Emails">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Subscriptions">
-              <PropertyRef Name="CurrentCampaignID" />
+            <Dependent Role="Niches">
+              <PropertyRef Name="EmailID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Custo__29221CFB">
+        <Association Name="FK__Subscript__Custo__503BEA1C">
           <End Role="Customers" Type="Self.Customers" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -101,6 +102,18 @@
             </Principal>
             <Dependent Role="Subscriptions">
               <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__NextE__5224328E">
+          <End Role="Emails" Type="Self.Emails" Multiplicity="1" />
+          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Emails">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="NextEmailToSend" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -130,12 +143,16 @@
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Curre__2B0A656D" Association="Self.FK__Subscript__Curre__2B0A656D">
-            <End Role="Campaigns" EntitySet="Campaigns" />
+          <AssociationSet Name="FK__Niches__EmailID__531856C7" Association="Self.FK__Niches__EmailID__531856C7">
+            <End Role="Emails" EntitySet="Emails" />
+            <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__Custo__503BEA1C" Association="Self.FK__Subscript__Custo__503BEA1C">
+            <End Role="Customers" EntitySet="Customers" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Custo__29221CFB" Association="Self.FK__Subscript__Custo__29221CFB">
-            <End Role="Customers" EntitySet="Customers" />
+          <AssociationSet Name="FK__Subscript__NextE__5224328E" Association="Self.FK__Subscript__NextE__5224328E">
+            <End Role="Emails" EntitySet="Emails" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
@@ -157,28 +174,30 @@
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Campaigns" ToRole="Niches" />
           <NavigationProperty Name="Emails" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Campaigns" ToRole="Emails" />
-          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Curre__2B0A656D" FromRole="Campaigns" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ID" Type="Guid" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSentDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__29221CFB" FromRole="Customers" ToRole="Subscriptions" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__503BEA1C" FromRole="Customers" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Email">
           <Key>
-            <PropertyRef Name="CampaignID" />
-            <PropertyRef Name="Day" />
+            <PropertyRef Name="ID" />
           </Key>
-          <Property Name="CampaignID" Type="Int32" Nullable="false" />
-          <Property Name="Day" Type="Int32" Nullable="false" />
+          <Property Name="ID" Type="Guid" Nullable="false" />
+          <Property Name="CampaignID" Type="Int32" />
+          <Property Name="Day" Type="Int32" />
           <Property Name="Subject" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Campaign" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Emails" ToRole="Campaigns" />
+          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__EmailID__531856C7" FromRole="Emails" ToRole="Niches" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__NextE__5224328E" FromRole="Emails" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Nich">
           <Key>
@@ -187,7 +206,9 @@
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="EmailID" Type="Guid" />
           <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Campaigns" />
+          <NavigationProperty Name="Email" Relationship="Self.FK__Niches__EmailID__531856C7" FromRole="Niches" ToRole="Emails" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Subscription">
@@ -195,16 +216,15 @@
             <PropertyRef Name="CustomerID" />
             <PropertyRef Name="NicheID" />
           </Key>
-          <Property Name="CustomerID" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CustomerID" Type="Guid" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
-          <Property Name="CurrentCampaignID" Type="Int32" Nullable="false" />
-          <Property Name="CurrentEmailDay" Type="Int32" Nullable="false" />
+          <Property Name="NextEmailToSend" Type="Guid" Nullable="false" />
           <Property Name="Active" Type="Boolean" Nullable="false" />
           <Property Name="Subscribed" Type="Boolean" Nullable="false" />
           <Property Name="DateSubscribed" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="DateUnsubscribed" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Campaign" Relationship="Self.FK__Subscript__Curre__2B0A656D" FromRole="Subscriptions" ToRole="Campaigns" />
-          <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__29221CFB" FromRole="Subscriptions" ToRole="Customers" />
+          <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__503BEA1C" FromRole="Subscriptions" ToRole="Customers" />
+          <NavigationProperty Name="Email" Relationship="Self.FK__Subscript__NextE__5224328E" FromRole="Subscriptions" ToRole="Emails" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Subscriptions" ToRole="Niches" />
         </EntityType>
         <Association Name="FK__Campaigns__Niche__440B1D61">
@@ -220,7 +240,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Emails__Campaign__08B54D69">
-          <End Role="Campaigns" Type="Self.Campaign" Multiplicity="1" />
+          <End Role="Campaigns" Type="Self.Campaign" Multiplicity="0..1" />
           <End Role="Emails" Type="Self.Email" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Campaigns">
@@ -231,19 +251,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Curre__2B0A656D">
-          <End Role="Campaigns" Type="Self.Campaign" Multiplicity="1" />
-          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Campaigns">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Subscriptions">
-              <PropertyRef Name="CurrentCampaignID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Subscript__Custo__29221CFB">
+        <Association Name="FK__Subscript__Custo__503BEA1C">
           <End Role="Customers" Type="Self.Customer" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -254,6 +262,30 @@
             </Principal>
             <Dependent Role="Subscriptions">
               <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Niches__EmailID__531856C7">
+          <End Role="Emails" Type="Self.Email" Multiplicity="0..1" />
+          <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Emails">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Niches">
+              <PropertyRef Name="EmailID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__NextE__5224328E">
+          <End Role="Emails" Type="Self.Email" Multiplicity="1" />
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Emails">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="NextEmailToSend" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -283,12 +315,16 @@
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Curre__2B0A656D" Association="Self.FK__Subscript__Curre__2B0A656D">
-            <End Role="Campaigns" EntitySet="Campaigns" />
+          <AssociationSet Name="FK__Subscript__Custo__503BEA1C" Association="Self.FK__Subscript__Custo__503BEA1C">
+            <End Role="Customers" EntitySet="Customers" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Custo__29221CFB" Association="Self.FK__Subscript__Custo__29221CFB">
-            <End Role="Customers" EntitySet="Customers" />
+          <AssociationSet Name="FK__Niches__EmailID__531856C7" Association="Self.FK__Niches__EmailID__531856C7">
+            <End Role="Emails" EntitySet="Emails" />
+            <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__NextE__5224328E" Association="Self.FK__Subscript__NextE__5224328E">
+            <End Role="Emails" EntitySet="Emails" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
@@ -316,6 +352,7 @@
               <MappingFragment StoreEntitySet="Customers">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailSentDate" ColumnName="EmailSentDate" />
                 <ScalarProperty Name="EmailSendFrequency" ColumnName="EmailSendFrequency" />
               </MappingFragment>
@@ -324,6 +361,7 @@
           <EntitySetMapping Name="Emails">
             <EntityTypeMapping TypeName="MarketingModel.Email">
               <MappingFragment StoreEntitySet="Emails">
+                <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="CampaignID" ColumnName="CampaignID" />
                 <ScalarProperty Name="Day" ColumnName="Day" />
                 <ScalarProperty Name="Subject" ColumnName="Subject" />
@@ -337,6 +375,7 @@
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
+                <ScalarProperty Name="EmailID" ColumnName="EmailID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -345,8 +384,7 @@
               <MappingFragment StoreEntitySet="Subscriptions">
                 <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
                 <ScalarProperty Name="NicheID" ColumnName="NicheID" />
-                <ScalarProperty Name="CurrentCampaignID" ColumnName="CurrentCampaignID" />
-                <ScalarProperty Name="CurrentEmailDay" ColumnName="CurrentEmailDay" />
+                <ScalarProperty Name="NextEmailToSend" ColumnName="NextEmailToSend" />
                 <ScalarProperty Name="Active" ColumnName="Active" />
                 <ScalarProperty Name="Subscribed" ColumnName="Subscribed" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />

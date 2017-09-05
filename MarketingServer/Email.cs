@@ -14,11 +14,23 @@ namespace MarketingServer
     
     public partial class Email
     {
-        public int CampaignID { get; set; }
-        public int Day { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Email()
+        {
+            this.Niches = new HashSet<Nich>();
+            this.Subscriptions = new HashSet<Subscription>();
+        }
+    
+        public System.Guid ID { get; set; }
+        public Nullable<int> CampaignID { get; set; }
+        public Nullable<int> Day { get; set; }
         public string Subject { get; set; }
         public string Body { get; set; }
     
         public virtual Campaign Campaign { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Nich> Niches { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }
