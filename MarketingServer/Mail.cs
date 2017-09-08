@@ -10,10 +10,12 @@ namespace MarketingServer
     public class Mail
     {
         private SmtpClient smtpClient = new SmtpClient();
-        private string from;
-        private string to;
-        private string subject;
-        private string body;
+        //private string DomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
+        public string from;
+        public string to;
+        public string subject;
+        public string body;
+        
 
         public Mail(Guid emailId, Customer customer, string subject, string body)
         {
@@ -21,7 +23,7 @@ namespace MarketingServer
             MailSettingsSectionGroup mailSettings = configurationFile.GetSectionGroup("system.net/mailSettings") as MailSettingsSectionGroup;
 
             this.subject = subject;
-            this.body = string.Format(body, customer.Name);
+            this.body = string.Format(body, customer.Name, emailId, customer.ID);
 
             to = customer.Email;
             from = mailSettings.Smtp.Network.UserName;

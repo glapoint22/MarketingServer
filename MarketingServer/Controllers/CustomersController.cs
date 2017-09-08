@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MarketingServer;
+using System.Web;
 
 namespace MarketingServer.Controllers
 {
@@ -75,6 +76,8 @@ namespace MarketingServer.Controllers
         [ResponseType(typeof(Customer))]
         public async Task<IHttpActionResult> PostCustomer(Body body)
         {
+            Customer customer;
+
             //Get the niche based on the lead page that was passed in
             var niche = await db.Niches.Where(x => x.LeadPage == body.leadPage).Select(x => new
                 {
@@ -82,25 +85,32 @@ namespace MarketingServer.Controllers
                     emailId = x.EmailID
                 }
             ).SingleAsync();
-            
-            //Set the customer object
-            Customer customer = new Customer()
-            {
-                ID = await db.Customers.Where(c => c.Email == body.email).Select(c => c.ID).FirstOrDefaultAsync(),
-                Email = body.email,
-                Name = body.name,
-                EmailSentDate = DateTime.Today,
-                EmailSendFrequency = 3
-            };
+
+            //See if we have an existing customer
+            Guid id = await db.Customers.Where(c => c.Email == body.email).Select(c => c.ID).FirstOrDefaultAsync();
 
 
             //If the customer DOES NOT exist in the database
-            if (customer.ID == Guid.Empty)
+            if (id == Guid.Empty)
             {
-                customer.ID = Guid.NewGuid();
+                customer = new Customer()
+                {
+                    ID = Guid.NewGuid(),
+                    Email = body.email,
+                    Name = body.name,
+                    EmailSentDate = DateTime.Today,
+                    EmailSendFrequency = 3
+                };
+
                 //Add the new customer to the database
                 db.Customers.Add(customer);
             }
+            else
+            {
+                customer = await db.Customers.FindAsync(id);
+            }
+
+
             
             //Check to see if this customer is subscribed to this niche
             if (!IsSubscribed(customer.ID, niche.nicheId))
@@ -120,8 +130,7 @@ namespace MarketingServer.Controllers
             ).SingleAsync();
 
             Mail mail = new Mail(niche.emailId, customer, email.subject, email.body);
-
-            mail.Send();
+            //mail.Send();
 
 
             //If there are any changes, update the database
@@ -130,7 +139,6 @@ namespace MarketingServer.Controllers
                 try
                 {
                     await db.SaveChangesAsync();
-                    customer.Subscriptions = new Subscription[0];
                 }
                 catch (DbUpdateException)
                 {
@@ -138,8 +146,12 @@ namespace MarketingServer.Controllers
                 }
             }
                 
-
-            return CreatedAtRoute("DefaultApi", new { id = customer.ID }, customer);
+            return CreatedAtRoute("DefaultApi", new { id = customer.ID }, new {
+                id = customer.ID,
+                email = customer.Email,
+                name = customer.Name,
+                emailSendFrequency = customer.EmailSendFrequency
+            });
         }
 
         // DELETE: api/Customers/5
