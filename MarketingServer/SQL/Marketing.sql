@@ -65,6 +65,13 @@ CREATE TABLE Emails(
 	FOREIGN KEY (CampaignID) REFERENCES Campaigns(ID)
 );
 
+
+CREATE TABLE Categories(
+	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
+	Name varchar(255) not null
+);
+
+
 Create NonClustered Index Customers_EmailSendDate on Customers(EmailSendDate)
 
 Create NonClustered Index IX_Active_Subscribed on CustomerCampaigns(Active, Subscribed)
@@ -81,19 +88,54 @@ FROM Emails
 WHERE CampaignID = 13 AND Day = 2
 
 
+alter table niches
+alter column Name varchar(255) not null
 
+alter table niches add FOREIGN KEY (CategoryID) REFERENCES Categories(ID)
 
 
  
 select * from campaigns
+select * from Categories
 select * from niches
-select * from customers
 select * from Subscriptions
-select * from emails where id = '0858A9A9-8DE4-4201-864E-5B18162FD3D8'
+select * from customers
+select * from emails order by CampaignID,day
+select * from CampaignLogs order by date desc
+
+delete customers
+
+alter table campaignlogs add FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE
+
+alter table niches drop column emailid
+alter table niches drop FK__Niches__EmailID__531856C7
+
+create table SubscriptionLogs(
+	SubscriptionID int not null,
+	Date datetime not null,
+	CurrentCampaignID int not null,
+	CurrentDay int not null,
+	primary key (SubscriptionID, Date),
+	Foreign Key (CurrentCampaignID) References Campaigns(id)
+)
+
+alter table subscriptionLogs add Foreign Key (customerid) References customers(id)
+
+alter table subscriptionLogs add CustomerID Uniqueidentifier
+alter table subscriptionLogs alter column customerid Uniqueidentifier not null
+
+select CampaignID, day from emails  as A where id in (select emailid from emailsentlogs where subscriptionid = 3) 
+
+
+select id from emails where emails.CampaignID = A.CampaignID and emails.day > A.day
+
+
 
 Create NonClustered Index IX_CampainID_Day on emails(campaignID, day)
 
-alter table niches alter column emailid uniqueidentifier not null
+update niches set name = replace(replace(Niches.Name,char(13),''),char(10),'')
+
+alter table niches alter column leadpage varchar(255) not null
 
 delete Subscriptions
 alter table niches add FOREIGN KEY (emailid) REFERENCES emails(ID)
@@ -142,4 +184,26 @@ ALTER TABLE CustomerCampaigns
 
    select id from emails, (select campaignid, day from emails where id = '69FDADB1-FBC0-450B-81E7-00F1620074D0') as a 
    where emails.CampaignID = a.CampaignID and emails.Day > a.Day
+
+
+   alter table niches alter column emailid uniqueidentifier not null
    
+   delete niches where categoryid = 18
+   delete Categories where id = 18
+
+
+   alter table niches alter column LeadMagnet varchar(255) not null
+
+   update niches set leadmagnet = 'Lead Magnet'
+   
+	Create table EmailSentLog(
+		EmailID uniqueidentifier not null,
+		SentDate datetime not null,
+		CustomerID uniqueidentifier not null,
+		primary key(EmailID, SentDate, CustomerID),
+		FOREIGN KEY (EmailID) REFERENCES emails(ID),
+		FOREIGN KEY (CustomerID) REFERENCES Customers(ID)
+	);
+
+	alter table subscriptions add primary key(subscriptionid)
+	alter table subscriptions drop [PK__Subscrip__91D1C12A8A2A5A62]

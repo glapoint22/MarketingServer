@@ -12,14 +12,16 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class Email
+    public partial class CampaignLog
     {
-        public System.Guid ID { get; set; }
-        public Nullable<int> CampaignID { get; set; }
-        public Nullable<int> Day { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
+        public int SubscriptionID { get; set; }
+        public System.DateTime Date { get; set; }
+        public int CampaignID { get; set; }
+        public int Day { get; set; }
+        public System.Guid CustomerID { get; set; }
     
+        public virtual Customer Customer { get; set; }
         public virtual Campaign Campaign { get; set; }
+        public virtual Subscription Subscription { get; set; }
     }
 }

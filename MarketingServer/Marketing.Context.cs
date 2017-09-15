@@ -25,7 +25,9 @@ namespace MarketingServer
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<CampaignLog> CampaignLogs { get; set; }
         public virtual DbSet<Campaign> Campaigns { get; set; }
+        public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Email> Emails { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }

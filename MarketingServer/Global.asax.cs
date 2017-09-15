@@ -38,69 +38,78 @@ namespace MarketingServer
 
                 //Get a list of customers that we will be sending emails to
                 List<Customer> customers = await db.Customers
-                    .Where(c => c.Subscriptions.Where(x => x.Active && x.Subscribed).Count() != 0
-                    && SqlFunctions.DateDiff("day", c.EmailSentDate, DateTime.Today) >= c.EmailSendFrequency
+                    .Where(c => c.Subscriptions.Where(x => x.Subscribed && !x.Suspended).Count() != 0
+                    && SqlFunctions.DateDiff("day", c.CampaignLogs.Where(e => e.CustomerID == c.ID).OrderByDescending(x => x.Date).Select(x => x.Date).FirstOrDefault(), DateTime.Today) >= c.EmailSendFrequency
                     )
-                    .Select(c => c).ToListAsync();
+                    .Select(c => c).AsNoTracking().ToListAsync();
 
+                
                 //Iterate through each customer
                 foreach (Customer customer in customers)
                 {
                     //Get a list of subscriptions this customer is subscribed to
                     List<Subscription> subscriptions = customer.Subscriptions
-                        .Where(c => c.Active && c.Subscribed)
+                        .Where(c => c.Subscribed && !c.Suspended)
                         .Select(c => c)
                         .ToList();
 
                     //Iterate through each subscription
                     foreach (Subscription subscription in subscriptions)
                     {
-                        //Compose the email and send
-                        var email = await db.Emails.Where(e => e.ID == subscription.NextEmailToSend).Select(e => new
-                        {
-                            subject = e.Subject,
-                            body = e.Body
-                        }).AsNoTracking().SingleAsync();
-
-                        Mail mail = new Mail(subscription.NextEmailToSend, customer, email.subject, email.body);
-                        mail.Send();
-
-
-                        //Get the next email to send
-                        var currentCampaign = await db.Emails.Where(x => x.ID == subscription.NextEmailToSend).Select(x => new
+                        //Advance to the next day of this campaign
+                        var campaign = await db.CampaignLogs.Where(x => x.SubscriptionID == subscription.ID).OrderByDescending(x => x.Date).Select(x => new 
                         {
                             campaignId = x.CampaignID,
-                            day = x.Day
-                        }).SingleAsync();
+                            day = x.Day + 1
+                        }).AsNoTracking().FirstOrDefaultAsync();
 
-                        var nextEmail =  await db.Emails.Where(x => x.CampaignID == currentCampaign.campaignId && x.Day > currentCampaign.day).OrderBy(x => x.Day).Select(x => x.ID).FirstOrDefaultAsync();
-
-
-                        //If there is another email day for this campaign
-                        if (nextEmail != Guid.Empty)
+                        //Set up a new log for this campaign
+                        CampaignLog campaignLog = new CampaignLog
                         {
-                            subscription.NextEmailToSend = nextEmail;
-                        }
-                        else
-                        {
-                            //There were no more emails for the current campaign, so lets grab another campaign id
-                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > currentCampaign.campaignId).Select(c => c.ID).FirstOrDefaultAsync();
+                            SubscriptionID = subscription.ID,
+                            Date = DateTime.Today,
+                            CampaignID = campaign.campaignId,
+                            Day = campaign.day,
+                            CustomerID = customer.ID
+                        };
 
-                            //If there are no more campaigns left to this niche, set inactive
+
+                        //See if this campaign actually exists
+                        bool exists = db.Emails.Any(x => x.CampaignID == campaign.campaignId && x.Day == campaign.day);
+                        
+                        if (!exists)
+                        {
+                            //The current campaign does not exists, so get another campaign in this niche 
+                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > campaign.campaignId).OrderBy(x => x.ID).Select(c => c.ID).FirstOrDefaultAsync();
+
+                            //If there are no other campaigns in this niche, suspend this subscription
                             if (nextCampaignId == 0)
                             {
-                                subscription.Active = false;
+                                subscription.Suspended = true;
+                                db.Entry(subscription).State = EntityState.Modified;
                                 continue;
                             }
-
-                            //Set the next email to send out
-                            subscription.NextEmailToSend = await db.Emails.Where(x => x.CampaignID == nextCampaignId && x.Day == 1).Select(x => x.ID).FirstOrDefaultAsync();
+                            else
+                            {
+                                //Set the new campaign
+                                campaignLog.CampaignID = nextCampaignId;
+                                campaignLog.Day = 1;
+                            }
                         }
+
+                        //Get the email and send
+                        var email = await db.Emails.Where(x => x.CampaignID == campaignLog.CampaignID && x.Day == campaignLog.Day).Select(x => new {
+                            id = x.ID,
+                            subject = x.Subject,
+                            body = x.Body
+                        }).AsNoTracking().FirstOrDefaultAsync();
+
+                        Mail mail = new Mail(email.id, customer, email.subject, email.body);
+                        //mail.Send();
+
+                        //Log this campaign
+                        db.CampaignLogs.Add(campaignLog);
                     }
-
-                    //Mark the date when the email(s) has been sent
-                    customer.EmailSentDate = DateTime.Today;
-
                 }
 
                 //Update the database

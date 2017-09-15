@@ -82,7 +82,8 @@ namespace MarketingServer.Controllers
             var niche = await db.Niches.Where(x => x.LeadPage == body.leadPage).Select(x => new
                 {
                     nicheId = x.ID,
-                    emailId = x.EmailID
+                    emailId = db.Emails.Where(e => e.CampaignID == db.Campaigns.Where(c => c.NicheID == x.ID).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefault() && e.Day == 0).Select(e => e.ID).FirstOrDefault(),
+                    leadMagnet = x.LeadMagnet
                 }
             ).SingleAsync();
 
@@ -98,7 +99,6 @@ namespace MarketingServer.Controllers
                     ID = Guid.NewGuid(),
                     Email = body.email,
                     Name = body.name,
-                    EmailSentDate = DateTime.Today,
                     EmailSendFrequency = 3
                 };
 
@@ -118,6 +118,17 @@ namespace MarketingServer.Controllers
                 //Subscribe the customer to this niche
                 Subscription subscription = await GetSubscription(customer.ID, niche.nicheId);
                 db.Subscriptions.Add(subscription);
+
+                //Add a log for this new campaign
+                CampaignLog campaignLog = new CampaignLog
+                {
+                    SubscriptionID = subscription.ID,
+                    Date = DateTime.Today,
+                    CampaignID = await db.Campaigns.Where(c => c.NicheID == niche.nicheId).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefaultAsync(),
+                    Day = 0,
+                    CustomerID = customer.ID
+                };
+                db.CampaignLogs.Add(campaignLog);
             }
 
 
@@ -145,13 +156,31 @@ namespace MarketingServer.Controllers
                     throw;
                 }
             }
+
+
+            var data = new
+            {
+                leadMagnet = niche.leadMagnet,
+                customer = new
+                {
+                    id = customer.ID,
+                    email = customer.Email,
+                    name = customer.Name,
+                    emailSendFrequency = customer.EmailSendFrequency
+                },
+                subscriptions = await db.Categories.Select(c => new
+                {
+                    name = c.Name,
+                    niches = db.Niches.Where(n => n.CategoryID == c.ID).Select(n => new {
+                        name = n.Name,
+                        isSubscribed = db.Subscriptions.Any(x => x.CustomerID == customer.ID && x.Subscribed && x.NicheID == n.ID)
+                    }).ToList(),
+                    count = db.Niches.Where(n => n.CategoryID == c.ID).Count()
+                }).OrderByDescending(x => x.count).ToListAsync()
+            };
+
                 
-            return CreatedAtRoute("DefaultApi", new { id = customer.ID }, new {
-                id = customer.ID,
-                email = customer.Email,
-                name = customer.Name,
-                emailSendFrequency = customer.EmailSendFrequency
-            });
+            return CreatedAtRoute("DefaultApi", new { id = customer.ID }, data);
         }
 
         // DELETE: api/Customers/5
@@ -197,9 +226,8 @@ namespace MarketingServer.Controllers
             {
                 CustomerID = id,
                 NicheID = nicheId,
-                NextEmailToSend = await db.Emails.Where(x => x.Day == 1 && x.CampaignID == db.Campaigns.Where(c => c.NicheID == nicheId).Select(c => c.ID).FirstOrDefault()).Select(x => x.ID).SingleAsync(),
-                Active = true,
                 Subscribed = true,
+                Suspended = false,
                 DateSubscribed = DateTime.Today
             };
 

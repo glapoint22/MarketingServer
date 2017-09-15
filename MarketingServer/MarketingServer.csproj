@@ -143,6 +143,12 @@
     <Compile Include="Campaign.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="CampaignLog.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Category.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\CustomersController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Customer.cs">
