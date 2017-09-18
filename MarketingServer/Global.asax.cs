@@ -75,7 +75,7 @@ namespace MarketingServer
 
 
                         //See if this campaign actually exists
-                        bool exists = db.Emails.Any(x => x.CampaignID == campaign.campaignId && x.Day == campaign.day);
+                        bool exists = await db.Emails.AnyAsync(x => x.CampaignID == campaign.campaignId && x.Day == campaign.day);
                         
                         if (!exists)
                         {

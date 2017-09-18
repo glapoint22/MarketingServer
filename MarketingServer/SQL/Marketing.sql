@@ -98,12 +98,56 @@ alter table niches add FOREIGN KEY (CategoryID) REFERENCES Categories(ID)
 select * from campaigns
 select * from Categories
 select * from niches
-select * from Subscriptions
 select * from customers
 select * from emails order by CampaignID,day
+select * from Subscriptions
 select * from CampaignLogs order by date desc
 
 delete customers
+
+
+insert into Subscriptions ( CustomerID, NicheID, Subscribed, Suspended, DateSubscribed)
+values('EEB4EDA0-ACEC-446A-8652-6EC622977B5D', 199, 1, 0, getdate())
+
+SELECT DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0)
+
+drop trigger trgAfterInsert
+
+CREATE TRIGGER trgAfterInsert ON Subscriptions 
+FOR INSERT
+AS
+	declare @subscriptionId int;
+	declare @customerId uniqueidentifier;
+	declare @nicheId int;
+	
+	
+
+	select @subscriptionId=i.ID from inserted i;	
+	select @customerId=i.CustomerID from inserted i;
+	select @nicheId=i.nicheId from inserted i;
+	
+	
+
+	insert into CampaignLogs
+           (SubscriptionID,Date,CampaignID,Day,CustomerID) 
+	select top 1 @subscriptionId,DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0), id,0,@customerId
+	from Campaigns where NicheID = @nicheId order by id
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 alter table campaignlogs add FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE
 
@@ -207,3 +251,7 @@ ALTER TABLE CustomerCampaigns
 
 	alter table subscriptions add primary key(subscriptionid)
 	alter table subscriptions drop [PK__Subscrip__91D1C12A8A2A5A62]
+
+
+
+

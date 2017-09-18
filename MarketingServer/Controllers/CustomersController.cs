@@ -39,19 +39,53 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Customers/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutCustomer(Guid id, Customer customer)
+        public async Task<IHttpActionResult> PutCustomer(Preferences preferences)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            //Assign the customer
+            Customer customer = preferences.customer;
 
-            if (id != customer.ID)
+            //If the customer info has been modified
+            if (preferences.customerModified)
             {
-                return BadRequest();
-            }
+                db.Entry(customer).State = EntityState.Modified;
 
-            db.Entry(customer).State = EntityState.Modified;
+                //If unsubscribing to all subscriptions
+                if (customer.EmailSendFrequency == 0)
+                {
+                    await db.Subscriptions.Where(x => x.CustomerID == customer.ID).ForEachAsync(x => {
+                        x.Subscribed = false;
+                        x.DateUnsubscribed = DateTime.Today;
+                    });
+                }
+            }
+            
+            //Iterate through the subscriptions
+            foreach (UpdatedSubscription updatedSubscription in preferences.updatedSubscriptions)
+            {
+                Subscription subscription;
+
+                //If subscribing to a new subscription
+                if (updatedSubscription.subscriptionId == 0)
+                {
+                    subscription = new Subscription
+                    {
+                        CustomerID = customer.ID,
+                        NicheID = updatedSubscription.nicheId,
+                        Subscribed = updatedSubscription.isSubscribed,
+                        DateSubscribed = DateTime.Today
+                    };
+
+                    db.Subscriptions.Add(subscription);
+                }
+                else
+                {
+                    //Update the existing subscription
+                    subscription = await db.Subscriptions.FindAsync(updatedSubscription.subscriptionId);
+                    subscription.Subscribed = !subscription.Subscribed;
+                    if (!subscription.Subscribed) subscription.DateUnsubscribed = DateTime.Today;
+                    db.Entry(subscription).State = EntityState.Modified;
+                }
+            }
 
             try
             {
@@ -59,22 +93,15 @@ namespace MarketingServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                throw;
             }
-
+            
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/Customers
         [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> PostCustomer(Body body)
+        public async Task<IHttpActionResult> PostCustomer(Lead body)
         {
             Customer customer;
 
@@ -110,25 +137,25 @@ namespace MarketingServer.Controllers
                 customer = await db.Customers.FindAsync(id);
             }
 
-
-            
             //Check to see if this customer is subscribed to this niche
-            if (!IsSubscribed(customer.ID, niche.nicheId))
+            Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == niche.nicheId).Select(x => x).FirstOrDefaultAsync();
+            if(subscription == null)
             {
-                //Subscribe the customer to this niche
-                Subscription subscription = await GetSubscription(customer.ID, niche.nicheId);
+                //Get a new subscription
+                subscription = await GetSubscription(customer.ID, niche.nicheId);
                 db.Subscriptions.Add(subscription);
-
-                //Add a log for this new campaign
-                CampaignLog campaignLog = new CampaignLog
+            }
+            else
+            {
+                if (!subscription.Subscribed)
                 {
-                    SubscriptionID = subscription.ID,
-                    Date = DateTime.Today,
-                    CampaignID = await db.Campaigns.Where(c => c.NicheID == niche.nicheId).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefaultAsync(),
-                    Day = 0,
-                    CustomerID = customer.ID
-                };
-                db.CampaignLogs.Add(campaignLog);
+                    //Renew the subscription
+                    subscription.Subscribed = true;
+                    subscription.DateSubscribed = DateTime.Today;
+
+                    //If the customer was unsubscribed to all, set the email send frequency to default
+                    if(customer.EmailSendFrequency == 0) customer.EmailSendFrequency = 3;
+                }
             }
 
 
@@ -172,8 +199,10 @@ namespace MarketingServer.Controllers
                 {
                     name = c.Name,
                     niches = db.Niches.Where(n => n.CategoryID == c.ID).Select(n => new {
+                        id = n.ID,
                         name = n.Name,
-                        isSubscribed = db.Subscriptions.Any(x => x.CustomerID == customer.ID && x.Subscribed && x.NicheID == n.ID)
+                        isSubscribed = n.Subscriptions.Any(x => x.CustomerID == customer.ID && x.Subscribed && x.NicheID == n.ID),
+                        subscriptionId = n.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == n.ID).Select(x => x.ID).FirstOrDefault()
                     }).ToList(),
                     count = db.Niches.Where(n => n.CategoryID == c.ID).Count()
                 }).OrderByDescending(x => x.count).ToListAsync()
@@ -213,10 +242,10 @@ namespace MarketingServer.Controllers
             return db.Customers.Count(e => e.ID == id) > 0;
         }
 
-        private bool IsSubscribed(Guid id, int nicheId)
-        {
-            return db.Subscriptions.Count(x => x.CustomerID == id && x.NicheID == nicheId) > 0;
-        }
+        //private bool IsSubscribed(Guid id, int nicheId)
+        //{
+        //    return db.Subscriptions.Count(x => x.CustomerID == id && x.NicheID == nicheId) > 0;
+        //}
 
         private async Task<Subscription> GetSubscription(Guid id, int nicheId)
         {
@@ -234,11 +263,4 @@ namespace MarketingServer.Controllers
             return subscription;
         }
     }
-}
-
-public struct Body
-{
-    public string email;
-    public string name;
-    public string leadPage;
 }
