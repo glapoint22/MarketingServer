@@ -149,7 +149,6 @@
     <Compile Include="Category.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\CustomersController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="Customer.cs">

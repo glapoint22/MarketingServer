@@ -1,22 +1,29 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Description;
 using MarketingServer;
-using System.Web;
 
 namespace MarketingServer.Controllers
 {
     public class SubscriptionsController : ApiController
     {
         private MarketingEntities db = new MarketingEntities();
+
+        public async Task<IHttpActionResult> Get(Guid customerId)
+        {
+            Customer customer = await db.Customers.FindAsync(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(await GetPreferences(customer));
+        }
 
         public async Task<IHttpActionResult> Post(Lead lead)
         {
@@ -102,21 +109,14 @@ namespace MarketingServer.Controllers
             }
 
 
-            var data = new
+            var response = new
             {
                 leadMagnet = niche.leadMagnet,
-                customer = new
-                {
-                    id = customer.ID,
-                    email = customer.Email,
-                    name = customer.Name,
-                    emailSendFrequency = customer.EmailSendFrequency
-                },
-                subscriptions = await GetSubscriptions(customer.ID)
+                preferences = await GetPreferences(customer)
             };
 
 
-            return Ok(data);
+            return Ok(response);
         }
 
         public async Task<IHttpActionResult> Put(Preferences preferences)
@@ -209,6 +209,21 @@ namespace MarketingServer.Controllers
                 }).ToList(),
                 count = db.Niches.Where(n => n.CategoryID == c.ID).Count()
             }).OrderByDescending(x => x.count).ToListAsync();
+        }
+
+        private async Task<object> GetPreferences(Customer customer)
+        {
+            return new
+            {
+                customer = new
+                {
+                    id = customer.ID,
+                    email = customer.Email,
+                    name = customer.Name,
+                    emailSendFrequency = customer.EmailSendFrequency
+                },
+                subscriptions = await GetSubscriptions(customer.ID)
+            };
         }
     }
 }
