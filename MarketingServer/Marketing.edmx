@@ -50,6 +50,23 @@
           <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Body" Type="varchar(max)" Nullable="false" />
         </EntityType>
+        <EntityType Name="Leads">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LeadPage" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="LeadMagnet" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="MainStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Image" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Text" Type="varchar(max)" Nullable="false" />
+          <Property Name="TextStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="BarStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="BarText" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="ButtonStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="ButtonText" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="FormButtonText" Type="varchar" MaxLength="100" Nullable="false" />
+        </EntityType>
         <EntityType Name="Niches">
           <Key>
             <PropertyRef Name="ID" />
@@ -57,8 +74,7 @@
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
-          <Property Name="LeadPage" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="LeadMagnet" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="LeadID" Type="int" />
         </EntityType>
         <EntityType Name="Subscriptions">
           <Key>
@@ -122,6 +138,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Niches__LeadID__54CB950F">
+          <End Role="Leads" Type="Self.Leads" Multiplicity="0..1" />
+          <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Leads">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Niches">
+              <PropertyRef Name="LeadID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Subscript__Curre__22401542">
           <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="1" />
           <End Role="CampaignLogs" Type="Self.CampaignLogs" Multiplicity="*" />
@@ -178,6 +206,7 @@
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Emails" EntityType="Self.Emails" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
@@ -194,6 +223,10 @@
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Categories" EntitySet="Categories" />
+            <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Niches__LeadID__54CB950F" Association="Self.FK__Niches__LeadID__54CB950F">
+            <End Role="Leads" EntitySet="Leads" />
             <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Curre__22401542" Association="Self.FK__Subscript__Curre__22401542">
@@ -273,6 +306,24 @@
           <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Campaign" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Emails" ToRole="Campaigns" />
         </EntityType>
+        <EntityType Name="Lead">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="MainStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Image" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Text" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TextStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BarStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BarText" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ButtonStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FormButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Leads" ToRole="Niches" />
+        </EntityType>
         <EntityType Name="Nich">
           <Key>
             <PropertyRef Name="ID" />
@@ -280,10 +331,10 @@
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
-          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LeadID" Type="Int32" />
           <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Campaigns" />
           <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Niches" ToRole="Categories" />
+          <NavigationProperty Name="Lead" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Niches" ToRole="Leads" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Subscription">
@@ -389,6 +440,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Niches__LeadID__54CB950F">
+          <End Role="Leads" Type="Self.Lead" Multiplicity="0..1" />
+          <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Leads">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Niches">
+              <PropertyRef Name="LeadID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Subscript__Niche__2A164134">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
           <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
@@ -407,6 +470,7 @@
           <EntitySet Name="Categories" EntityType="Self.Category" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="Emails" EntityType="Self.Email" />
+          <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
@@ -436,6 +500,10 @@
           <AssociationSet Name="FK__Subscript__Custo__503BEA1C" Association="Self.FK__Subscript__Custo__503BEA1C">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Niches__LeadID__54CB950F" Association="Self.FK__Niches__LeadID__54CB950F">
+            <End Role="Leads" EntitySet="Leads" />
+            <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
             <End Role="Niches" EntitySet="Niches" />
@@ -497,14 +565,31 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="Leads">
+            <EntityTypeMapping TypeName="MarketingModel.Lead">
+              <MappingFragment StoreEntitySet="Leads">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
+                <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
+                <ScalarProperty Name="MainStyle" ColumnName="MainStyle" />
+                <ScalarProperty Name="Image" ColumnName="Image" />
+                <ScalarProperty Name="Text" ColumnName="Text" />
+                <ScalarProperty Name="TextStyle" ColumnName="TextStyle" />
+                <ScalarProperty Name="BarStyle" ColumnName="BarStyle" />
+                <ScalarProperty Name="BarText" ColumnName="BarText" />
+                <ScalarProperty Name="ButtonStyle" ColumnName="ButtonStyle" />
+                <ScalarProperty Name="ButtonText" ColumnName="ButtonText" />
+                <ScalarProperty Name="FormButtonText" ColumnName="FormButtonText" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Niches">
             <EntityTypeMapping TypeName="MarketingModel.Nich">
               <MappingFragment StoreEntitySet="Niches">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
-                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
-                <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
+                <ScalarProperty Name="LeadID" ColumnName="LeadID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

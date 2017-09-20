@@ -102,8 +102,27 @@ select * from customers
 select * from emails order by CampaignID,day
 select * from Subscriptions
 select * from CampaignLogs order by date desc
+select * from leads
 
 delete customers
+
+alter table niches add LeadID int
+alter table niches add FOREIGN KEY (LeadID) REFERENCES Leads(ID)
+
+create table Leads(
+	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
+	LeadPage varchar(255) not null,
+	LeadMagnet varchar (255) not null,
+	MainStyle varchar(255) not null,
+	Image varchar(100) not null,
+	Text varchar(max) not null,
+	TextStyle varchar(255) not null,
+	BarStyle varchar(255) not null,
+	BarText varchar(255) not null,
+	ButtonStyle varchar(255) not null,
+	ButtonText varchar(100) not null,
+	FormButtonText varchar(100) not null
+);
 
 
 insert into Subscriptions ( CustomerID, NicheID, Subscribed, Suspended, DateSubscribed)

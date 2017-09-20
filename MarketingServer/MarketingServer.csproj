@@ -149,6 +149,7 @@
     <Compile Include="Category.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\LeadsController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="Customer.cs">
@@ -159,6 +160,9 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Lead.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Mail.cs" />
     <Compile Include="Marketing.Context.cs">

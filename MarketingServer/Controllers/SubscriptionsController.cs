@@ -25,16 +25,15 @@ namespace MarketingServer.Controllers
             return Ok(await GetPreferences(customer));
         }
 
-        public async Task<IHttpActionResult> Post(Lead lead)
+        public async Task<IHttpActionResult> Post(Leads lead)
         {
             Customer customer;
 
-            //Get the niche based on the lead page that was passed in
-            var niche = await db.Niches.Where(x => x.LeadPage == lead.leadPage).Select(x => new
+            //Get the niche based on the lead ID that was passed in
+            var niche = await db.Niches.Where(x => x.LeadID == lead.leadId).Select(x => new
             {
                 nicheId = x.ID,
-                emailId = db.Emails.Where(e => e.CampaignID == db.Campaigns.Where(c => c.NicheID == x.ID).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefault() && e.Day == 0).Select(e => e.ID).FirstOrDefault(),
-                leadMagnet = x.LeadMagnet
+                leadMagnetEmailId = db.Emails.Where(e => e.CampaignID == db.Campaigns.Where(c => c.NicheID == x.ID).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefault() && e.Day == 0).Select(e => e.ID).FirstOrDefault()
             }
             ).SingleAsync();
 
@@ -84,14 +83,14 @@ namespace MarketingServer.Controllers
 
 
             //Get the email and send
-            var email = await db.Emails.Where(x => x.ID == niche.emailId).Select(x => new
+            var email = await db.Emails.Where(x => x.ID == niche.leadMagnetEmailId).Select(x => new
             {
                 subject = x.Subject,
                 body = x.Body
             }
             ).SingleAsync();
 
-            Mail mail = new Mail(niche.emailId, customer, email.subject, email.body);
+            Mail mail = new Mail(niche.leadMagnetEmailId, customer, email.subject, email.body);
             //mail.Send();
 
 
@@ -111,7 +110,7 @@ namespace MarketingServer.Controllers
 
             var response = new
             {
-                leadMagnet = niche.leadMagnet,
+                leadMagnet = lead.leadMagnet,
                 preferences = await GetPreferences(customer)
             };
 
@@ -228,11 +227,12 @@ namespace MarketingServer.Controllers
     }
 }
 
-public struct Lead
+public struct Leads
 {
     public string email;
     public string name;
-    public string leadPage;
+    public int leadId;
+    public string leadMagnet;
 }
 public struct Preferences
 {
