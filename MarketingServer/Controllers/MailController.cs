@@ -12,7 +12,13 @@ namespace MarketingServer.Controllers
 
         public async Task<IHttpActionResult> GetMail(Guid emailId, Guid customerId)
         {
-            string emailBody = await db.Emails.Where(e => e.ID == emailId).Select(e => e.Body).SingleAsync();
+            string emailBody = await db.Emails.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
+
+            if (emailBody == null)
+            {
+                return BadRequest();
+            }
+
             Mail mail = new Mail(emailId, await db.Customers.Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", emailBody);
             return Ok(mail.body);
         }
