@@ -96,8 +96,8 @@ alter table niches add FOREIGN KEY (CategoryID) REFERENCES Categories(ID)
 
  
 select * from campaigns
-select * from Categories
-select * from niches
+select * from Niches
+select * from SubNiches
 select * from customers
 select * from emails order by CampaignID,day
 select * from Subscriptions
@@ -132,7 +132,7 @@ SELECT DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0)
 
 drop trigger trgAfterInsert
 
-CREATE TRIGGER trgAfterInsert ON Subscriptions 
+CREATE TRIGGER trgAfterInsertCampaignLogs ON Subscriptions 
 FOR INSERT
 AS
 	declare @subscriptionId int;
@@ -143,14 +143,14 @@ AS
 
 	select @subscriptionId=i.ID from inserted i;	
 	select @customerId=i.CustomerID from inserted i;
-	select @nicheId=i.nicheId from inserted i;
+	select @nicheId=i.subNicheId from inserted i;
 	
 	
 
 	insert into CampaignLogs
            (SubscriptionID,Date,CampaignID,Day,CustomerID) 
 	select top 1 @subscriptionId,DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0), id,0,@customerId
-	from Campaigns where NicheID = @nicheId order by id
+	from Campaigns where subNicheID = @nicheId order by id
 	
 
 

@@ -23,11 +23,11 @@ namespace MarketingServer
     
         public int ID { get; set; }
         public string Name { get; set; }
-        public int NicheID { get; set; }
+        public int SubNicheID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CampaignLog> CampaignLogs { get; set; }
-        public virtual Nich Nich { get; set; }
+        public virtual SubNich SubNich { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Email> Emails { get; set; }
     }

@@ -27,11 +27,11 @@ namespace MarketingServer
     
         public virtual DbSet<CampaignLog> CampaignLogs { get; set; }
         public virtual DbSet<Campaign> Campaigns { get; set; }
-        public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Email> Emails { get; set; }
         public virtual DbSet<Lead> Leads { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
+        public virtual DbSet<SubNich> SubNiches { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
     }
 }

@@ -22,14 +22,7 @@
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="20" Nullable="false" />
-          <Property Name="NicheID" Type="int" Nullable="false" />
-        </EntityType>
-        <EntityType Name="Categories">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="SubNicheID" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Customers">
           <Key>
@@ -73,7 +66,14 @@
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="CategoryID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="SubNiches">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="ParentNicheID" Type="int" Nullable="false" />
           <Property Name="LeadID" Type="int" />
         </EntityType>
         <EntityType Name="Subscriptions">
@@ -82,7 +82,7 @@
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="CustomerID" Type="uniqueidentifier" Nullable="false" />
-          <Property Name="NicheID" Type="int" Nullable="false" />
+          <Property Name="SubNicheID" Type="int" Nullable="false" />
           <Property Name="Subscribed" Type="bit" Nullable="false" />
           <Property Name="Suspended" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
@@ -103,14 +103,14 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Campaigns__Niche__440B1D61">
-          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="SubNiches" Type="Self.SubNiches" Multiplicity="1" />
           <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Niches">
+            <Principal Role="SubNiches">
               <PropertyRef Name="ID" />
             </Principal>
             <Dependent Role="Campaigns">
-              <PropertyRef Name="NicheID" />
+              <PropertyRef Name="SubNicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -127,25 +127,25 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Niches__Category__625A9A57">
-          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
-          <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="SubNiches" Type="Self.SubNiches" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Categories">
+            <Principal Role="Niches">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Niches">
-              <PropertyRef Name="CategoryID" />
+            <Dependent Role="SubNiches">
+              <PropertyRef Name="ParentNicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Niches__LeadID__54CB950F">
           <End Role="Leads" Type="Self.Leads" Multiplicity="0..1" />
-          <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
+          <End Role="SubNiches" Type="Self.SubNiches" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Leads">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Niches">
+            <Dependent Role="SubNiches">
               <PropertyRef Name="LeadID" />
             </Dependent>
           </ReferentialConstraint>
@@ -177,14 +177,14 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Subscript__Niche__2A164134">
-          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="SubNiches" Type="Self.SubNiches" Multiplicity="1" />
           <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Niches">
+            <Principal Role="SubNiches">
               <PropertyRef Name="ID" />
             </Principal>
             <Dependent Role="Subscriptions">
-              <PropertyRef Name="NicheID" />
+              <PropertyRef Name="SubNicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -203,18 +203,18 @@
         <EntityContainer Name="MarketingModelStoreContainer">
           <EntitySet Name="CampaignLogs" EntityType="Self.CampaignLogs" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Campaigns" EntityType="Self.Campaigns" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Emails" EntityType="Self.Emails" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SubNiches" EntityType="Self.SubNiches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="CampaignLogs" EntitySet="CampaignLogs" />
           </AssociationSet>
           <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
-            <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
             <End Role="Campaigns" EntitySet="Campaigns" />
           </AssociationSet>
           <AssociationSet Name="FK__Emails__Campaign__08B54D69" Association="Self.FK__Emails__Campaign__08B54D69">
@@ -222,12 +222,12 @@
             <End Role="Emails" EntitySet="Emails" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
-            <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__LeadID__54CB950F" Association="Self.FK__Niches__LeadID__54CB950F">
             <End Role="Leads" EntitySet="Leads" />
-            <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Curre__22401542" Association="Self.FK__Subscript__Curre__22401542">
             <End Role="Campaigns" EntitySet="Campaigns" />
@@ -238,7 +238,7 @@
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
-            <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Subsc__2334397B" Association="Self.FK__Subscript__Subsc__2334397B">
@@ -271,18 +271,10 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="SubNicheID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="CampaignLogs" Relationship="Self.FK__Subscript__Curre__22401542" FromRole="Campaigns" ToRole="CampaignLogs" />
-          <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Campaigns" ToRole="Niches" />
+          <NavigationProperty Name="SubNich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Campaigns" ToRole="SubNiches" />
           <NavigationProperty Name="Emails" Relationship="Self.FK__Emails__Campaign__08B54D69" FromRole="Campaigns" ToRole="Emails" />
-        </EntityType>
-        <EntityType Name="Category">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Categories" ToRole="Niches" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
@@ -322,7 +314,7 @@
           <Property Name="ButtonStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FormButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Leads" ToRole="Niches" />
+          <NavigationProperty Name="SubNiches" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Leads" ToRole="SubNiches" />
         </EntityType>
         <EntityType Name="Nich">
           <Key>
@@ -330,12 +322,20 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="SubNiches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Niches" ToRole="SubNiches" />
+        </EntityType>
+        <EntityType Name="SubNich">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ParentNicheID" Type="Int32" Nullable="false" />
           <Property Name="LeadID" Type="Int32" />
-          <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Campaigns" />
-          <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Niches" ToRole="Categories" />
-          <NavigationProperty Name="Lead" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Niches" ToRole="Leads" />
-          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Niches" ToRole="Subscriptions" />
+          <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="SubNiches" ToRole="Campaigns" />
+          <NavigationProperty Name="Lead" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="SubNiches" ToRole="Leads" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="SubNiches" ToRole="Niches" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="SubNiches" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Subscription">
           <Key>
@@ -343,14 +343,14 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="CustomerID" Type="Guid" Nullable="false" />
-          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="SubNicheID" Type="Int32" Nullable="false" />
           <Property Name="Subscribed" Type="Boolean" Nullable="false" />
           <Property Name="Suspended" Type="Boolean" Nullable="false" />
           <Property Name="DateSubscribed" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="DateUnsubscribed" Type="DateTime" Precision="3" />
           <NavigationProperty Name="CampaignLogs" Relationship="Self.FK__Subscript__Subsc__2334397B" FromRole="Subscriptions" ToRole="CampaignLogs" />
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__503BEA1C" FromRole="Subscriptions" ToRole="Customers" />
-          <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Subscriptions" ToRole="Niches" />
+          <NavigationProperty Name="SubNich" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Subscriptions" ToRole="SubNiches" />
         </EntityType>
         <Association Name="FK__CampaignL__Custo__2CBDA3B5">
           <End Role="Customers" Type="Self.Customer" Multiplicity="1">
@@ -391,14 +391,14 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK__Campaigns__Niche__440B1D61">
-          <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
+          <End Role="SubNiches" Type="Self.SubNich" Multiplicity="1" />
           <End Role="Campaigns" Type="Self.Campaign" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Niches">
+            <Principal Role="SubNiches">
               <PropertyRef Name="ID" />
             </Principal>
             <Dependent Role="Campaigns">
-              <PropertyRef Name="NicheID" />
+              <PropertyRef Name="SubNicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -411,18 +411,6 @@
             </Principal>
             <Dependent Role="Emails">
               <PropertyRef Name="CampaignID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Niches__Category__625A9A57">
-          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
-          <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Categories">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Niches">
-              <PropertyRef Name="CategoryID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -442,36 +430,48 @@
         </Association>
         <Association Name="FK__Niches__LeadID__54CB950F">
           <End Role="Leads" Type="Self.Lead" Multiplicity="0..1" />
-          <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
+          <End Role="SubNiches" Type="Self.SubNich" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Leads">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Niches">
+            <Dependent Role="SubNiches">
               <PropertyRef Name="LeadID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Niche__2A164134">
+        <Association Name="FK__Niches__Category__625A9A57">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
-          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
+          <End Role="SubNiches" Type="Self.SubNich" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Niches">
               <PropertyRef Name="ID" />
             </Principal>
+            <Dependent Role="SubNiches">
+              <PropertyRef Name="ParentNicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__Niche__2A164134">
+          <End Role="SubNiches" Type="Self.SubNich" Multiplicity="1" />
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SubNiches">
+              <PropertyRef Name="ID" />
+            </Principal>
             <Dependent Role="Subscriptions">
-              <PropertyRef Name="NicheID" />
+              <PropertyRef Name="SubNicheID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CampaignLogs" EntityType="Self.CampaignLog" />
           <EntitySet Name="Campaigns" EntityType="Self.Campaign" />
-          <EntitySet Name="Categories" EntityType="Self.Category" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="Emails" EntityType="Self.Email" />
           <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
+          <EntitySet Name="SubNiches" EntityType="Self.SubNich" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
             <End Role="Customers" EntitySet="Customers" />
@@ -486,16 +486,12 @@
             <End Role="CampaignLogs" EntitySet="CampaignLogs" />
           </AssociationSet>
           <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
-            <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
             <End Role="Campaigns" EntitySet="Campaigns" />
           </AssociationSet>
           <AssociationSet Name="FK__Emails__Campaign__08B54D69" Association="Self.FK__Emails__Campaign__08B54D69">
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
-            <End Role="Categories" EntitySet="Categories" />
-            <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Custo__503BEA1C" Association="Self.FK__Subscript__Custo__503BEA1C">
             <End Role="Customers" EntitySet="Customers" />
@@ -503,10 +499,14 @@
           </AssociationSet>
           <AssociationSet Name="FK__Niches__LeadID__54CB950F" Association="Self.FK__Niches__LeadID__54CB950F">
             <End Role="Leads" EntitySet="Leads" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
-            <End Role="Niches" EntitySet="Niches" />
+            <End Role="SubNiches" EntitySet="SubNiches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
         </EntityContainer>
@@ -532,15 +532,7 @@
               <MappingFragment StoreEntitySet="Campaigns">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Categories">
-            <EntityTypeMapping TypeName="MarketingModel.Category">
-              <MappingFragment StoreEntitySet="Categories">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="SubNicheID" ColumnName="SubNicheID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -588,7 +580,15 @@
               <MappingFragment StoreEntitySet="Niches">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SubNiches">
+            <EntityTypeMapping TypeName="MarketingModel.SubNich">
+              <MappingFragment StoreEntitySet="SubNiches">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ParentNicheID" ColumnName="ParentNicheID" />
                 <ScalarProperty Name="LeadID" ColumnName="LeadID" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -598,7 +598,7 @@
               <MappingFragment StoreEntitySet="Subscriptions">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
-                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+                <ScalarProperty Name="SubNicheID" ColumnName="SubNicheID" />
                 <ScalarProperty Name="Subscribed" ColumnName="Subscribed" />
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />

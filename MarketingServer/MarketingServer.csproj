@@ -146,9 +146,6 @@
     <Compile Include="CampaignLog.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="Category.cs">
-      <DependentUpon>Marketing.tt</DependentUpon>
-    </Compile>
     <Compile Include="Controllers\LeadsController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
@@ -184,6 +181,9 @@
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubNich.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="Subscription.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

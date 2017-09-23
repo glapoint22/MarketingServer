@@ -17,7 +17,7 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Lead()
         {
-            this.Niches = new HashSet<Nich>();
+            this.SubNiches = new HashSet<SubNich>();
         }
     
         public int ID { get; set; }
@@ -34,6 +34,6 @@ namespace MarketingServer
         public string FormButtonText { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Nich> Niches { get; set; }
+        public virtual ICollection<SubNich> SubNiches { get; set; }
     }
 }

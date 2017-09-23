@@ -21,7 +21,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            //await Run();
+            await Run();
         }
 
         public async Task Run()
@@ -78,10 +78,10 @@ namespace MarketingServer
                         
                         if (!exists)
                         {
-                            //The current campaign does not exists, so get another campaign in this niche 
-                            int nextCampaignId = await db.Campaigns.Where(c => c.NicheID == subscription.NicheID && c.ID > campaign.campaignId).OrderBy(x => x.ID).Select(c => c.ID).FirstOrDefaultAsync();
+                            //The current campaign does not exists, so get another campaign in this sub niche 
+                            int nextCampaignId = await db.Campaigns.Where(c => c.SubNicheID == subscription.SubNicheID && c.ID > campaign.campaignId).OrderBy(x => x.ID).Select(c => c.ID).FirstOrDefaultAsync();
 
-                            //If there are no other campaigns in this niche, suspend this subscription
+                            //If there are no other campaigns in this sub niche, suspend this subscription
                             if (nextCampaignId == 0)
                             {
                                 subscription.Suspended = true;
