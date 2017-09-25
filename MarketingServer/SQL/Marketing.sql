@@ -272,5 +272,58 @@ ALTER TABLE CustomerCampaigns
 	alter table subscriptions drop [PK__Subscrip__91D1C12A8A2A5A62]
 
 
+	
 
 
+	Create table Transactions(
+		id int NOT NULL PRIMARY KEY,
+		transactionTime datetime not null,
+		receipt varchar(21) not null,
+		transactionType varchar(15) not null,
+		vendor varchar(10) null,
+		affiliate varchar(10) null,
+		role varchar(9) null,
+		totalAccountAmount float not null,
+		paymentMethod varchar(4) not null,
+		totalOrderAmount float not null,
+		totalTaxAmount float not null,
+		totalShippingAmount float not null,
+		currency varchar(3) not null,
+		orderLanguage varchar(2) null,
+		customerId uniqueidentifier null,
+		constraint uk_Transactions_receipt unique (receipt)
+	);
+
+	create table LineItems(
+		transactionId int not null,
+		itemNo varchar(25) not null,
+		productTitle varchar (255) not null,
+		shippable bit not null,
+		recurring bit not null,
+		accountAmount float not null,
+		quantity int not null,
+		downloadUrl varchar(255) null,
+		lineItemType varchar(8) not null,
+		primary key(transactionId, itemNo),
+		FOREIGN KEY (transactionId) REFERENCES Transactions(ID)
+	);
+
+	
+	Create table Upsells(
+		id int NOT NULL PRIMARY KEY IDENTITY(1,1),
+		upsellOriginalReceipt varchar(21) not null,
+		upsellFlowId int not null,
+		upsellSession varchar(16) null,
+		upsellPath varchar(12) null,
+		FOREIGN KEY (upsellOriginalReceipt) REFERENCES Transactions(receipt)
+	);
+
+	alter table Customers add lastName varchar(255) null,
+							  phoneNumber varchar(255) null,
+							  address1 varchar(255) null,
+							  address2 varchar(255) null,
+							  city varchar (255) null,
+							  county varchar(255) null,
+							  state varchar(255) null,
+							  postalCode varchar(255),
+							  country varchar(255)

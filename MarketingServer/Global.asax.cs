@@ -21,7 +21,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            await Run();
+            //await Run();
         }
 
         public async Task Run()

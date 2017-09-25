@@ -30,8 +30,11 @@ namespace MarketingServer
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<Email> Emails { get; set; }
         public virtual DbSet<Lead> Leads { get; set; }
+        public virtual DbSet<LineItem> LineItems { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
         public virtual DbSet<SubNich> SubNiches { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
+        public virtual DbSet<Transaction> Transactions { get; set; }
+        public virtual DbSet<Upsell> Upsells { get; set; }
     }
 }

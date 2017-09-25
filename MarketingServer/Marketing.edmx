@@ -32,6 +32,15 @@
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Email" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="int" Nullable="false" />
+          <Property Name="lastName" Type="varchar" MaxLength="255" />
+          <Property Name="phoneNumber" Type="varchar" MaxLength="255" />
+          <Property Name="address1" Type="varchar" MaxLength="255" />
+          <Property Name="address2" Type="varchar" MaxLength="255" />
+          <Property Name="city" Type="varchar" MaxLength="255" />
+          <Property Name="county" Type="varchar" MaxLength="255" />
+          <Property Name="state" Type="varchar" MaxLength="255" />
+          <Property Name="postalCode" Type="varchar" MaxLength="255" />
+          <Property Name="country" Type="varchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="Emails">
           <Key>
@@ -60,6 +69,21 @@
           <Property Name="ButtonText" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="FormButtonText" Type="varchar" MaxLength="100" Nullable="false" />
         </EntityType>
+        <EntityType Name="LineItems">
+          <Key>
+            <PropertyRef Name="transactionId" />
+            <PropertyRef Name="itemNo" />
+          </Key>
+          <Property Name="transactionId" Type="int" Nullable="false" />
+          <Property Name="itemNo" Type="varchar" MaxLength="25" Nullable="false" />
+          <Property Name="productTitle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="shippable" Type="bit" Nullable="false" />
+          <Property Name="recurring" Type="bit" Nullable="false" />
+          <Property Name="accountAmount" Type="float" Nullable="false" />
+          <Property Name="quantity" Type="int" Nullable="false" />
+          <Property Name="downloadUrl" Type="varchar" MaxLength="255" />
+          <Property Name="lineItemType" Type="varchar" MaxLength="8" Nullable="false" />
+        </EntityType>
         <EntityType Name="Niches">
           <Key>
             <PropertyRef Name="ID" />
@@ -87,6 +111,36 @@
           <Property Name="Suspended" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
           <Property Name="DateUnsubscribed" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Transactions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="transactionTime" Type="datetime" Nullable="false" />
+          <Property Name="receipt" Type="varchar" MaxLength="21" Nullable="false" />
+          <Property Name="transactionType" Type="varchar" MaxLength="15" Nullable="false" />
+          <Property Name="vendor" Type="varchar" MaxLength="10" />
+          <Property Name="affiliate" Type="varchar" MaxLength="10" />
+          <Property Name="role" Type="varchar" MaxLength="9" />
+          <Property Name="totalAccountAmount" Type="float" Nullable="false" />
+          <Property Name="paymentMethod" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="totalOrderAmount" Type="float" Nullable="false" />
+          <Property Name="totalTaxAmount" Type="float" Nullable="false" />
+          <Property Name="totalShippingAmount" Type="float" Nullable="false" />
+          <Property Name="currency" Type="varchar" MaxLength="3" Nullable="false" />
+          <Property Name="orderLanguage" Type="varchar" MaxLength="2" />
+          <Property Name="customerId" Type="uniqueidentifier" />
+        </EntityType>
+        <EntityType Name="Upsells">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="upsellOriginalReceipt" Type="varchar" MaxLength="21" Nullable="false" />
+          <Property Name="upsellFlowId" Type="int" Nullable="false" />
+          <Property Name="upsellSession" Type="varchar" MaxLength="16" />
+          <Property Name="upsellPath" Type="varchar" MaxLength="12" />
         </EntityType>
         <Association Name="FK__CampaignL__Custo__2CBDA3B5">
           <End Role="Customers" Type="Self.Customers" Multiplicity="1">
@@ -123,6 +177,18 @@
             </Principal>
             <Dependent Role="Emails">
               <PropertyRef Name="CampaignID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__LineItems__trans__7DCDAAA2">
+          <End Role="Transactions" Type="Self.Transactions" Multiplicity="1" />
+          <End Role="LineItems" Type="Self.LineItems" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Transactions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="LineItems">
+              <PropertyRef Name="transactionId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -200,15 +266,21 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <!--Errors Found During Generation:
+warning 6035: The relationship 'FK__Upsells__upsellO__038683F8' has columns that are not part of the key of the table on the primary side of the relationship. The relationship was excluded.
+        <Association Name="FK__Upsells__upsellO__038683F8" />-->
         <EntityContainer Name="MarketingModelStoreContainer">
           <EntitySet Name="CampaignLogs" EntityType="Self.CampaignLogs" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Campaigns" EntityType="Self.Campaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Emails" EntityType="Self.Emails" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LineItems" EntityType="Self.LineItems" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="SubNiches" EntityType="Self.SubNiches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Transactions" EntityType="Self.Transactions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Upsells" EntityType="Self.Upsells" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="CampaignLogs" EntitySet="CampaignLogs" />
@@ -220,6 +292,10 @@
           <AssociationSet Name="FK__Emails__Campaign__08B54D69" Association="Self.FK__Emails__Campaign__08B54D69">
             <End Role="Campaigns" EntitySet="Campaigns" />
             <End Role="Emails" EntitySet="Emails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LineItems__trans__7DCDAAA2" Association="Self.FK__LineItems__trans__7DCDAAA2">
+            <End Role="Transactions" EntitySet="Transactions" />
+            <End Role="LineItems" EntitySet="LineItems" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Niches" EntitySet="Niches" />
@@ -284,6 +360,15 @@
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Email" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
+          <Property Name="lastName" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="phoneNumber" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="address1" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="address2" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="city" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="county" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="state" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="postalCode" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="country" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="CampaignLogs" Relationship="Self.FK__CampaignL__Custo__2CBDA3B5" FromRole="Customers" ToRole="CampaignLogs" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__503BEA1C" FromRole="Customers" ToRole="Subscriptions" />
         </EntityType>
@@ -315,6 +400,22 @@
           <Property Name="ButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FormButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="SubNiches" Relationship="Self.FK__Niches__LeadID__54CB950F" FromRole="Leads" ToRole="SubNiches" />
+        </EntityType>
+        <EntityType Name="LineItem">
+          <Key>
+            <PropertyRef Name="transactionId" />
+            <PropertyRef Name="itemNo" />
+          </Key>
+          <Property Name="transactionId" Type="Int32" Nullable="false" />
+          <Property Name="itemNo" Type="String" MaxLength="25" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="productTitle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="shippable" Type="Boolean" Nullable="false" />
+          <Property Name="recurring" Type="Boolean" Nullable="false" />
+          <Property Name="accountAmount" Type="Double" Nullable="false" />
+          <Property Name="quantity" Type="Int32" Nullable="false" />
+          <Property Name="downloadUrl" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="lineItemType" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Transaction" Relationship="Self.FK__LineItems__trans__7DCDAAA2" FromRole="LineItems" ToRole="Transactions" />
         </EntityType>
         <EntityType Name="Nich">
           <Key>
@@ -351,6 +452,37 @@
           <NavigationProperty Name="CampaignLogs" Relationship="Self.FK__Subscript__Subsc__2334397B" FromRole="Subscriptions" ToRole="CampaignLogs" />
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__503BEA1C" FromRole="Subscriptions" ToRole="Customers" />
           <NavigationProperty Name="SubNich" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Subscriptions" ToRole="SubNiches" />
+        </EntityType>
+        <EntityType Name="Transaction">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="transactionTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="receipt" Type="String" MaxLength="21" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="transactionType" Type="String" MaxLength="15" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="vendor" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="affiliate" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="role" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="totalAccountAmount" Type="Double" Nullable="false" />
+          <Property Name="paymentMethod" Type="String" MaxLength="4" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="totalOrderAmount" Type="Double" Nullable="false" />
+          <Property Name="totalTaxAmount" Type="Double" Nullable="false" />
+          <Property Name="totalShippingAmount" Type="Double" Nullable="false" />
+          <Property Name="currency" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="orderLanguage" Type="String" MaxLength="2" FixedLength="false" Unicode="false" />
+          <Property Name="customerId" Type="Guid" />
+          <NavigationProperty Name="LineItems" Relationship="Self.FK__LineItems__trans__7DCDAAA2" FromRole="Transactions" ToRole="LineItems" />
+        </EntityType>
+        <EntityType Name="Upsell">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="upsellOriginalReceipt" Type="String" MaxLength="21" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="upsellFlowId" Type="Int32" Nullable="false" />
+          <Property Name="upsellSession" Type="String" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="upsellPath" Type="String" MaxLength="12" FixedLength="false" Unicode="false" />
         </EntityType>
         <Association Name="FK__CampaignL__Custo__2CBDA3B5">
           <End Role="Customers" Type="Self.Customer" Multiplicity="1">
@@ -440,6 +572,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__LineItems__trans__7DCDAAA2">
+          <End Role="Transactions" Type="Self.Transaction" Multiplicity="1" />
+          <End Role="LineItems" Type="Self.LineItem" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Transactions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="LineItems">
+              <PropertyRef Name="transactionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Niches__Category__625A9A57">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
           <End Role="SubNiches" Type="Self.SubNich" Multiplicity="*" />
@@ -470,9 +614,12 @@
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="Emails" EntityType="Self.Email" />
           <EntitySet Name="Leads" EntityType="Self.Lead" />
+          <EntitySet Name="LineItems" EntityType="Self.LineItem" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="SubNiches" EntityType="Self.SubNich" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
+          <EntitySet Name="Transactions" EntityType="Self.Transaction" />
+          <EntitySet Name="Upsells" EntityType="Self.Upsell" />
           <AssociationSet Name="FK__CampaignL__Custo__2CBDA3B5" Association="Self.FK__CampaignL__Custo__2CBDA3B5">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="CampaignLogs" EntitySet="CampaignLogs" />
@@ -500,6 +647,10 @@
           <AssociationSet Name="FK__Niches__LeadID__54CB950F" Association="Self.FK__Niches__LeadID__54CB950F">
             <End Role="Leads" EntitySet="Leads" />
             <End Role="SubNiches" EntitySet="SubNiches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LineItems__trans__7DCDAAA2" Association="Self.FK__LineItems__trans__7DCDAAA2">
+            <End Role="Transactions" EntitySet="Transactions" />
+            <End Role="LineItems" EntitySet="LineItems" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Niches" EntitySet="Niches" />
@@ -543,6 +694,15 @@
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailSendFrequency" ColumnName="EmailSendFrequency" />
+                <ScalarProperty Name="lastName" ColumnName="lastName" />
+                <ScalarProperty Name="phoneNumber" ColumnName="phoneNumber" />
+                <ScalarProperty Name="address1" ColumnName="address1" />
+                <ScalarProperty Name="address2" ColumnName="address2" />
+                <ScalarProperty Name="city" ColumnName="city" />
+                <ScalarProperty Name="county" ColumnName="county" />
+                <ScalarProperty Name="state" ColumnName="state" />
+                <ScalarProperty Name="postalCode" ColumnName="postalCode" />
+                <ScalarProperty Name="country" ColumnName="country" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -575,6 +735,21 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="LineItems">
+            <EntityTypeMapping TypeName="MarketingModel.LineItem">
+              <MappingFragment StoreEntitySet="LineItems">
+                <ScalarProperty Name="transactionId" ColumnName="transactionId" />
+                <ScalarProperty Name="itemNo" ColumnName="itemNo" />
+                <ScalarProperty Name="productTitle" ColumnName="productTitle" />
+                <ScalarProperty Name="shippable" ColumnName="shippable" />
+                <ScalarProperty Name="recurring" ColumnName="recurring" />
+                <ScalarProperty Name="accountAmount" ColumnName="accountAmount" />
+                <ScalarProperty Name="quantity" ColumnName="quantity" />
+                <ScalarProperty Name="downloadUrl" ColumnName="downloadUrl" />
+                <ScalarProperty Name="lineItemType" ColumnName="lineItemType" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Niches">
             <EntityTypeMapping TypeName="MarketingModel.Nich">
               <MappingFragment StoreEntitySet="Niches">
@@ -603,6 +778,38 @@
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
                 <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Transactions">
+            <EntityTypeMapping TypeName="MarketingModel.Transaction">
+              <MappingFragment StoreEntitySet="Transactions">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="transactionTime" ColumnName="transactionTime" />
+                <ScalarProperty Name="receipt" ColumnName="receipt" />
+                <ScalarProperty Name="transactionType" ColumnName="transactionType" />
+                <ScalarProperty Name="vendor" ColumnName="vendor" />
+                <ScalarProperty Name="affiliate" ColumnName="affiliate" />
+                <ScalarProperty Name="role" ColumnName="role" />
+                <ScalarProperty Name="totalAccountAmount" ColumnName="totalAccountAmount" />
+                <ScalarProperty Name="paymentMethod" ColumnName="paymentMethod" />
+                <ScalarProperty Name="totalOrderAmount" ColumnName="totalOrderAmount" />
+                <ScalarProperty Name="totalTaxAmount" ColumnName="totalTaxAmount" />
+                <ScalarProperty Name="totalShippingAmount" ColumnName="totalShippingAmount" />
+                <ScalarProperty Name="currency" ColumnName="currency" />
+                <ScalarProperty Name="orderLanguage" ColumnName="orderLanguage" />
+                <ScalarProperty Name="customerId" ColumnName="customerId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Upsells">
+            <EntityTypeMapping TypeName="MarketingModel.Upsell">
+              <MappingFragment StoreEntitySet="Upsells">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="upsellOriginalReceipt" ColumnName="upsellOriginalReceipt" />
+                <ScalarProperty Name="upsellFlowId" ColumnName="upsellFlowId" />
+                <ScalarProperty Name="upsellSession" ColumnName="upsellSession" />
+                <ScalarProperty Name="upsellPath" ColumnName="upsellPath" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
