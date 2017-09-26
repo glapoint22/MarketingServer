@@ -273,7 +273,15 @@ ALTER TABLE CustomerCampaigns
 
 
 	
+	select * from Transactions
+	select * from LineItems
+	select * from Upsells
 
+	delete Transactions
+	delete LineItems
+	delete Upsells
+
+	select * from Customers
 
 	Create table Transactions(
 		id int NOT NULL PRIMARY KEY,
