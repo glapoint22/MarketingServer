@@ -19,6 +19,7 @@ namespace MarketingServer
         public string ProductID { get; set; }
         public int Day { get; set; }
         public bool ProductPurchased { get; set; }
+        public bool Ended { get; set; }
     
         public virtual Product Product { get; set; }
         public virtual Subscription Subscription { get; set; }

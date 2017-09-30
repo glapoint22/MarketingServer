@@ -37,13 +37,8 @@ namespace MarketingServer
 
                 //Get a list of customers that we will be sending emails to
                 List<Customer> customers = await db.Customers
-                    .Where(c => c.Subscriptions
-                        .Where(x => x.Subscribed && !x.Suspended).Count() != 0 && SqlFunctions.DateDiff("day", db.Campaigns
-                            .Where(e => e.Subscription.CustomerID == c.ID)
-                            .OrderByDescending(x => x.Date)
-                            .Select(x => x.Date)
-                            .FirstOrDefault(), DateTime.Today) >= c.EmailSendFrequency)
-                    .AsNoTracking()
+                    .Where(c => SqlFunctions.DateDiff("day", c.EmailSentDate, DateTime.Today) >= c.EmailSendFrequency && c.Subscriptions
+                        .Where(x => x.Subscribed && !x.Suspended).Count() != 0)
                     .ToListAsync();
 
                 
@@ -59,47 +54,84 @@ namespace MarketingServer
                     //Iterate through each subscription
                     foreach (Subscription subscription in subscriptions)
                     {
-                        object email;
+                        Email email;
+                        Campaign newCampaign;
 
                         //Get the current campaign this customer is on
-                        var currentCampaign = await db.Campaigns
-                            .OrderByDescending(x => x.Date)
-                            .Where(x => x.SubscriptionID == subscription.ID)
-                            .Select(x => new {
-                                productId = x.ProductID,
-                                day = x.Day,
-                                productPurchased = x.ProductPurchased
-                            })
+                        Campaign currentCampaign = await db.Campaigns
+                            .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
                             .FirstOrDefaultAsync();
 
-
-                        if (!currentCampaign.productPurchased)
+                        if (currentCampaign == null)
                         {
-                            email = await GetEmail(currentCampaign.productId, currentCampaign.day + 1);
-                            if(email == null)
+                            //Error!
+                            continue;
+                        }
+
+                        //Get the next email from this campaign
+                        email = await GetEmail(currentCampaign.ProductID, currentCampaign.Day + 1);
+
+                        /*
+                        If the email is null, this means we are at the end of the 
+                        campaign and must start a new campaign with a new product
+                        */
+                        if (email == null)
+                        {
+                            //Mark that the current campaign has ended
+                            currentCampaign.Ended = true;
+                            db.Entry(currentCampaign).State = EntityState.Modified;
+
+                            //Get a new product
+                            var productId = await GetNewProductId(subscription.NicheID, subscription.ID);
+
+                            /*
+                            If the product id is null, this means there are no more products in this 
+                            subscription and we must suspend this subscription until more products are added
+                            */
+                            if(productId == null)
                             {
-                                //Get a new product
-                                var productId = await GetNewProductId(subscription.NicheID, subscription.ID);
-
-                                //Start a new campaign with this new product
-                                Campaign newCampaign = new Campaign
-                                {
-                                    SubscriptionID = subscription.ID,
-                                    Date = DateTime.Today,
-                                    ProductID = productId,
-                                    Day = 1,
-                                };
+                                //Suspending subscription
+                                subscription.Suspended = true;
+                                db.Entry(subscription).State = EntityState.Modified;
+                                continue;
                             }
-                        }
-                        else
-                        {
-                            //Get another product
-                        }
 
 
+                            //Start a new campaign with this new product
+                            newCampaign = new Campaign
+                            {
+                                SubscriptionID = subscription.ID,
+                                Date = DateTime.Now,
+                                ProductID = productId,
+                                Day = 1,
+                            };
                             
-                        
-                        
+
+                            //Get the first email from this campaign
+                            email = await GetEmail(newCampaign.ProductID, newCampaign.Day);
+                        }else
+                        {
+                            newCampaign = new Campaign
+                            {
+                                SubscriptionID = subscription.ID,
+                                Date = DateTime.Now,
+                                ProductID = currentCampaign.ProductID,
+                                Day = currentCampaign.Day + 1,
+                            };
+                        }
+
+                        Mail mail = new Mail(email.id, customer, email.subject, email.body);
+                        //mail.Send();
+                        customer.EmailSentDate = DateTime.Today;
+
+                        //Add the new record
+                        db.Campaigns.Add(newCampaign);
+
+
+
+
+
+
 
 
 
@@ -183,17 +215,16 @@ namespace MarketingServer
             
         }
 
-        private async Task<object> GetEmail(string productId, int day)
+        private async Task<Email> GetEmail(string productId, int day)
         {
             return await db.EmailCampaigns
                 .Where(x => x.ProductID == productId && x.Day == day)
-                .Select(x => new
+                .Select(x => new Email
                 {
                     id = x.ID,
                     subject = x.Subject,
                     body = x.Body
                 })
-                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
@@ -206,8 +237,13 @@ namespace MarketingServer
                     .ToList()
                     .Contains(x.ID))
                 .Select(x => x.ID)
-                .AsNoTracking()
                 .FirstOrDefaultAsync();
         }
     }
+}
+public class Email
+{
+    public string id;
+    public string subject;
+    public string body;
 }

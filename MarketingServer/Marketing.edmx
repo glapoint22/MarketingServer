@@ -15,6 +15,7 @@
           <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Day" Type="int" Nullable="false" />
           <Property Name="ProductPurchased" Type="bit" Nullable="false" />
+          <Property Name="Ended" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Categories">
           <Key>
@@ -31,6 +32,7 @@
           <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Email" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="int" Nullable="false" />
+          <Property Name="EmailSentDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="EmailCampaigns">
           <Key>
@@ -270,6 +272,7 @@
           <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Day" Type="Int32" Nullable="false" />
           <Property Name="ProductPurchased" Type="Boolean" Nullable="false" />
+          <Property Name="Ended" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Product" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Campaigns" ToRole="Products" />
           <NavigationProperty Name="Subscription" Relationship="Self.FK__Campaigns__Subsc__3BCADD1B" FromRole="Campaigns" ToRole="Subscriptions" />
         </EntityType>
@@ -289,6 +292,7 @@
           <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
+          <Property Name="EmailSentDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__2116E6DF" FromRole="Customers" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="EmailCampaign">
@@ -542,6 +546,7 @@
                 <ScalarProperty Name="ProductID" ColumnName="ProductID" />
                 <ScalarProperty Name="Day" ColumnName="Day" />
                 <ScalarProperty Name="ProductPurchased" ColumnName="ProductPurchased" />
+                <ScalarProperty Name="Ended" ColumnName="Ended" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -560,6 +565,7 @@
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailSendFrequency" ColumnName="EmailSendFrequency" />
+                <ScalarProperty Name="EmailSentDate" ColumnName="EmailSentDate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

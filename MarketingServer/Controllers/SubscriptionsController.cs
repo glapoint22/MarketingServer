@@ -171,11 +171,11 @@ namespace MarketingServer.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        private Subscription CreateSubscription(string id, int nicheId)
+        private Subscription CreateSubscription(string customerId, int nicheId)
         {
             Subscription subscription = new Subscription()
             {
-                CustomerID = id,
+                CustomerID = customerId,
                 NicheID = nicheId,
                 Subscribed = true,
                 Suspended = false,

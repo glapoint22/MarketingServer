@@ -101,13 +101,15 @@ select * from Niches
 select * from emailCampaigns order by ProductID,day
 select * from customers
 select * from Subscriptions
-select * from Campaigns order by date desc
+select * from Campaigns order by subscriptionid
 select * from leads
 select * from LeadMagnetEmails
 
 
 
-alter table campaigns drop column customerid
+alter table customers add EmailSentDate Datetime default DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) not null
+alter table customers drop column emailsentdate
+alter table customers drop DF__Customers__Email__473C8FC7
 
 create table LeadMagnetEmails(
 	ID varchar(10) NOT NULL PRIMARY KEY,
@@ -139,14 +141,14 @@ AS
 	
 
 	insert into Campaigns
-           (SubscriptionID,Date,ProductID,Day) 
-	select top 1 @subscriptionId,DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0), id,0
+           (SubscriptionID, Date, ProductID, Day) 
+	select top 1 @subscriptionId, GETDATE(), id, 0
 	from Products where NicheID = @nicheId
 	
 
+	
 
-
-
+	
 	
 
 
