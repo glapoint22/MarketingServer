@@ -17,26 +17,14 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Customer()
         {
-            this.CampaignLogs = new HashSet<CampaignLog>();
             this.Subscriptions = new HashSet<Subscription>();
         }
     
-        public System.Guid ID { get; set; }
+        public string ID { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
         public int EmailSendFrequency { get; set; }
-        public string lastName { get; set; }
-        public string phoneNumber { get; set; }
-        public string address1 { get; set; }
-        public string address2 { get; set; }
-        public string city { get; set; }
-        public string county { get; set; }
-        public string state { get; set; }
-        public string postalCode { get; set; }
-        public string country { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CampaignLog> CampaignLogs { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Subscription> Subscriptions { get; set; }
     }

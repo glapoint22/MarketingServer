@@ -17,7 +17,7 @@ namespace MarketingServer
         public string body;
         
 
-        public Mail(Guid emailId, Customer customer, string subject, string body)
+        public Mail(string emailId, Customer customer, string subject, string body)
         {
             Configuration configurationFile = WebConfigurationManager.OpenWebConfiguration(HttpRuntime.AppDomainAppVirtualPath);
             MailSettingsSectionGroup mailSettings = configurationFile.GetSectionGroup("system.net/mailSettings") as MailSettingsSectionGroup;

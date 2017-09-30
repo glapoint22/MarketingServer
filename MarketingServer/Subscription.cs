@@ -17,20 +17,20 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Subscription()
         {
-            this.CampaignLogs = new HashSet<CampaignLog>();
+            this.Campaigns = new HashSet<Campaign>();
         }
     
         public int ID { get; set; }
-        public System.Guid CustomerID { get; set; }
-        public int SubNicheID { get; set; }
+        public string CustomerID { get; set; }
+        public int NicheID { get; set; }
         public bool Subscribed { get; set; }
         public bool Suspended { get; set; }
         public System.DateTime DateSubscribed { get; set; }
         public Nullable<System.DateTime> DateUnsubscribed { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CampaignLog> CampaignLogs { get; set; }
+        public virtual ICollection<Campaign> Campaigns { get; set; }
         public virtual Customer Customer { get; set; }
-        public virtual SubNich SubNich { get; set; }
+        public virtual Nich Nich { get; set; }
     }
 }

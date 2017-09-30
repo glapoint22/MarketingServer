@@ -14,21 +14,13 @@ namespace MarketingServer
     
     public partial class Campaign
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Campaign()
-        {
-            this.CampaignLogs = new HashSet<CampaignLog>();
-            this.Emails = new HashSet<Email>();
-        }
+        public int SubscriptionID { get; set; }
+        public System.DateTime Date { get; set; }
+        public string ProductID { get; set; }
+        public int Day { get; set; }
+        public bool ProductPurchased { get; set; }
     
-        public int ID { get; set; }
-        public string Name { get; set; }
-        public int SubNicheID { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CampaignLog> CampaignLogs { get; set; }
-        public virtual SubNich SubNich { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Email> Emails { get; set; }
+        public virtual Product Product { get; set; }
+        public virtual Subscription Subscription { get; set; }
     }
 }

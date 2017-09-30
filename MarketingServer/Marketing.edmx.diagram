@@ -4,27 +4,24 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="edcc29a539a04fcba101152b5cc4f50e" Name="Diagram1">
-        <EntityTypeShape EntityType="MarketingModel.CampaignLog" Width="1.5" PointX="7.5" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Campaign" Width="1.5" PointX="5.25" PointY="5.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="3" PointY="8.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Email" Width="1.5" PointX="7.5" PointY="8.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Lead" Width="1.5" PointX="0.75" PointY="4.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.LineItem" Width="1.5" PointX="12" PointY="2" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Nich" Width="1.5" PointX="0.75" PointY="1.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.SubNich" Width="1.5" PointX="3" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Subscription" Width="1.5" PointX="5.25" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Transaction" Width="1.5" PointX="9.75" PointY="1.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Upsell" Width="1.5" PointX="9.75" PointY="7.125" IsExpanded="true" />
-        <AssociationConnector Association="MarketingModel.FK__CampaignL__Custo__2CBDA3B5" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Subscript__Curre__22401542" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Subscript__Subsc__2334397B" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Campaigns__Niche__440B1D61" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Emails__Campaign__08B54D69" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Subscript__Custo__503BEA1C" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Niches__LeadID__54CB950F" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__LineItems__trans__7DCDAAA2" ManuallyRouted="false" />
+      <Diagram DiagramId="815dcee1fb3a41b6a51fb6cbc702c5ff" Name="Diagram1">
+        <EntityTypeShape EntityType="MarketingModel.Campaign" Width="1.5" PointX="7.5" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="1.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.EmailCampaign" Width="1.5" PointX="7.5" PointY="15.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.LeadMagnetEmail" Width="1.5" PointX="5.25" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Lead" Width="1.5" PointX="5.25" PointY="7.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Nich" Width="1.5" PointX="3" PointY="8.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="5.25" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Subscription" Width="1.5" PointX="8.25" PointY="8.25" IsExpanded="true" />
+        <AssociationConnector Association="MarketingModel.FK__CampaignL__Produ__39E294A9" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Campaigns__Subsc__3BCADD1B" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__Niches__Category__625A9A57" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Subscript__Custo__2116E6DF" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Emails__ProductI__38EE7070" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__LeadMagne__Niche__370627FE" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Leads__NicheID__37FA4C37" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Campaigns__Niche__440B1D61" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__Subscript__Niche__2A164134" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>

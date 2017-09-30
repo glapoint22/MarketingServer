@@ -17,13 +17,24 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Nich()
         {
-            this.SubNiches = new HashSet<SubNich>();
+            this.LeadMagnetEmails = new HashSet<LeadMagnetEmail>();
+            this.Leads = new HashSet<Lead>();
+            this.Products = new HashSet<Product>();
+            this.Subscriptions = new HashSet<Subscription>();
         }
     
         public int ID { get; set; }
         public string Name { get; set; }
+        public int CategoryID { get; set; }
     
+        public virtual Category Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SubNich> SubNiches { get; set; }
+        public virtual ICollection<LeadMagnetEmail> LeadMagnetEmails { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Lead> Leads { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Product> Products { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

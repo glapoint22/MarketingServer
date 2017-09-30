@@ -10,9 +10,9 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
-        public async Task<IHttpActionResult> GetMail(Guid emailId, Guid customerId)
+        public async Task<IHttpActionResult> GetMail(string emailId, string customerId)
         {
-            string emailBody = await db.Emails.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
+            string emailBody = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
 
             if (emailBody == null)
             {

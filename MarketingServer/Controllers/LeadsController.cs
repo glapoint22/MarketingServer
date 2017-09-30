@@ -29,7 +29,6 @@ namespace MarketingServer.Controllers
         {
             var lead = await db.Leads.Where(x => x.LeadPage == leadPage).Select(x => new
             {
-                leadId = x.ID,
                 leadMagnet = x.LeadMagnet,
                 mainStyle = x.MainStyle,
                 image = x.Image,
@@ -39,7 +38,8 @@ namespace MarketingServer.Controllers
                 barText = x.BarText,
                 buttonStyle = x.ButtonStyle,
                 buttonText = x.ButtonText,
-                formButtonText = x.FormButtonText
+                formButtonText = x.FormButtonText,
+                nicheId = x.NicheID
             }).SingleOrDefaultAsync();
 
 

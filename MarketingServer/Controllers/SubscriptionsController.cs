@@ -29,24 +29,16 @@ namespace MarketingServer.Controllers
         {
             Customer customer;
 
-            //Get the sub niche based on the lead ID that was passed in
-            var subNiche = await db.SubNiches.Where(x => x.LeadID == lead.leadId).Select(x => new
-            {
-                subNicheId = x.ID,
-                leadMagnetEmailId = db.Emails.Where(e => e.CampaignID == db.Campaigns.Where(c => c.SubNicheID == x.ID).OrderBy(c => c.ID).Select(c => c.ID).FirstOrDefault() && e.Day == 0).Select(e => e.ID).FirstOrDefault()
-            }
-            ).SingleAsync();
-
             //See if we have an existing customer
-            Guid id = await db.Customers.Where(c => c.Email == lead.email).Select(c => c.ID).FirstOrDefaultAsync();
+            string id = await db.Customers.Where(c => c.Email == lead.email).Select(c => c.ID).FirstOrDefaultAsync();
 
 
             //If the customer DOES NOT exist in the database
-            if (id == Guid.Empty)
+            if (id == null)
             {
                 customer = new Customer()
                 {
-                    ID = Guid.NewGuid(),
+                    ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                     Email = lead.email,
                     Name = lead.name,
                     EmailSendFrequency = 3
@@ -60,12 +52,12 @@ namespace MarketingServer.Controllers
                 customer = await db.Customers.FindAsync(id);
             }
 
-            //Check to see if this customer is subscribed to this sub niche
-            Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.SubNicheID == subNiche.subNicheId).Select(x => x).FirstOrDefaultAsync();
+            //Check to see if this customer is subscribed to this niche
+            Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == lead.nicheId).FirstOrDefaultAsync();
             if (subscription == null)
             {
                 //Get a new subscription
-                subscription = await CreateSubscription(customer.ID, subNiche.subNicheId);
+                subscription = CreateSubscription(customer.ID, lead.nicheId);
                 db.Subscriptions.Add(subscription);
             }
             else
@@ -83,14 +75,15 @@ namespace MarketingServer.Controllers
 
 
             //Get the email and send
-            var email = await db.Emails.Where(x => x.ID == subNiche.leadMagnetEmailId).Select(x => new
+            var email = await db.LeadMagnetEmails.Where(x => x.NicheID == lead.nicheId).Select(x => new
             {
+                id = x.ID,
                 subject = x.Subject,
                 body = x.Body
             }
             ).SingleAsync();
 
-            Mail mail = new Mail(subNiche.leadMagnetEmailId, customer, email.subject, email.body);
+            Mail mail = new Mail(email.id, customer, email.subject, email.body);
             //mail.Send();
 
 
@@ -149,7 +142,7 @@ namespace MarketingServer.Controllers
                     subscription = new Subscription
                     {
                         CustomerID = customer.ID,
-                        SubNicheID = updatedSubscription.subNicheId,
+                        NicheID = updatedSubscription.nicheId,
                         Subscribed = updatedSubscription.isSubscribed,
                         DateSubscribed = DateTime.Today
                     };
@@ -178,14 +171,12 @@ namespace MarketingServer.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        private async Task<Subscription> CreateSubscription(Guid id, int subNicheId)
+        private Subscription CreateSubscription(string id, int nicheId)
         {
-            int currentCampaignID = await db.Campaigns.Where(x => x.SubNicheID == subNicheId).Select(x => x.ID).FirstOrDefaultAsync();
-
             Subscription subscription = new Subscription()
             {
                 CustomerID = id,
-                SubNicheID = subNicheId,
+                NicheID = nicheId,
                 Subscribed = true,
                 Suspended = false,
                 DateSubscribed = DateTime.Today
@@ -194,19 +185,19 @@ namespace MarketingServer.Controllers
             return subscription;
         }
 
-        private async Task<object> GetSubscriptions(Guid customerId)
+        private async Task<object> GetSubscriptions(string customerId)
         {
-            return await db.Niches.Select(c => new
+            return await db.Categories.Select(c => new
             {
                 name = c.Name,
-                subNiches = db.SubNiches.Where(n => n.ParentNicheID == c.ID).Select(n => new
+                niches = db.Niches.Where(n => n.CategoryID == c.ID).Select(n => new
                 {
                     id = n.ID,
                     name = n.Name,
-                    isSubscribed = n.Subscriptions.Any(x => x.CustomerID == customerId && x.Subscribed && x.SubNicheID == n.ID),
-                    subscriptionId = n.Subscriptions.Where(x => x.CustomerID == customerId && x.SubNicheID == n.ID).Select(x => x.ID).FirstOrDefault()
+                    isSubscribed = n.Subscriptions.Any(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == n.ID),
+                    subscriptionId = n.Subscriptions.Where(x => x.CustomerID == customerId && x.NicheID == n.ID).Select(x => x.ID).FirstOrDefault()
                 }).ToList(),
-                count = db.SubNiches.Where(n => n.ParentNicheID == c.ID).Count()
+                count = db.Niches.Where(n => n.CategoryID == c.ID).Count()
             }).OrderByDescending(x => x.count).ToListAsync();
         }
 
@@ -231,7 +222,7 @@ public struct Leads
 {
     public string email;
     public string name;
-    public int leadId;
+    public int nicheId;
     public string leadMagnet;
 }
 public struct Preferences
@@ -245,5 +236,5 @@ public struct UpdatedSubscription
 {
     public int subscriptionId;
     public bool isSubscribed;
-    public int subNicheId;
+    public int nicheId;
 }

@@ -14,12 +14,6 @@ namespace MarketingServer
     
     public partial class Lead
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Lead()
-        {
-            this.SubNiches = new HashSet<SubNich>();
-        }
-    
         public int ID { get; set; }
         public string LeadPage { get; set; }
         public string LeadMagnet { get; set; }
@@ -32,8 +26,8 @@ namespace MarketingServer
         public string ButtonStyle { get; set; }
         public string ButtonText { get; set; }
         public string FormButtonText { get; set; }
+        public int NicheID { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SubNich> SubNiches { get; set; }
+        public virtual Nich Nich { get; set; }
     }
 }

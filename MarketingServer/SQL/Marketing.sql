@@ -91,37 +91,30 @@ WHERE CampaignID = 13 AND Day = 2
 alter table niches
 alter column Name varchar(255) not null
 
-alter table niches add FOREIGN KEY (CategoryID) REFERENCES Categories(ID)
+
 
 
  
-select * from campaigns
+select * from Products order by nicheid
+select * from Categories
 select * from Niches
-select * from SubNiches
+select * from emailCampaigns order by ProductID,day
 select * from customers
-select * from emails order by CampaignID,day
 select * from Subscriptions
-select * from CampaignLogs order by date desc
+select * from Campaigns order by date desc
 select * from leads
+select * from LeadMagnetEmails
 
-delete customers
 
-alter table niches add LeadID int
-alter table niches add FOREIGN KEY (LeadID) REFERENCES Leads(ID)
 
-create table Leads(
-	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
-	LeadPage varchar(255) not null,
-	LeadMagnet varchar (255) not null,
-	MainStyle varchar(255) not null,
-	Image varchar(100) not null,
-	Text varchar(max) not null,
-	TextStyle varchar(255) not null,
-	BarStyle varchar(255) not null,
-	BarText varchar(255) not null,
-	ButtonStyle varchar(255) not null,
-	ButtonText varchar(100) not null,
-	FormButtonText varchar(100) not null
+alter table campaigns drop column customerid
+
+create table LeadMagnetEmails(
+	ID varchar(10) NOT NULL PRIMARY KEY,
+	Subject varchar(255) not null,
+	Body varchar(max) not null,
+	NicheID int not null,
+	foreign key (nicheid) references niches(id)
 );
 
 
@@ -130,34 +123,31 @@ values('EEB4EDA0-ACEC-446A-8652-6EC622977B5D', 199, 1, 0, getdate())
 
 SELECT DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0)
 
-drop trigger trgAfterInsert
+drop trigger trgAfterInsertCampaigns
 
-CREATE TRIGGER trgAfterInsertCampaignLogs ON Subscriptions 
+CREATE TRIGGER trgAfterInsertCampaigns ON Subscriptions 
 FOR INSERT
 AS
 	declare @subscriptionId int;
-	declare @customerId uniqueidentifier;
 	declare @nicheId int;
 	
 	
 
 	select @subscriptionId=i.ID from inserted i;	
-	select @customerId=i.CustomerID from inserted i;
-	select @nicheId=i.subNicheId from inserted i;
+	select @nicheId=i.NicheId from inserted i;
 	
 	
 
-	insert into CampaignLogs
-           (SubscriptionID,Date,CampaignID,Day,CustomerID) 
-	select top 1 @subscriptionId,DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0), id,0,@customerId
-	from Campaigns where subNicheID = @nicheId order by id
+	insert into Campaigns
+           (SubscriptionID,Date,ProductID,Day) 
+	select top 1 @subscriptionId,DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0), id,0
+	from Products where NicheID = @nicheId
 	
 
 
 
 
-
-
+	
 
 
 
@@ -277,61 +267,55 @@ ALTER TABLE CustomerCampaigns
 	select * from LineItems
 	select * from Upsells
 
-	delete Transactions
-	delete LineItems
-	delete Upsells
+	drop table Transactions
+	drop table LineItems
+	drop table Upsells
+
+	
 
 	select * from Customers
 
 	Create table Transactions(
-		id int NOT NULL PRIMARY KEY,
+		id varchar(10) NOT NULL PRIMARY KEY,
 		transactionTime datetime not null,
 		receipt varchar(21) not null,
 		transactionType varchar(15) not null,
-		vendor varchar(10) null,
-		affiliate varchar(10) null,
-		role varchar(9) null,
+		vendor varchar(10) not null,
+		affiliate varchar(10) not null,
+		role varchar(9) not null,
 		totalAccountAmount float not null,
 		paymentMethod varchar(4) not null,
 		totalOrderAmount float not null,
 		totalTaxAmount float not null,
 		totalShippingAmount float not null,
 		currency varchar(3) not null,
-		orderLanguage varchar(2) null,
-		customerId uniqueidentifier null,
+		orderLanguage varchar(2) not null,
+		customerId varchar(10) NOT NULL,
 		constraint uk_Transactions_receipt unique (receipt)
 	);
 
 	create table LineItems(
-		transactionId int not null,
+		transactionId varchar(10) NOT NULL,
 		itemNo varchar(25) not null,
 		productTitle varchar (255) not null,
 		shippable bit not null,
 		recurring bit not null,
 		accountAmount float not null,
 		quantity int not null,
-		downloadUrl varchar(255) null,
 		lineItemType varchar(8) not null,
 		primary key(transactionId, itemNo),
 		FOREIGN KEY (transactionId) REFERENCES Transactions(ID)
 	);
 
+	select * from Campaigns
 	
 	Create table Upsells(
-		id int NOT NULL PRIMARY KEY IDENTITY(1,1),
+		id varchar(10) NOT NULL PRIMARY KEY,
 		upsellOriginalReceipt varchar(21) not null,
 		upsellFlowId int not null,
-		upsellSession varchar(16) null,
-		upsellPath varchar(12) null,
+		upsellSession varchar(16) not null,
+		upsellPath varchar(12) not null,
 		FOREIGN KEY (upsellOriginalReceipt) REFERENCES Transactions(receipt)
 	);
 
-	alter table Customers add lastName varchar(255) null,
-							  phoneNumber varchar(255) null,
-							  address1 varchar(255) null,
-							  address2 varchar(255) null,
-							  city varchar (255) null,
-							  county varchar(255) null,
-							  state varchar(255) null,
-							  postalCode varchar(255),
-							  country varchar(255)
+	

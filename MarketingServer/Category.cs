@@ -12,16 +12,18 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class CampaignLog
+    public partial class Category
     {
-        public int SubscriptionID { get; set; }
-        public System.DateTime Date { get; set; }
-        public int CampaignID { get; set; }
-        public int Day { get; set; }
-        public System.Guid CustomerID { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public Category()
+        {
+            this.Niches = new HashSet<Nich>();
+        }
     
-        public virtual Customer Customer { get; set; }
-        public virtual Campaign Campaign { get; set; }
-        public virtual Subscription Subscription { get; set; }
+        public int ID { get; set; }
+        public string Name { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Nich> Niches { get; set; }
     }
 }

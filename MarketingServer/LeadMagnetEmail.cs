@@ -12,18 +12,13 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class LineItem
+    public partial class LeadMagnetEmail
     {
-        public int transactionId { get; set; }
-        public string itemNo { get; set; }
-        public string productTitle { get; set; }
-        public bool shippable { get; set; }
-        public bool recurring { get; set; }
-        public double accountAmount { get; set; }
-        public int quantity { get; set; }
-        public string downloadUrl { get; set; }
-        public string lineItemType { get; set; }
+        public string ID { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public int NicheID { get; set; }
     
-        public virtual Transaction Transaction { get; set; }
+        public virtual Nich Nich { get; set; }
     }
 }

@@ -12,25 +12,24 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class SubNich
+    public partial class Product
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public SubNich()
+        public Product()
         {
             this.Campaigns = new HashSet<Campaign>();
-            this.Subscriptions = new HashSet<Subscription>();
+            this.EmailCampaigns = new HashSet<EmailCampaign>();
         }
     
-        public int ID { get; set; }
+        public string ID { get; set; }
         public string Name { get; set; }
-        public int ParentNicheID { get; set; }
-        public Nullable<int> LeadID { get; set; }
+        public int NicheID { get; set; }
+        public string HopLink { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Campaign> Campaigns { get; set; }
-        public virtual Lead Lead { get; set; }
-        public virtual Nich Nich { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Subscription> Subscriptions { get; set; }
+        public virtual ICollection<EmailCampaign> EmailCampaigns { get; set; }
+        public virtual Nich Nich { get; set; }
     }
 }
