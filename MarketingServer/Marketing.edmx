@@ -5,12 +5,12 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
       <Schema Namespace="MarketingModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <EntityType Name="Campaigns">
+        <EntityType Name="CampaignRecords">
           <Key>
             <PropertyRef Name="SubscriptionID" />
             <PropertyRef Name="Date" />
           </Key>
-          <Property Name="SubscriptionID" Type="int" Nullable="false" />
+          <Property Name="SubscriptionID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Date" Type="datetime" Nullable="false" />
           <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Day" Type="int" Nullable="false" />
@@ -92,7 +92,7 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="CustomerID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
           <Property Name="Subscribed" Type="bit" Nullable="false" />
@@ -102,13 +102,27 @@
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
-          <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="*" />
+          <End Role="CampaignRecords" Type="Self.CampaignRecords" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Products">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Campaigns">
+            <Dependent Role="CampaignRecords">
               <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CampaignR__Subsc__703EA55A">
+          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CampaignRecords" Type="Self.CampaignRecords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Subscriptions">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CampaignRecords">
+              <PropertyRef Name="SubscriptionID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -121,18 +135,6 @@
             </Principal>
             <Dependent Role="Products">
               <PropertyRef Name="NicheID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__Campaigns__Subsc__3BCADD1B">
-          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="1" />
-          <End Role="Campaigns" Type="Self.Campaigns" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Subscriptions">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Campaigns">
-              <PropertyRef Name="SubscriptionID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -184,7 +186,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Custo__2116E6DF">
+        <Association Name="FK__Subscript__Custo__6D6238AF">
           <End Role="Customers" Type="Self.Customers" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -198,7 +200,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Niche__2A164134">
+        <Association Name="FK__Subscript__Niche__6E565CE8">
           <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
           <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
           <ReferentialConstraint>
@@ -211,7 +213,7 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="MarketingModelStoreContainer">
-          <EntitySet Name="Campaigns" EntityType="Self.Campaigns" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecords" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
@@ -222,15 +224,15 @@
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
-            <End Role="Campaigns" EntitySet="Campaigns" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
           </AssociationSet>
           <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Products" EntitySet="Products" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Campaigns__Subsc__3BCADD1B" Association="Self.FK__Campaigns__Subsc__3BCADD1B">
-            <End Role="Subscriptions" EntitySet="Subscriptions" />
-            <End Role="Campaigns" EntitySet="Campaigns" />
           </AssociationSet>
           <AssociationSet Name="FK__Emails__ProductI__38EE7070" Association="Self.FK__Emails__ProductI__38EE7070">
             <End Role="Products" EntitySet="Products" />
@@ -248,11 +250,11 @@
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Custo__2116E6DF" Association="Self.FK__Subscript__Custo__2116E6DF">
+          <AssociationSet Name="FK__Subscript__Custo__6D6238AF" Association="Self.FK__Subscript__Custo__6D6238AF">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
+          <AssociationSet Name="FK__Subscript__Niche__6E565CE8" Association="Self.FK__Subscript__Niche__6E565CE8">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
@@ -262,19 +264,19 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="MarketingModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="Campaign">
+        <EntityType Name="CampaignRecord">
           <Key>
             <PropertyRef Name="SubscriptionID" />
             <PropertyRef Name="Date" />
           </Key>
-          <Property Name="SubscriptionID" Type="Int32" Nullable="false" />
+          <Property Name="SubscriptionID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Day" Type="Int32" Nullable="false" />
           <Property Name="ProductPurchased" Type="Boolean" Nullable="false" />
           <Property Name="Ended" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Product" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Campaigns" ToRole="Products" />
-          <NavigationProperty Name="Subscription" Relationship="Self.FK__Campaigns__Subsc__3BCADD1B" FromRole="Campaigns" ToRole="Subscriptions" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="CampaignRecords" ToRole="Products" />
+          <NavigationProperty Name="Subscription" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="CampaignRecords" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Category">
           <Key>
@@ -293,7 +295,7 @@
           <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
           <Property Name="EmailSentDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__2116E6DF" FromRole="Customers" ToRole="Subscriptions" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Customers" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="EmailCampaign">
           <Key>
@@ -346,7 +348,7 @@
           <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__370627FE" FromRole="Niches" ToRole="LeadMagnetEmails" />
           <NavigationProperty Name="Leads" Relationship="Self.FK__Leads__NicheID__37FA4C37" FromRole="Niches" ToRole="Leads" />
           <NavigationProperty Name="Products" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Products" />
-          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Niches" ToRole="Subscriptions" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="Product">
           <Key>
@@ -356,7 +358,7 @@
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Campaigns" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="Campaigns" />
+          <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
         </EntityType>
@@ -364,37 +366,39 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="CustomerID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <Property Name="Subscribed" Type="Boolean" Nullable="false" />
           <Property Name="Suspended" Type="Boolean" Nullable="false" />
           <Property Name="DateSubscribed" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="DateUnsubscribed" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Campaigns" Relationship="Self.FK__Campaigns__Subsc__3BCADD1B" FromRole="Subscriptions" ToRole="Campaigns" />
-          <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__2116E6DF" FromRole="Subscriptions" ToRole="Customers" />
-          <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__2A164134" FromRole="Subscriptions" ToRole="Niches" />
+          <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="Subscriptions" ToRole="CampaignRecords" />
+          <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Subscriptions" ToRole="Niches" />
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
-          <End Role="Campaigns" Type="Self.Campaign" Multiplicity="*" />
+          <End Role="CampaignRecords" Type="Self.CampaignRecord" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Products">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Campaigns">
+            <Dependent Role="CampaignRecords">
               <PropertyRef Name="ProductID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Campaigns__Subsc__3BCADD1B">
-          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="1" />
-          <End Role="Campaigns" Type="Self.Campaign" Multiplicity="*" />
+        <Association Name="FK__CampaignR__Subsc__703EA55A">
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CampaignRecords" Type="Self.CampaignRecord" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Subscriptions">
               <PropertyRef Name="ID" />
             </Principal>
-            <Dependent Role="Campaigns">
+            <Dependent Role="CampaignRecords">
               <PropertyRef Name="SubscriptionID" />
             </Dependent>
           </ReferentialConstraint>
@@ -411,7 +415,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Custo__2116E6DF">
+        <Association Name="FK__Subscript__Custo__6D6238AF">
           <End Role="Customers" Type="Self.Customer" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -473,7 +477,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Subscript__Niche__2A164134">
+        <Association Name="FK__Subscript__Niche__6E565CE8">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
           <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
           <ReferentialConstraint>
@@ -486,7 +490,7 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Campaigns" EntityType="Self.Campaign" />
+          <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
@@ -497,17 +501,17 @@
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
-            <End Role="Campaigns" EntitySet="Campaigns" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
           </AssociationSet>
-          <AssociationSet Name="FK__Campaigns__Subsc__3BCADD1B" Association="Self.FK__Campaigns__Subsc__3BCADD1B">
+          <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
             <End Role="Subscriptions" EntitySet="Subscriptions" />
-            <End Role="Campaigns" EntitySet="Campaigns" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Custo__2116E6DF" Association="Self.FK__Subscript__Custo__2116E6DF">
+          <AssociationSet Name="FK__Subscript__Custo__6D6238AF" Association="Self.FK__Subscript__Custo__6D6238AF">
             <End Role="Customers" EntitySet="Customers" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
@@ -527,7 +531,7 @@
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Products" EntitySet="Products" />
           </AssociationSet>
-          <AssociationSet Name="FK__Subscript__Niche__2A164134" Association="Self.FK__Subscript__Niche__2A164134">
+          <AssociationSet Name="FK__Subscript__Niche__6E565CE8" Association="Self.FK__Subscript__Niche__6E565CE8">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
@@ -538,9 +542,9 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="MarketingModelStoreContainer" CdmEntityContainer="MarketingEntities">
-          <EntitySetMapping Name="Campaigns">
-            <EntityTypeMapping TypeName="MarketingModel.Campaign">
-              <MappingFragment StoreEntitySet="Campaigns">
+          <EntitySetMapping Name="CampaignRecords">
+            <EntityTypeMapping TypeName="MarketingModel.CampaignRecord">
+              <MappingFragment StoreEntitySet="CampaignRecords">
                 <ScalarProperty Name="SubscriptionID" ColumnName="SubscriptionID" />
                 <ScalarProperty Name="Date" ColumnName="Date" />
                 <ScalarProperty Name="ProductID" ColumnName="ProductID" />

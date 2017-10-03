@@ -95,21 +95,36 @@ alter column Name varchar(255) not null
 
 
  
-select * from Products order by nicheid
+
 select * from Categories
 select * from Niches
 select * from emailCampaigns order by ProductID,day
 select * from customers
 select * from Subscriptions
-select * from Campaigns order by subscriptionid
+select * from CampaignRecords order by subscriptionid, date desc
+select * from Products order by nicheid
 select * from leads
 select * from LeadMagnetEmails
 
+delete customers
 
+ALTER TABLE Subscriptions ADD CONSTRAINT DF_Suspended DEFAULT 0 FOR Suspended
 
-alter table customers add EmailSentDate Datetime default DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) not null
-alter table customers drop column emailsentdate
-alter table customers drop DF__Customers__Email__473C8FC7
+create table Subscriptions (
+	ID varchar(10) primary key not null,
+	CustomerID varchar(10) not null,
+	NicheID int not null,
+	Subscribed bit not null,
+	Suspended bit default 0 not null,
+	DateSubscribed datetime not null,
+	DateUnsubscribed datetime null,
+	FOREIGN KEY (CustomerID) REFERENCES Customers(ID) ON DELETE CASCADE,
+	FOREIGN KEY (NicheID) REFERENCES Niches(ID)
+)
+
+alter table campaignrecords alter column subscriptionID varchar(10) not null
+alter table campaignrecords add foreign key(subscriptionid) references subscriptions(ID) on delete cascade
+
 
 create table LeadMagnetEmails(
 	ID varchar(10) NOT NULL PRIMARY KEY,
@@ -125,9 +140,9 @@ values('EEB4EDA0-ACEC-446A-8652-6EC622977B5D', 199, 1, 0, getdate())
 
 SELECT DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0)
 
-drop trigger trgAfterInsertCampaigns
+drop trigger trgAfterInsertCampaignRecords
 
-CREATE TRIGGER trgAfterInsertCampaigns ON Subscriptions 
+CREATE TRIGGER trgAfterInsertCampaignRecords ON Subscriptions 
 FOR INSERT
 AS
 	declare @subscriptionId int;
@@ -140,7 +155,7 @@ AS
 	
 	
 
-	insert into Campaigns
+	insert into CampaignRecords
            (SubscriptionID, Date, ProductID, Day) 
 	select top 1 @subscriptionId, GETDATE(), id, 0
 	from Products where NicheID = @nicheId

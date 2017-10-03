@@ -21,7 +21,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            await Run();
+            //await Run();
         }
 
         public async Task Run()
@@ -55,34 +55,34 @@ namespace MarketingServer
                     foreach (Subscription subscription in subscriptions)
                     {
                         Email email;
-                        Campaign newCampaign;
+                        CampaignRecord newCampaignRecord;
 
-                        //Get the current campaign this customer is on
-                        Campaign currentCampaign = await db.Campaigns
+                        //Get the current campaign record from this subscription
+                        CampaignRecord currentCampaignRecord = await db.CampaignRecords
+                            .OrderByDescending(x => x.Date)
                             .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
                             .FirstOrDefaultAsync();
 
-                        if (currentCampaign == null)
+                        if (currentCampaignRecord == null)
                         {
                             //Error!
                             continue;
                         }
 
                         //Get the next email from this campaign
-                        email = await GetEmail(currentCampaign.ProductID, currentCampaign.Day + 1);
+                        email = await GetEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1);
 
                         /*
                         If the email is null, this means we are at the end of the 
-                        campaign and must start a new campaign with a new product
+                        email campaign and must start a new campaign with a new product
                         */
                         if (email == null)
                         {
-                            //Mark that the current campaign has ended
-                            currentCampaign.Ended = true;
-                            db.Entry(currentCampaign).State = EntityState.Modified;
+                            //Mark the current campaign record that this campaign has ended
+                            currentCampaignRecord.Ended = true;
 
                             //Get a new product
-                            var productId = await GetNewProductId(subscription.NicheID, subscription.ID);
+                            string productId = await Campaign.GetNewProductId(subscription.NicheID, subscription.ID);
 
                             /*
                             If the product id is null, this means there are no more products in this 
@@ -92,13 +92,11 @@ namespace MarketingServer
                             {
                                 //Suspending subscription
                                 subscription.Suspended = true;
-                                db.Entry(subscription).State = EntityState.Modified;
                                 continue;
                             }
 
-
                             //Start a new campaign with this new product
-                            newCampaign = new Campaign
+                            newCampaignRecord = new CampaignRecord
                             {
                                 SubscriptionID = subscription.ID,
                                 Date = DateTime.Now,
@@ -108,93 +106,32 @@ namespace MarketingServer
                             
 
                             //Get the first email from this campaign
-                            email = await GetEmail(newCampaign.ProductID, newCampaign.Day);
-                        }else
+                            email = await GetEmail(newCampaignRecord.ProductID, newCampaignRecord.Day);
+
+                            if(email == null)
+                            {
+                                //Error!
+                                continue;
+                            }
+                        }
+                        else
                         {
-                            newCampaign = new Campaign
+                            //Create a new record for this campaign
+                            newCampaignRecord = new CampaignRecord
                             {
                                 SubscriptionID = subscription.ID,
                                 Date = DateTime.Now,
-                                ProductID = currentCampaign.ProductID,
-                                Day = currentCampaign.Day + 1,
+                                ProductID = currentCampaignRecord.ProductID,
+                                Day = currentCampaignRecord.Day + 1,
                             };
                         }
 
                         Mail mail = new Mail(email.id, customer, email.subject, email.body);
                         //mail.Send();
-                        customer.EmailSentDate = DateTime.Today;
+                        //customer.EmailSentDate = DateTime.Today;
 
                         //Add the new record
-                        db.Campaigns.Add(newCampaign);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        //Advance to the next day of this campaign
-                        //var campaign = await db.Campaigns.Where(x => x.SubscriptionID == subscription.ID).OrderByDescending(x => x.Date).Select(x => new 
-                        //{
-                        //    productId = x.ProductID,
-                        //    day = x.Day
-                        //}).AsNoTracking().FirstOrDefaultAsync();
-
-                        //Set up a new log for this campaign
-                        //Campaign campaignLog = new Campaign
-                        //{
-                        //    SubscriptionID = subscription.ID,
-                        //    Date = DateTime.Today,
-                        //    ProductID = campaign.productId,
-                        //    Day = campaign.day,
-                        //    CustomerID = customer.ID
-                        //};
-
-
-                        //See if this campaign actually exists
-                        //bool exists = await db.EmailCampaigns.AnyAsync(x => x.ProductID == campaign.productId && x.Day == campaign.day);
-
-                        //if (!exists)
-                        //{
-                        //The current campaign does not exists, so get another campaign in this niche 
-                        //int nextproductId = await db.Products.Where(c => c.NicheID == subscription.NicheID && c.ID > campaign.productId).OrderBy(x => x.ID).Select(c => c.ID).FirstOrDefaultAsync();
-
-                        //If there are no other campaigns in this niche, suspend this subscription
-                        //if (nextproductId == 0)
-                        //{
-                        //    subscription.Suspended = true;
-                        //    db.Entry(subscription).State = EntityState.Modified;
-                        //    continue;
-                        //}
-                        //else
-                        //{
-                        //    //Set the new campaign
-                        //    campaignLog.ProductID = nextproductId;
-                        //    campaignLog.Day = 1;
-                        //}
-                        // }
-
-                        //Get the email and send
-                        //var email = await db.Emails.Where(x => x.ProductID == campaignLog.ProductID && x.Day == campaignLog.Day).Select(x => new {
-                        //    id = x.ID,
-                        //    subject = x.Subject,
-                        //    body = x.Body
-                        //}).AsNoTracking().FirstOrDefaultAsync();
-
-                        //Mail mail = new Mail(email.id, customer, email.subject, email.body);
-                        //mail.Send();
-
-                        //Log this campaign
-                        //db.CampaignLogs.Add(campaignLog);
+                        db.CampaignRecords.Add(newCampaignRecord);
                     }
                 }
 
@@ -228,17 +165,17 @@ namespace MarketingServer
                 .FirstOrDefaultAsync();
         }
 
-        private async Task<string> GetNewProductId(int nicheId, int subscriptionId)
-        {
-            return await db.Products
-                .Where(x => x.NicheID == nicheId && !x.Campaigns
-                    .Where(z => z.SubscriptionID == subscriptionId)
-                    .Select(z => z.ProductID)
-                    .ToList()
-                    .Contains(x.ID))
-                .Select(x => x.ID)
-                .FirstOrDefaultAsync();
-        }
+        //private async Task<string> GetNewProductId(int nicheId, int subscriptionId)
+        //{
+        //    return await db.Products
+        //        .Where(x => x.NicheID == nicheId && !x.CampaignRecords
+        //            .Where(z => z.SubscriptionID == subscriptionId)
+        //            .Select(z => z.ProductID)
+        //            .ToList()
+        //            .Contains(x.ID))
+        //        .Select(x => x.ID)
+        //        .FirstOrDefaultAsync();
+        //}
     }
 }
 public class Email

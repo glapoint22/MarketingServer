@@ -36,87 +36,67 @@ namespace MarketingServer.Controllers
 
             JObject jObject = JObject.Parse(data);
 
-            
-
-            //if(jObject["trackingCodes"] != null)
-            //{
-            //    List<string> trackingCodes = jObject["trackingCodes"].ToObject<List<string>>();
-
-            //    foreach(string trackingCode in trackingCodes)
-            //    {
-            //        string customerId = trackingCode.Substring(0, 10);
-            //        string productId = trackingCode.Substring(10);
-            //        Campaign campaign = await db.Campaigns.Where(x => x.CustomerID == customerId && x.ProductID == productId).OrderByDescending(x => x.Date).FirstOrDefaultAsync();
 
 
-            //        if (campaign != null)
-            //        {
-            //            campaign.ProductPurchased = true;
-            //            db.Entry(campaign).State = EntityState.Modified;
-            //        }
-            //    }
-            //}
-            
+            if (jObject["trackingCodes"] != null)
+            {
+                List<string> trackingCodes = jObject["trackingCodes"].ToObject<List<string>>();
 
-            //Transaction transaction = new Transaction
-            //{
-            //    id = Guid.NewGuid().ToString("N").Substring(0, 10),
-            //    transactionTime = jObject["transactionTime"] != null ? (DateTime)jObject.SelectToken("transactionTime"):DateTime.Now,
-            //    receipt = jObject["receipt"] != null ? (string)jObject.SelectToken("receipt"): "NA",
-            //    transactionType = jObject["transactionType"] != null ? (string)jObject.SelectToken("transactionType"): "NA",
-            //    vendor = jObject["vendor"] != null ? (string)jObject.SelectToken("vendor"): "NA",
-            //    affiliate = jObject["affiliate"] != null ? (string)jObject.SelectToken("affiliate"): "NA",
-            //    role = jObject["role"] != null ? (string)jObject.SelectToken("role"): "NA",
-            //    totalAccountAmount = jObject["totalAccountAmount"] != null ? (double)jObject.SelectToken("totalAccountAmount"): 0,
-            //    paymentMethod = jObject["paymentMethod"] != null ? (string)jObject.SelectToken("paymentMethod"): "NA",
-            //    totalOrderAmount = jObject["totalOrderAmount"] != null ? (double)jObject.SelectToken("totalOrderAmount"): 0,
-            //    totalTaxAmount = jObject["totalTaxAmount"] != null ? (double)jObject.SelectToken("totalTaxAmount"): 0,
-            //    totalShippingAmount = jObject["totalShippingAmount"] != null ? (double)jObject.SelectToken("totalShippingAmount"): 0,
-            //    currency = jObject["currency"] != null ? (string)jObject.SelectToken("currency"): "NA",
-            //    orderLanguage = jObject["orderLanguage"] != null ? (string)jObject.SelectToken("orderLanguage"): "NA",
-            //};
+                foreach (string trackingCode in trackingCodes)
+                {
+                    string customerId = trackingCode.Substring(0, 10);
+                    string productId = trackingCode.Substring(10);
 
-            //db.Transactions.Add(transaction);
+                    if(await db.Customers.FindAsync(customerId) == null || await db.Products.FindAsync(productId) == null)
+                    {
+                        continue;
+                    }
 
-            //if (jObject["lineItems"] != null)
-            //{
-            //    List<LineItem> lineItems = jObject.SelectToken("lineItems").Select(x => new LineItem
-            //    {
-            //        transactionId = transaction.id,
-            //        itemNo = x["itemNo"] != null ? (string)x["itemNo"]: "NA",
-            //        productTitle = x["productTitle"] != null ? (string)x["productTitle"]: "NA",
-            //        shippable = x["shippable"] != null ? (bool)x["shippable"]: false,
-            //        recurring = x["recurring"] != null ? (bool)x["recurring"]: false,
-            //        accountAmount = x["accountAmount"] != null ? (double)x["accountAmount"]: 0,
-            //        quantity = x["quantity"] != null ? (int)x["quantity"]: 0,
-            //        lineItemType = x["lineItemType"] != null ? (string)x["lineItemType"]: "NA"
-            //    }).ToList();
-
-            //    foreach(LineItem lineItem in lineItems)
-            //    {
-            //        db.LineItems.Add(lineItem);
-            //    }
-            //}
+                    CampaignRecord campaignRecord = await db.CampaignRecords
+                        .Where(x => x.SubscriptionID == x.Subscription.ID && x.ProductID == productId)
+                        .OrderByDescending(x => x.Date)
+                        .FirstOrDefaultAsync();
 
 
-            //if (jObject["upsell"] != null && jObject["upsell"]["upsellOriginalReceipt"] != null)
-            //{
-            //    List<JProperty> list = jObject.SelectToken("upsell").Children<JProperty>().ToList();
+                    if (campaignRecord != null)
+                    {
+                        campaignRecord.ProductPurchased = true;
 
-            //    Upsell upsell = new Upsell
-            //    {
-            //        id = Guid.NewGuid().ToString("N").Substring(0, 10),
-            //        upsellOriginalReceipt = jObject["upsell"]["upsellOriginalReceipt"] != null ? (string)list.First(x => x.Name == "upsellOriginalReceipt").Value: "NA",
-            //        upsellFlowId = jObject["upsell"]["upsellFlowId"] != null ? (int)list.First(x => x.Name == "upsellFlowId").Value: 0,
-            //        upsellSession = jObject["upsell"]["upsellSession"] != null ? (string)list.First(x => x.Name == "upsellSession").Value: "NA",
-            //        upsellPath = jObject["upsell"]["upsellPath"] != null ? (string)list.First(x => x.Name == "upsellPath").Value: "NA"
-            //    };
+                        string newProductId = await Campaign.GetNewProductId(campaignRecord.Subscription.NicheID, campaignRecord.SubscriptionID);
 
-            //    db.Upsells.Add(upsell);
-            //}
+                        if (newProductId != null)
+                        {
+                            //Add the new record
+                            db.CampaignRecords.Add(Campaign.CreateCampaignRecord(campaignRecord.SubscriptionID, newProductId, false));
+                        }
+                        else
+                        {
+                            bool isRecords = await db.CampaignRecords.AnyAsync(x => x.SubscriptionID == campaignRecord.SubscriptionID && !x.ProductPurchased);
+                            if (!isRecords)
+                            {
+                                campaignRecord.Subscription.Suspended = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int nicheId = await db.Products.Where(x => x.ID == productId).Select(x => x.NicheID).SingleAsync();
+                        string subscriptionId = await db.Subscriptions.Where(x => x.CustomerID == customerId && x.NicheID == nicheId).Select(x => x.ID).SingleOrDefaultAsync();
 
+                        if(subscriptionId == null)
+                        {
+                            Subscription subscription = SubscriptionsController.CreateSubscription(customerId, nicheId);
+                            subscriptionId = subscription.ID;
+                            db.Subscriptions.Add(subscription);
+                        }
 
+                        
+                        db.CampaignRecords.Add(Campaign.CreateCampaignRecord(subscriptionId, productId, true));
+                    }
+                }
+            }
 
+           
             //If there are any changes, update the database
             if (db.ChangeTracker.HasChanges())
             {
@@ -133,41 +113,6 @@ namespace MarketingServer.Controllers
 
             return StatusCode(HttpStatusCode.NoContent);
         }
-
-        //public async Task<IHttpActionResult> Get()
-        //{
-        //    HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://api.clickbank.com/rest/1.3/orders2/AXN66NVG");
-        //    request.Accept = "application/json";
-        //    request.Headers.Add(HttpRequestHeader.Authorization, "DEV-SHE17V09PLJ3MARVSI502TNSEULV7U09:API-PHI76F2Q3KL52NIRBLKOHDQQFP2V5A3E");
-        //    request.Method = "GET";
-
-        //    HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-        //    Console.WriteLine(response.StatusCode);
-        //    Console.WriteLine(response.StatusDescription);
-        //    Stream resStream = response.GetResponseStream();
-        //    StringBuilder sb = new StringBuilder();
-
-        //    string tempString = null;
-        //    int count = 0;
-        //    byte[] buf = new byte[8192];
-
-        //    do
-        //    {
-        //        count = resStream.Read(buf, 0, buf.Length);
-
-        //        if (count != 0)
-        //        {
-        //            tempString = Encoding.ASCII.GetString(buf, 0, count);
-        //            sb.Append(tempString);
-        //        }
-        //    }
-        //    while (count > 0);
-
-            
-
-        //    return Ok(sb.ToString());
-        //}
     }
 }
 

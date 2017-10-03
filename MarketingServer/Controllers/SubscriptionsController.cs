@@ -41,7 +41,9 @@ namespace MarketingServer.Controllers
                     ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                     Email = lead.email,
                     Name = lead.name,
-                    EmailSendFrequency = 3
+                    EmailSendFrequency = 3,
+                    EmailSentDate = DateTime.Today
+                    
                 };
 
                 //Add the new customer to the database
@@ -59,6 +61,7 @@ namespace MarketingServer.Controllers
                 //Get a new subscription
                 subscription = CreateSubscription(customer.ID, lead.nicheId);
                 db.Subscriptions.Add(subscription);
+                db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
             }
             else
             {
@@ -139,15 +142,9 @@ namespace MarketingServer.Controllers
                 //If subscribing to a new subscription
                 if (updatedSubscription.subscriptionId == 0)
                 {
-                    subscription = new Subscription
-                    {
-                        CustomerID = customer.ID,
-                        NicheID = updatedSubscription.nicheId,
-                        Subscribed = updatedSubscription.isSubscribed,
-                        DateSubscribed = DateTime.Today
-                    };
-
+                    subscription = CreateSubscription(customer.ID, updatedSubscription.nicheId);
                     db.Subscriptions.Add(subscription);
+                    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
                 }
                 else
                 {
@@ -171,17 +168,17 @@ namespace MarketingServer.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        private Subscription CreateSubscription(string customerId, int nicheId)
+        public static Subscription CreateSubscription(string customerId, int nicheId)
         {
             Subscription subscription = new Subscription()
             {
+                ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
                 CustomerID = customerId,
                 NicheID = nicheId,
                 Subscribed = true,
                 Suspended = false,
                 DateSubscribed = DateTime.Today
             };
-
             return subscription;
         }
 

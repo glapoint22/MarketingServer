@@ -43,7 +43,7 @@ public class Encryption
                 decryptedString = new StreamReader(cryptoStream).ReadToEnd();
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             //Trace.WriteLine(new TraceData(TraceCategoryEnum.Errors, "Error decrypting message: " + ex.Message));
         }

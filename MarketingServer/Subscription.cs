@@ -17,10 +17,10 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Subscription()
         {
-            this.Campaigns = new HashSet<Campaign>();
+            this.CampaignRecords = new HashSet<CampaignRecord>();
         }
     
-        public int ID { get; set; }
+        public string ID { get; set; }
         public string CustomerID { get; set; }
         public int NicheID { get; set; }
         public bool Subscribed { get; set; }
@@ -29,7 +29,7 @@ namespace MarketingServer
         public Nullable<System.DateTime> DateUnsubscribed { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Campaign> Campaigns { get; set; }
+        public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }
         public virtual Customer Customer { get; set; }
         public virtual Nich Nich { get; set; }
     }

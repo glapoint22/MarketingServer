@@ -17,7 +17,7 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Product()
         {
-            this.Campaigns = new HashSet<Campaign>();
+            this.CampaignRecords = new HashSet<CampaignRecord>();
             this.EmailCampaigns = new HashSet<EmailCampaign>();
         }
     
@@ -27,7 +27,7 @@ namespace MarketingServer
         public string HopLink { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Campaign> Campaigns { get; set; }
+        public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmailCampaign> EmailCampaigns { get; set; }
         public virtual Nich Nich { get; set; }
