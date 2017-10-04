@@ -164,18 +164,6 @@ namespace MarketingServer
                 })
                 .FirstOrDefaultAsync();
         }
-
-        //private async Task<string> GetNewProductId(int nicheId, int subscriptionId)
-        //{
-        //    return await db.Products
-        //        .Where(x => x.NicheID == nicheId && !x.CampaignRecords
-        //            .Where(z => z.SubscriptionID == subscriptionId)
-        //            .Select(z => z.ProductID)
-        //            .ToList()
-        //            .Contains(x.ID))
-        //        .Select(x => x.ID)
-        //        .FirstOrDefaultAsync();
-        //}
     }
 }
 public class Email

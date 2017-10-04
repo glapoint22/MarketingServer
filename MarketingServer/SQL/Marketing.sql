@@ -106,6 +106,10 @@ select * from Products order by nicheid
 select * from leads
 select * from LeadMagnetEmails
 
+
+
+
+
 delete customers
 
 ALTER TABLE Subscriptions ADD CONSTRAINT DF_Suspended DEFAULT 0 FOR Suspended
