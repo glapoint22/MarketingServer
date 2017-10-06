@@ -21,7 +21,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            //await Run();
+            await Run();
         }
 
         public async Task Run()
@@ -82,13 +82,13 @@ namespace MarketingServer
                             currentCampaignRecord.Ended = true;
 
                             //Get a new product
-                            string productId = await Campaign.GetNewProductId(subscription.NicheID, subscription.ID);
+                            string newProduct = await Campaign.GetProduct(subscription.NicheID, subscription.ID);
 
                             /*
-                            If the product id is null, this means there are no more products in this 
+                            If the product is null, this means there are no more products in this 
                             subscription and we must suspend this subscription until more products are added
                             */
-                            if(productId == null)
+                            if(newProduct == null)
                             {
                                 //Suspending subscription
                                 subscription.Suspended = true;
@@ -100,7 +100,7 @@ namespace MarketingServer
                             {
                                 SubscriptionID = subscription.ID,
                                 Date = DateTime.Now,
-                                ProductID = productId,
+                                ProductID = newProduct,
                                 Day = 1,
                             };
                             

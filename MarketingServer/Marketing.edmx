@@ -87,6 +87,7 @@
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
           <Property Name="HopLink" Type="varchar" MaxLength="255" />
+          <Property Name="Order" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="Subscriptions">
           <Key>
@@ -358,6 +359,7 @@
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="Order" Type="Int32" Nullable="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
@@ -629,6 +631,7 @@
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="NicheID" ColumnName="NicheID" />
                 <ScalarProperty Name="HopLink" ColumnName="HopLink" />
+                <ScalarProperty Name="Order" ColumnName="Order" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -4,15 +4,15 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="291446b7f33c4c2f970fe1c369484115" Name="Diagram1">
+      <Diagram DiagramId="0d40e545724c41fcb91d2a6e6d2acc0e" Name="Diagram1">
         <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="7.5" PointY="12.125" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="9" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="1.75" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.EmailCampaign" Width="1.5" PointX="7.5" PointY="15.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.LeadMagnetEmail" Width="1.5" PointX="5.25" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Lead" Width="1.5" PointX="5.25" PointY="7.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Lead" Width="1.5" PointX="5.25" PointY="7.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Nich" Width="1.5" PointX="3" PointY="8.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="5.25" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="5.25" PointY="12.125" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Subscription" Width="1.5" PointX="8.25" PointY="8.375" IsExpanded="true" />
         <AssociationConnector Association="MarketingModel.FK__CampaignL__Produ__39E294A9" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__CampaignR__Subsc__703EA55A" ManuallyRouted="false" />
