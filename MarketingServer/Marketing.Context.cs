@@ -33,6 +33,7 @@ namespace MarketingServer
         public virtual DbSet<Lead> Leads { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
         public virtual DbSet<Product> Products { get; set; }
+        public virtual DbSet<ProductVideo> ProductVideos { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace MarketingServer
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
             
-            await Run();
+            //await Run();
         }
 
         public async Task Run()
@@ -82,7 +82,7 @@ namespace MarketingServer
                             currentCampaignRecord.Ended = true;
 
                             //Get a new product
-                            string newProduct = await Campaign.GetProduct(subscription.NicheID, subscription.ID);
+                            string newProduct = await Campaign.GetProduct(subscription.ID);
 
                             /*
                             If the product is null, this means there are no more products in this 

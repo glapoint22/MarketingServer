@@ -19,6 +19,7 @@ namespace MarketingServer
         {
             this.CampaignRecords = new HashSet<CampaignRecord>();
             this.EmailCampaigns = new HashSet<EmailCampaign>();
+            this.ProductVideos = new HashSet<ProductVideo>();
         }
     
         public string ID { get; set; }
@@ -26,11 +27,15 @@ namespace MarketingServer
         public int NicheID { get; set; }
         public string HopLink { get; set; }
         public int Order { get; set; }
+        public string Description { get; set; }
+        public string Image { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmailCampaign> EmailCampaigns { get; set; }
         public virtual Nich Nich { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ProductVideo> ProductVideos { get; set; }
     }
 }

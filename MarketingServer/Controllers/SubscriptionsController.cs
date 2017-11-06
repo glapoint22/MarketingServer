@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
+using System.Collections.Generic;
 
 namespace MarketingServer.Controllers
 {
@@ -61,7 +62,7 @@ namespace MarketingServer.Controllers
                 //Get a new subscription
                 subscription = CreateSubscription(customer.ID, lead.nicheId);
                 db.Subscriptions.Add(subscription);
-                db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
+                db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID));
             }
             else
             {
@@ -139,21 +140,21 @@ namespace MarketingServer.Controllers
             {
                 Subscription subscription;
 
-                //If subscribing to a new subscription
-                if (updatedSubscription.subscriptionId == 0)
-                {
-                    subscription = CreateSubscription(customer.ID, updatedSubscription.nicheId);
-                    db.Subscriptions.Add(subscription);
-                    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
-                }
-                else
-                {
+                ////If subscribing to a new subscription
+                //if (updatedSubscription.subscriptionId == 0)
+                //{
+                //    subscription = CreateSubscription(customer.ID, updatedSubscription.nicheId);
+                //    db.Subscriptions.Add(subscription);
+                //    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
+                //}
+                //else
+                //{
                     //Update the existing subscription
                     subscription = await db.Subscriptions.FindAsync(updatedSubscription.subscriptionId);
                     subscription.Subscribed = !subscription.Subscribed;
                     if (!subscription.Subscribed) subscription.DateUnsubscribed = DateTime.Today;
                     db.Entry(subscription).State = EntityState.Modified;
-                }
+                //}
             }
 
             try
@@ -184,18 +185,32 @@ namespace MarketingServer.Controllers
 
         private async Task<object> GetSubscriptions(string customerId)
         {
-            return await db.Categories.Select(c => new
-            {
-                name = c.Name,
-                niches = db.Niches.Where(n => n.CategoryID == c.ID).Select(n => new
-                {
-                    id = n.ID,
-                    name = n.Name,
-                    isSubscribed = n.Subscriptions.Any(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == n.ID),
-                    subscriptionId = n.Subscriptions.Where(x => x.CustomerID == customerId && x.NicheID == n.ID).Select(x => x.ID).FirstOrDefault()
-                }).ToList(),
-                count = db.Niches.Where(n => n.CategoryID == c.ID).Count()
-            }).OrderByDescending(x => x.count).ToListAsync();
+            return await db.Categories
+                .Where(n => db.Niches
+                    .Where(s => db.Subscriptions
+                        .Where(a => a.CustomerID == customerId)
+                        .Select(a => a.NicheID)
+                        .ToList()
+                        .Contains(s.ID))
+                    .Select(z => z.CategoryID)
+                    .ToList()
+                    .Contains(n.ID))
+                .Select(x => new {
+                    name = x.Name,
+                    niches = db.Niches
+                        .Where(y => y.CategoryID == x.ID && db.Subscriptions
+                            .Where(a => a.CustomerID == customerId)
+                            .Select(a => a.NicheID)
+                            .ToList()
+                            .Contains(y.ID))
+                        .Select(n => new {
+                            id = n.ID,
+                            name = n.Name,
+                            isSubscribed = n.Subscriptions.Any(a => a.CustomerID == customerId && a.Subscribed && a.NicheID == n.ID),
+                            subscriptionId = n.Subscriptions.Where(a => a.CustomerID == customerId && a.NicheID == n.ID).Select(a => a.ID).FirstOrDefault()
+                        }).ToList()
+                })
+                .ToListAsync();
         }
 
         private async Task<object> GetPreferences(Customer customer)
@@ -231,7 +246,7 @@ public struct Preferences
 }
 public struct UpdatedSubscription
 {
-    public int subscriptionId;
+    public string subscriptionId;
     public bool isSubscribed;
     public int nicheId;
 }

@@ -88,6 +88,16 @@
           <Property Name="NicheID" Type="int" Nullable="false" />
           <Property Name="HopLink" Type="varchar" MaxLength="255" />
           <Property Name="Order" Type="int" Nullable="false" />
+          <Property Name="Description" Type="varchar(max)" Nullable="false" />
+          <Property Name="Image" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductVideos">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Url" />
+          </Key>
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Url" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <EntityType Name="Subscriptions">
           <Key>
@@ -187,6 +197,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__ProductVi__Produ__00750D23">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="ProductVideos" Type="Self.ProductVideos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductVideos">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Subscript__Custo__6D6238AF">
           <End Role="Customers" Type="Self.Customers" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -222,6 +244,7 @@
           <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
@@ -250,6 +273,10 @@
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductVideos" EntitySet="ProductVideos" />
           </AssociationSet>
           <AssociationSet Name="FK__Subscript__Custo__6D6238AF" Association="Self.FK__Subscript__Custo__6D6238AF">
             <End Role="Customers" EntitySet="Customers" />
@@ -360,9 +387,21 @@
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Order" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
+          <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
+        </EntityType>
+        <EntityType Name="ProductVideo">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Url" />
+          </Key>
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Url" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="ProductVideos" ToRole="Products" />
         </EntityType>
         <EntityType Name="Subscription">
           <Key>
@@ -491,6 +530,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__ProductVi__Produ__00750D23">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="ProductVideos" Type="Self.ProductVideo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductVideos">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
@@ -500,6 +551,7 @@
           <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="Products" EntityType="Self.Product" />
+          <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
@@ -536,6 +588,10 @@
           <AssociationSet Name="FK__Subscript__Niche__6E565CE8" Association="Self.FK__Subscript__Niche__6E565CE8">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductVideos" EntitySet="ProductVideos" />
           </AssociationSet>
         </EntityContainer>
       </Schema>
@@ -632,6 +688,16 @@
                 <ScalarProperty Name="NicheID" ColumnName="NicheID" />
                 <ScalarProperty Name="HopLink" ColumnName="HopLink" />
                 <ScalarProperty Name="Order" ColumnName="Order" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Image" ColumnName="Image" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductVideos">
+            <EntityTypeMapping TypeName="MarketingModel.ProductVideo">
+              <MappingFragment StoreEntitySet="ProductVideos">
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Url" ColumnName="Url" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

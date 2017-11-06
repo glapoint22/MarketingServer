@@ -107,8 +107,17 @@ select * from leads
 select * from LeadMagnetEmails
 
 
-alter table products alter column [Order] int not null
+delete CampaignRecords where productid = '99D2344880'
 
+alter table products alter column [Order] int not null
+alter table products alter column [Image] varchar(255) not null
+
+create table ProductVideos(
+	ProductID varchar(10) not null,
+	Url varchar(255) not null,
+	PRIMARY KEY(ProductID, Url),
+	FOREIGN KEY (ProductID) REFERENCES Products(ID)
+)
 
 delete customers
 
