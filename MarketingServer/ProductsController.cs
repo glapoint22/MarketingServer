@@ -17,10 +17,35 @@ namespace MarketingServer
         private MarketingEntities db = new MarketingEntities();
 
         // GET: api/Products
-        //public IQueryable<Product> GetProducts()
-        //{
-        //    return db.Products;
-        //}
+        [ResponseType(typeof(Product))]
+        public async Task<IHttpActionResult> GetProducts()
+        {
+            var products = await db.Niches
+                .OrderByDescending(x => x.Products.Count())
+                .Take(2)
+                .Select(x => new
+                {
+                    caption = x.Name,
+                    products = db.Products
+                        .Where(z => z.NicheID == x.ID)
+                        .Select(z => new
+                        {
+                            id = z.ID,
+                            name = z.Name,
+                            hopLink = z.HopLink,
+                            description = z.Description,
+                            image = z.Image,
+                            videos = db.ProductVideos
+                                .Where(y => y.ProductID == z.ID)
+                                .Select(y => y.Url)
+                                .ToList()
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return Ok(products);
+        }
 
         // GET: api/Products/5
         [ResponseType(typeof(Product))]
@@ -30,7 +55,7 @@ namespace MarketingServer
                 .Where(x => x.CustomerID == customerId)
                 .Select(x => new
                 {
-                    niche = x.Nich.Name,
+                    caption = "Recommendations for you in " + x.Nich.Name,
                     products = db.Products
                         .Where(z => z.NicheID == x.NicheID && !z.CampaignRecords
                             .Where(a => a.SubscriptionID == x.ID)
@@ -40,7 +65,7 @@ namespace MarketingServer
                         .Select(z => new {
                             id = z.ID,
                             name = z.Name,
-                            hopLink = z.HopLink,
+                            hopLink = z.HopLink + "?tid=" + customerId + z.ID,
                             description = z.Description,
                             image = z.Image,
                             videos = db.ProductVideos
