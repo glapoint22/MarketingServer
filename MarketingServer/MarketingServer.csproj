@@ -189,7 +189,7 @@
     <Compile Include="Product.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="ProductsController.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="ProductVideo.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

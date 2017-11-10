@@ -15,80 +15,85 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
-        public async Task<IHttpActionResult> Get(Guid customerId)
+        //public async Task<IHttpActionResult> Get(Guid customerId)
+        //{
+        //    Customer customer = await db.Customers.FindAsync(customerId);
+        //    if (customer == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    return Ok(await GetPreferences(customer));
+        //}
+
+        public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
         {
-            Customer customer = await db.Customers.FindAsync(customerId);
-            if (customer == null)
+            var response = new object();
+
+            //Set the customer
+            Customer customer = await SetCustomer(subscriptionInfo.name, subscriptionInfo.email);
+
+            if(subscriptionInfo.leadMagnet != null)
             {
-                return NotFound();
-            }
-
-            return Ok(await GetPreferences(customer));
-        }
-
-        public async Task<IHttpActionResult> Post(Leads lead)
-        {
-            Customer customer;
-
-            //See if we have an existing customer
-            string id = await db.Customers.Where(c => c.Email == lead.email).Select(c => c.ID).FirstOrDefaultAsync();
-
-
-            //If the customer DOES NOT exist in the database
-            if (id == null)
-            {
-                customer = new Customer()
+                //Check to see if this customer is subscribed to this niche
+                Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == subscriptionInfo.nicheId).FirstOrDefaultAsync();
+                if (subscription == null)
                 {
-                    ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-                    Email = lead.email,
-                    Name = lead.name,
-                    EmailSendFrequency = 3,
-                    EmailSentDate = DateTime.Today
-                    
-                };
-
-                //Add the new customer to the database
-                db.Customers.Add(customer);
-            }
-            else
-            {
-                customer = await db.Customers.FindAsync(id);
-            }
-
-            //Check to see if this customer is subscribed to this niche
-            Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == lead.nicheId).FirstOrDefaultAsync();
-            if (subscription == null)
-            {
-                //Get a new subscription
-                subscription = CreateSubscription(customer.ID, lead.nicheId);
-                db.Subscriptions.Add(subscription);
-                db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID));
-            }
-            else
-            {
-                if (!subscription.Subscribed)
-                {
-                    //Renew the subscription
-                    subscription.Subscribed = true;
-                    subscription.DateSubscribed = DateTime.Today;
-
-                    //If the customer was unsubscribed to all, set the email send frequency to default
-                    if (customer.EmailSendFrequency == 0) customer.EmailSendFrequency = 3;
+                    //Get a new subscription
+                    subscription = CreateSubscription(customer.ID, subscriptionInfo.nicheId);
+                    db.Subscriptions.Add(subscription);
+                    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID));
                 }
+                else
+                {
+                    if (!subscription.Subscribed)
+                    {
+                        //Renew the subscription
+                        subscription.Subscribed = true;
+                        subscription.DateSubscribed = DateTime.Today;
+
+                        //If the customer was unsubscribed to all, set the email send frequency to default
+                        if (customer.EmailSendFrequency == 0) customer.EmailSendFrequency = 3;
+                    }
+                }
+
+
+                //Get the email and send
+                var email = await db.LeadMagnetEmails.Where(x => x.NicheID == subscriptionInfo.nicheId).Select(x => new
+                {
+                    id = x.ID,
+                    subject = x.Subject,
+                    body = x.Body
+                }
+                ).SingleAsync();
+
+                Mail mail = new Mail(email.id, customer, email.subject, email.body);
+                //mail.Send();
+
+
+                 response = new
+                {
+                    leadMagnet = subscriptionInfo.leadMagnet,
+                     customer = new
+                     {
+                         id = customer.ID,
+                         email = customer.Email,
+                         name = customer.Name,
+                         emailSendFrequency = customer.EmailSendFrequency
+                     },
+                     subscriptions = await GetSubscriptions(customer.ID)
+                 };
             }
-
-
-            //Get the email and send
-            var email = await db.LeadMagnetEmails.Where(x => x.NicheID == lead.nicheId).Select(x => new
+            else
             {
-                id = x.ID,
-                subject = x.Subject,
-                body = x.Body
+                response = new
+                {
+                    customer = new
+                    {
+                        id = customer.ID,
+                    }
+                };
             }
-            ).SingleAsync();
-
-            Mail mail = new Mail(email.id, customer, email.subject, email.body);
-            //mail.Send();
 
 
             //If there are any changes, update the database
@@ -104,16 +109,12 @@ namespace MarketingServer.Controllers
                 }
             }
 
-
-            var response = new
-            {
-                leadMagnet = lead.leadMagnet,
-                preferences = await GetPreferences(customer)
-            };
-
-
             return Ok(response);
         }
+
+       
+
+
 
         public async Task<IHttpActionResult> Put(Preferences preferences)
         {
@@ -183,6 +184,38 @@ namespace MarketingServer.Controllers
             return subscription;
         }
 
+        private async Task<Customer> SetCustomer(string name, string email)
+        {
+            Customer customer;
+
+            //See if we have an existing customer
+            string id = await db.Customers.Where(c => c.Email == email).Select(c => c.ID).FirstOrDefaultAsync();
+
+
+            //If the customer DOES NOT exist in the database
+            if (id == null)
+            {
+                customer = new Customer()
+                {
+                    ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+                    Email = email,
+                    Name = name,
+                    EmailSendFrequency = 3,
+                    EmailSentDate = DateTime.Today
+
+                };
+
+                //Add the new customer to the database
+                db.Customers.Add(customer);
+            }
+            else
+            {
+                customer = await db.Customers.FindAsync(id);
+            }
+
+            return customer;
+        }
+
         private async Task<object> GetSubscriptions(string customerId)
         {
             return await db.Categories
@@ -213,30 +246,31 @@ namespace MarketingServer.Controllers
                 .ToListAsync();
         }
 
-        private async Task<object> GetPreferences(Customer customer)
-        {
-            return new
-            {
-                customer = new
-                {
-                    id = customer.ID,
-                    email = customer.Email,
-                    name = customer.Name,
-                    emailSendFrequency = customer.EmailSendFrequency
-                },
-                subscriptions = await GetSubscriptions(customer.ID)
-            };
-        }
+        //private async Task<object> GetPreferences(Customer customer)
+        //{
+        //    return new
+        //    {
+        //        customer = new
+        //        {
+        //            id = customer.ID,
+        //            email = customer.Email,
+        //            name = customer.Name,
+        //            emailSendFrequency = customer.EmailSendFrequency
+        //        },
+        //        subscriptions = await GetSubscriptions(customer.ID)
+        //    };
+        //}
     }
 }
 
-public struct Leads
+public struct SubscriptionInfo
 {
-    public string email;
     public string name;
+    public string email;
     public int nicheId;
     public string leadMagnet;
 }
+
 public struct Preferences
 {
     public bool customerModified;
