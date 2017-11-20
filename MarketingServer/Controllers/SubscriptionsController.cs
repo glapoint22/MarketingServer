@@ -74,13 +74,13 @@ namespace MarketingServer.Controllers
                  response = new
                 {
                     leadMagnet = subscriptionInfo.leadMagnet,
-                     customer = new
-                     {
-                         id = customer.ID,
-                         email = customer.Email,
-                         name = customer.Name,
-                         emailSendFrequency = customer.EmailSendFrequency
-                     },
+                    customer = new
+                    {
+                        id = customer.ID,
+                        email = customer.Email,
+                        name = customer.Name,
+                        emailSendFrequency = customer.EmailSendFrequency
+                    },
                      subscriptions = await GetSubscriptions(customer.ID)
                  };
             }

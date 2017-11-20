@@ -147,6 +147,7 @@
     <Compile Include="Category.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\LeadsController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\NotificationsController.cs" />
