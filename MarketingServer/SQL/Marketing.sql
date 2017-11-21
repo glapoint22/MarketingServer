@@ -106,6 +106,8 @@ select * from Products order by nicheid, [order]
 select * from leads
 select * from LeadMagnetEmails
 select * from ProductVideos
+select * from CategoryImages
+select * from ProductBanners
 
 
 delete CampaignRecords where productid = '99D2344880'
@@ -113,10 +115,11 @@ delete CampaignRecords where productid = '99D2344880'
 alter table products alter column [Order] int not null
 alter table products alter column [Image] varchar(255) not null
 
-create table ProductVideos(
+create table ProductBanners(
 	ProductID varchar(10) not null,
-	Url varchar(255) not null,
-	PRIMARY KEY(ProductID, Url),
+	Name varchar(255) not null,
+	Selected bit not null,
+	PRIMARY KEY(ProductID, Name),
 	FOREIGN KEY (ProductID) REFERENCES Products(ID)
 )
 

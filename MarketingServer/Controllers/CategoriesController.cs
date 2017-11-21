@@ -22,7 +22,15 @@ namespace MarketingServer.Controllers
         {
             var categories = await db.Categories
                 .Select(x => new {
+                    id = x.ID,
                     name = x.Name,
+                    categoryImage = x.CategoryImages
+                        .Where(c => c.Selected)
+                        .Select(c => new {
+                            categoryId = c.CategoryID,
+                            name = c.Name
+                        })
+                        .FirstOrDefault(),
                     niches = x.Niches
                         .Select(z => new {
                             id = z.ID,
@@ -34,8 +42,7 @@ namespace MarketingServer.Controllers
                                     hopLink = p.HopLink
                                 }).Take(4)
                                 .ToList()
-                        }).ToList(),
-                    image = "cat.png"
+                        }).ToList()
                 }
             )
             .ToListAsync();

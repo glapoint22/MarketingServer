@@ -147,6 +147,9 @@
     <Compile Include="Category.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="CategoryImage.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\CategoriesController.cs" />
     <Compile Include="Controllers\LeadsController.cs" />
     <Compile Include="Controllers\MailController.cs" />
@@ -169,6 +172,7 @@
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Mail.cs" />
+    <Compile Include="Controllers\ProductsController.cs" />
     <Compile Include="Marketing.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -190,7 +194,9 @@
     <Compile Include="Product.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\ProductsController.cs" />
+    <Compile Include="ProductBanner.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="ProductVideo.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

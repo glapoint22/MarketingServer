@@ -24,6 +24,15 @@
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
+        <EntityType Name="CategoryImages">
+          <Key>
+            <PropertyRef Name="CategoryID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="CategoryID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Selected" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="Customers">
           <Key>
             <PropertyRef Name="ID" />
@@ -78,6 +87,15 @@
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductBanners">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Selected" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Products">
           <Key>
@@ -149,6 +167,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__CategoryI__Categ__1387E197">
+          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
+          <End Role="CategoryImages" Type="Self.CategoryImages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CategoryImages">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Emails__ProductI__38EE7070">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
           <End Role="EmailCampaigns" Type="Self.EmailCampaigns" Multiplicity="*" />
@@ -197,6 +227,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__ProductBa__Produ__16644E42">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="ProductBanners" Type="Self.ProductBanners" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductBanners">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideos" Multiplicity="*" />
@@ -238,11 +280,13 @@
         <EntityContainer Name="MarketingModelStoreContainer">
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecords" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImages" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmails" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductBanners" EntityType="Self.ProductBanners" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
@@ -257,6 +301,10 @@
           <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Products" EntitySet="Products" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
           <AssociationSet Name="FK__Emails__ProductI__38EE7070" Association="Self.FK__Emails__ProductI__38EE7070">
             <End Role="Products" EntitySet="Products" />
@@ -273,6 +321,10 @@
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductBanners" EntitySet="ProductBanners" />
           </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
@@ -312,7 +364,18 @@
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="Categories" ToRole="CategoryImages" />
           <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Categories" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="CategoryImage">
+          <Key>
+            <PropertyRef Name="CategoryID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Selected" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="CategoryImages" ToRole="Categories" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
@@ -378,6 +441,16 @@
           <NavigationProperty Name="Products" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Products" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
+        <EntityType Name="ProductBanner">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Selected" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="ProductBanners" ToRole="Products" />
+        </EntityType>
         <EntityType Name="Product">
           <Key>
             <PropertyRef Name="ID" />
@@ -392,6 +465,7 @@
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
+          <NavigationProperty Name="ProductBanners" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="Products" ToRole="ProductBanners" />
           <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
         </EntityType>
         <EntityType Name="ProductVideo">
@@ -441,6 +515,18 @@
             </Principal>
             <Dependent Role="CampaignRecords">
               <PropertyRef Name="SubscriptionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CategoryI__Categ__1387E197">
+          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
+          <End Role="CategoryImages" Type="Self.CategoryImage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CategoryImages">
+              <PropertyRef Name="CategoryID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -530,6 +616,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__ProductBa__Produ__16644E42">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="ProductBanners" Type="Self.ProductBanner" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductBanners">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideo" Multiplicity="*" />
@@ -545,11 +643,13 @@
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
+          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImage" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmail" />
           <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
+          <EntitySet Name="ProductBanners" EntityType="Self.ProductBanner" />
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
@@ -560,6 +660,10 @@
           <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
             <End Role="Subscriptions" EntitySet="Subscriptions" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
             <End Role="Categories" EntitySet="Categories" />
@@ -589,6 +693,10 @@
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Subscriptions" EntitySet="Subscriptions" />
           </AssociationSet>
+          <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductVideos" EntitySet="ProductVideos" />
@@ -617,6 +725,15 @@
               <MappingFragment StoreEntitySet="Categories">
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CategoryImages">
+            <EntityTypeMapping TypeName="MarketingModel.CategoryImage">
+              <MappingFragment StoreEntitySet="CategoryImages">
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Selected" ColumnName="Selected" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -677,6 +794,15 @@
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductBanners">
+            <EntityTypeMapping TypeName="MarketingModel.ProductBanner">
+              <MappingFragment StoreEntitySet="ProductBanners">
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Selected" ColumnName="Selected" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

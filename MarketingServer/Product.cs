@@ -19,6 +19,7 @@ namespace MarketingServer
         {
             this.CampaignRecords = new HashSet<CampaignRecord>();
             this.EmailCampaigns = new HashSet<EmailCampaign>();
+            this.ProductBanners = new HashSet<ProductBanner>();
             this.ProductVideos = new HashSet<ProductVideo>();
         }
     
@@ -35,6 +36,8 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<EmailCampaign> EmailCampaigns { get; set; }
         public virtual Nich Nich { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ProductBanner> ProductBanners { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProductVideo> ProductVideos { get; set; }
     }
