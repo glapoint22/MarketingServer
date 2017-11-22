@@ -197,6 +197,7 @@
     <Compile Include="ProductBanner.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="ProductBannersController.cs" />
     <Compile Include="ProductVideo.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
