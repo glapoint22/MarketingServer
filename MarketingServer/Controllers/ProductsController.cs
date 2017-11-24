@@ -82,6 +82,26 @@ namespace MarketingServer
             return Ok(products);
         }
 
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category)
+        {
+            var products = await db.Products
+                .Where(x => x.Name.Contains(query) && (category !=0 ? x.Nich.CategoryID == category: 1 == 1))
+                .Select(x => new {
+                    id = x.ID,
+                    name = x.Name,
+                    hopLink = x.HopLink,
+                    description = x.Description,
+                    image = x.Image,
+                    videos = db.ProductVideos
+                        .Where(y => y.ProductID == x.ID)
+                        .Select(y => y.Url)
+                        .ToList()
+                })
+                .ToListAsync();
+
+            return Ok(products);
+        }
+
         // PUT: api/Products/5
         [ResponseType(typeof(void))]
         public async Task<IHttpActionResult> PutProduct(string id, Product product)
