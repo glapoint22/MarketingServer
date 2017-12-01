@@ -82,10 +82,19 @@ namespace MarketingServer
             return Ok(products);
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category)
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int page)
         {
-            var products = await db.Products
-                .Where(x => x.Name.Contains(query) && (category !=0 ? x.Nich.CategoryID == category: 1 == 1))
+            int resultsPerPage = 20;
+            int numProducts;
+            int currentPage;
+
+            var data = new
+            {
+                resultsPerPage = resultsPerPage,
+                totalProducts = numProducts = db.Products.Count(x => x.Name.Contains(query) && (category != 0 ? x.Nich.CategoryID == category : 1 == 1)),
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)numProducts / resultsPerPage) ? page : 1,
+                products = await db.Products
+                .Where(x => x.Name.Contains(query) && (category != 0 ? x.Nich.CategoryID == category : 1 == 1))
                 .Select(x => new {
                     id = x.ID,
                     name = x.Name,
@@ -97,9 +106,13 @@ namespace MarketingServer
                         .Select(y => y.Url)
                         .ToList()
                 })
-                .ToListAsync();
+                .OrderBy(x => x.name)
+                .Skip((currentPage - 1) * resultsPerPage)
+                .Take(resultsPerPage)
+                .ToListAsync()
+            };
 
-            return Ok(products);
+            return Ok(data);
         }
 
         // PUT: api/Products/5
@@ -137,35 +150,81 @@ namespace MarketingServer
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Products
-        [ResponseType(typeof(Product))]
-        public async Task<IHttpActionResult> PostProduct(Product product)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //POST: api/Products
+       //[ResponseType(typeof(Product))]
+       // public async Task<IHttpActionResult> PostProduct(Product product)
+       // {
+       //     var categories = await db.Categories
+       //         .Select(x => new
+       //         {
+       //             id = x.ID,
+       //             name = x.Name
+       //         })
+       //         .ToListAsync();
 
-            db.Products.Add(product);
+       //     foreach (var category in categories)
+       //     {
+       //         var niches = await db.Niches
+       //             .Where(x => x.CategoryID == category.id)
+       //             .Select(x => new
+       //             {
+       //                 id = x.ID,
+       //                 name = x.Name
+       //             })
+       //             .ToListAsync();
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ProductExists(product.ID))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+       //         foreach (var niche in niches)
+       //         {
+       //             int order = 1;
+       //             Random rnd = new Random();
+       //             int count = rnd.Next(10, 25);
 
-            return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
-        }
+       //             for (int i = 0; i < count; i++)
+       //             {
+       //                 Product p = new Product
+       //                 {
+       //                     ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+       //                     Name = niche.name + " " + order,
+       //                     NicheID = niche.id,
+       //                     HopLink = "http://56e2c0n4zhqi1se007udp9fq11.hop.clickbank.net/",
+       //                     Order = order,
+       //                     Description = "A Foolproof, Science-Based System that's Guaranteed to Melt Away All Your Unwanted Stubborn Body Fat in Just 14 Days.",
+       //                     Image = "2WeekDiet.gif"
+       //                 };
+
+       //                 int day = 1;
+       //                 for (int j = 0; j < 4; j++)
+       //                 {
+       //                     EmailCampaign e = new EmailCampaign
+       //                     {
+       //                         ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+       //                         ProductID = p.ID,
+       //                         Day = j + 1,
+       //                         Subject = p.Name + " Day " + day,
+       //                         Body = p.Name + " Day " + day
+       //                     };
+       //                     db.EmailCampaigns.Add(e);
+       //                     day++;
+       //                 }
+
+       //                 db.Products.Add(p);
+       //                 order++;
+       //             }
+       //         }
+       //     }
+
+
+       //     try
+       //     {
+       //         await db.SaveChangesAsync();
+       //     }
+       //     catch (DbUpdateException)
+       //     {
+       //         throw;
+       //     }
+
+       //     return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
+       // }
 
         // DELETE: api/Products/5
         [ResponseType(typeof(Product))]
