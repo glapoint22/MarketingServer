@@ -8,7 +8,9 @@ using System.Data.Entity;
 using System;
 using System.Data.Entity.SqlServer;
 
-
+using System.IO;
+using System.Net;
+using System.Text;
 
 namespace MarketingServer
 {
@@ -20,7 +22,37 @@ namespace MarketingServer
         {
 
             GlobalConfiguration.Configure(WebApiConfig.Register);
-            
+
+            //HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://api.clickbank.com/rest/1.3/products/1?site=drewie22");
+            //request.Accept = "application/json";
+            //request.Headers.Add(HttpRequestHeader.Authorization, "DEV-SHE17V09PLJ3MARVSI502TNSEULV7U09:API-LB20FGB0E01FE4C8EQ057HHUJQ8PS61U");
+            //request.Method = "GET";
+
+            //HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            //Console.WriteLine(response.StatusCode);
+            //Console.WriteLine(response.StatusDescription);
+            //Stream resStream = response.GetResponseStream();
+            //StringBuilder sb = new StringBuilder();
+
+            //string tempString = null;
+            //int count = 0;
+            //byte[] buf = new byte[8192];
+
+            //do
+            //{
+            //    count = resStream.Read(buf, 0, buf.Length);
+
+            //    if (count != 0)
+            //    {
+            //        tempString = Encoding.ASCII.GetString(buf, 0, count);
+            //        sb.Append(tempString);
+            //    }
+            //}
+            //while (count > 0);
+
+            //Console.WriteLine(sb.ToString());
+
             //await Run();
         }
 

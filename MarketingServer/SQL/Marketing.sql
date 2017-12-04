@@ -108,19 +108,32 @@ select * from LeadMagnetEmails
 select * from ProductVideos
 select * from CategoryImages
 select * from ProductBanners
+select * from vendors
 
 
-delete CampaignRecords where productid = '99D2344880'
+delete Products
 
-alter table products alter column [Order] int not null
-alter table products alter column [Image] varchar(255) not null
+select name from products where name like '%Dietary%' and name like '%1%'
 
-create table ProductBanners(
-	ProductID varchar(10) not null,
+update products set Trial = 0
+
+alter table products alter column DigitalDownload bit not null
+alter table products alter column Shippable bit not null
+alter table products alter column German bit not null
+alter table products alter column English bit not null
+alter table products alter column Spanish bit not null
+alter table products alter column French bit not null
+alter table products alter column Italian bit not null
+alter table products alter column Portuguese bit not null
+alter table products alter column SinglePayment bit not null
+alter table products alter column Subscription bit not null
+alter table products alter column Trial bit not null
+
+
+create table Vendors(
+	ID int primary key not null,
 	Name varchar(255) not null,
-	Selected bit not null,
-	PRIMARY KEY(ProductID, Name),
-	FOREIGN KEY (ProductID) REFERENCES Products(ID)
+	APIKey varchar(255) not null
 )
 
 delete customers

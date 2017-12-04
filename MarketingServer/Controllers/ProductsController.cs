@@ -27,7 +27,7 @@ namespace MarketingServer
                 {
                     caption = x.Name,
                     products = db.Products
-                        .Where(z => z.NicheID == x.ID)
+                        .Where(z => z.NicheID == x.ID && z.Active)
                         .Select(z => new
                         {
                             id = z.ID,
@@ -35,6 +35,7 @@ namespace MarketingServer
                             hopLink = z.HopLink,
                             description = z.Description,
                             image = z.Image,
+                            price = z.Price,
                             videos = db.ProductVideos
                                 .Where(y => y.ProductID == z.ID)
                                 .Select(y => y.Url)
@@ -61,13 +62,14 @@ namespace MarketingServer
                             .Where(a => a.SubscriptionID == x.ID)
                             .Select(a => a.ProductID)
                             .ToList()
-                            .Contains(z.ID))
+                            .Contains(z.ID) && z.Active)
                         .Select(z => new {
                             id = z.ID,
                             name = z.Name,
                             hopLink = z.HopLink + "?tid=" + customerId + z.ID,
                             description = z.Description,
                             image = z.Image,
+                            price = z.Price,
                             videos = db.ProductVideos
                                 .Where(y => y.ProductID == z.ID)
                                 .Select(y => y.Url)
@@ -87,20 +89,22 @@ namespace MarketingServer
             int resultsPerPage = 20;
             int numProducts;
             int currentPage;
+            string[] searchWords = query.Split(' ');
 
             var data = new
             {
                 resultsPerPage = resultsPerPage,
-                totalProducts = numProducts = db.Products.Count(x => x.Name.Contains(query) && (category != 0 ? x.Nich.CategoryID == category : 1 == 1)),
+                totalProducts = numProducts = await db.Products.Where(db, searchWords, category).CountAsync(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)numProducts / resultsPerPage) ? page : 1,
                 products = await db.Products
-                .Where(x => x.Name.Contains(query) && (category != 0 ? x.Nich.CategoryID == category : 1 == 1))
+                .Where(db, searchWords, category)
                 .Select(x => new {
                     id = x.ID,
                     name = x.Name,
                     hopLink = x.HopLink,
                     description = x.Description,
                     image = x.Image,
+                    price = x.Price,
                     videos = db.ProductVideos
                         .Where(y => y.ProductID == x.ID)
                         .Select(y => y.Url)
@@ -151,80 +155,96 @@ namespace MarketingServer
         }
 
         //POST: api/Products
-       //[ResponseType(typeof(Product))]
-       // public async Task<IHttpActionResult> PostProduct(Product product)
-       // {
-       //     var categories = await db.Categories
-       //         .Select(x => new
-       //         {
-       //             id = x.ID,
-       //             name = x.Name
-       //         })
-       //         .ToListAsync();
+        //[ResponseType(typeof(Product))]
+        //public async Task<IHttpActionResult> PostProduct(Product product)
+        //{
+        //    var categories = await db.Categories
+        //        .Select(x => new
+        //        {
+        //            id = x.ID,
+        //            name = x.Name
+        //        })
+        //        .ToListAsync();
 
-       //     foreach (var category in categories)
-       //     {
-       //         var niches = await db.Niches
-       //             .Where(x => x.CategoryID == category.id)
-       //             .Select(x => new
-       //             {
-       //                 id = x.ID,
-       //                 name = x.Name
-       //             })
-       //             .ToListAsync();
+        //    foreach (var category in categories)
+        //    {
+        //        var niches = await db.Niches
+        //            .Where(x => x.CategoryID == category.id)
+        //            .Select(x => new
+        //            {
+        //                id = x.ID,
+        //                name = x.Name
+        //            })
+        //            .ToListAsync();
 
-       //         foreach (var niche in niches)
-       //         {
-       //             int order = 1;
-       //             Random rnd = new Random();
-       //             int count = rnd.Next(10, 25);
+        //        foreach (var niche in niches)
+        //        {
+        //            int order = 1;
+        //            Random rnd = new Random();
+        //            int count = rnd.Next(10, 25);
 
-       //             for (int i = 0; i < count; i++)
-       //             {
-       //                 Product p = new Product
-       //                 {
-       //                     ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-       //                     Name = niche.name + " " + order,
-       //                     NicheID = niche.id,
-       //                     HopLink = "http://56e2c0n4zhqi1se007udp9fq11.hop.clickbank.net/",
-       //                     Order = order,
-       //                     Description = "A Foolproof, Science-Based System that's Guaranteed to Melt Away All Your Unwanted Stubborn Body Fat in Just 14 Days.",
-       //                     Image = "2WeekDiet.gif"
-       //                 };
+        //            string[] images = new string[] { "2WeekDiet.gif", "ad2.jpg", "book.png", "box-medium.jpg", "diabetes-lie-3d.png", "EatStopEat.png", "hnm2.jpg", "leanbelly.png", "organifi.png", "Unlock-Your-Hip-Flexors.png", "WakeUpLean.png", "ynm3.jpg" };
 
-       //                 int day = 1;
-       //                 for (int j = 0; j < 4; j++)
-       //                 {
-       //                     EmailCampaign e = new EmailCampaign
-       //                     {
-       //                         ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-       //                         ProductID = p.ID,
-       //                         Day = j + 1,
-       //                         Subject = p.Name + " Day " + day,
-       //                         Body = p.Name + " Day " + day
-       //                     };
-       //                     db.EmailCampaigns.Add(e);
-       //                     day++;
-       //                 }
+        //            for (int i = 0; i < count; i++)
+        //            {
+        //                Product p = new Product
+        //                {
+        //                    ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+        //                    Name = niche.name + " " + order,
+        //                    NicheID = niche.id,
+        //                    HopLink = "http://56e2c0n4zhqi1se007udp9fq11.hop.clickbank.net/",
+        //                    Order = order,
+        //                    Description = "A Foolproof, Science-Based System that's Guaranteed to Melt Away All Your Unwanted Stubborn Body Fat in Just 14 Days.",
+        //                    Image = images[rnd.Next(0, 12)],
+        //                    Active = true,
+        //                    VendorID = 1,
+        //                    Price = (decimal)(rnd.NextDouble() * (100.00 - 3.00) + 3.00),
+        //                    DigitalDownload = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Shippable = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    German = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    English = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Spanish = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    French = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Italian = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Portuguese = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    SinglePayment = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Subscription = Convert.ToBoolean(rnd.Next(0, 2)),
+        //                    Trial = Convert.ToBoolean(rnd.Next(0, 2))
+        //                };
 
-       //                 db.Products.Add(p);
-       //                 order++;
-       //             }
-       //         }
-       //     }
+        //                int day = 1;
+        //                for (int j = 0; j < 4; j++)
+        //                {
+        //                    EmailCampaign e = new EmailCampaign
+        //                    {
+        //                        ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
+        //                        ProductID = p.ID,
+        //                        Day = j + 1,
+        //                        Subject = p.Name + " Day " + day,
+        //                        Body = p.Name + " Day " + day
+        //                    };
+        //                    db.EmailCampaigns.Add(e);
+        //                    day++;
+        //                }
+
+        //                db.Products.Add(p);
+        //                order++;
+        //            }
+        //        }
+        //    }
 
 
-       //     try
-       //     {
-       //         await db.SaveChangesAsync();
-       //     }
-       //     catch (DbUpdateException)
-       //     {
-       //         throw;
-       //     }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        throw;
+        //    }
 
-       //     return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
-       // }
+        //    return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
+        //}
 
         // DELETE: api/Products/5
         [ResponseType(typeof(Product))]
@@ -257,3 +277,4 @@ namespace MarketingServer
         }
     }
 }
+

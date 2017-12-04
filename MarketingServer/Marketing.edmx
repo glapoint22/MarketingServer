@@ -108,6 +108,20 @@
           <Property Name="Order" Type="int" Nullable="false" />
           <Property Name="Description" Type="varchar(max)" Nullable="false" />
           <Property Name="Image" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="VendorID" Type="int" Nullable="false" />
+          <Property Name="Price" Type="money" Nullable="false" />
+          <Property Name="DigitalDownload" Type="bit" Nullable="false" />
+          <Property Name="Shippable" Type="bit" Nullable="false" />
+          <Property Name="German" Type="bit" Nullable="false" />
+          <Property Name="English" Type="bit" Nullable="false" />
+          <Property Name="Spanish" Type="bit" Nullable="false" />
+          <Property Name="French" Type="bit" Nullable="false" />
+          <Property Name="Italian" Type="bit" Nullable="false" />
+          <Property Name="Portuguese" Type="bit" Nullable="false" />
+          <Property Name="SinglePayment" Type="bit" Nullable="false" />
+          <Property Name="Subscription" Type="bit" Nullable="false" />
+          <Property Name="Trial" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="ProductVideos">
           <Key>
@@ -128,6 +142,14 @@
           <Property Name="Suspended" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
           <Property Name="DateUnsubscribed" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Vendors">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="APIKey" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
@@ -239,6 +261,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Products__Vendor__278EDA44">
+          <End Role="Vendors" Type="Self.Vendors" Multiplicity="1" />
+          <End Role="Products" Type="Self.Products" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vendors">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Products">
+              <PropertyRef Name="VendorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideos" Multiplicity="*" />
@@ -290,6 +324,7 @@
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Vendors" EntityType="Self.Vendors" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
@@ -325,6 +360,10 @@
           <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Products__Vendor__278EDA44" Association="Self.FK__Products__Vendor__278EDA44">
+            <End Role="Vendors" EntitySet="Vendors" />
+            <End Role="Products" EntitySet="Products" />
           </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
@@ -462,10 +501,25 @@
           <Property Name="Order" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="VendorID" Type="Int32" Nullable="false" />
+          <Property Name="Price" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
+          <Property Name="DigitalDownload" Type="Boolean" Nullable="false" />
+          <Property Name="Shippable" Type="Boolean" Nullable="false" />
+          <Property Name="German" Type="Boolean" Nullable="false" />
+          <Property Name="English" Type="Boolean" Nullable="false" />
+          <Property Name="Spanish" Type="Boolean" Nullable="false" />
+          <Property Name="French" Type="Boolean" Nullable="false" />
+          <Property Name="Italian" Type="Boolean" Nullable="false" />
+          <Property Name="Portuguese" Type="Boolean" Nullable="false" />
+          <Property Name="SinglePayment" Type="Boolean" Nullable="false" />
+          <Property Name="Subscription" Type="Boolean" Nullable="false" />
+          <Property Name="Trial" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
           <NavigationProperty Name="ProductBanners" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="Products" ToRole="ProductBanners" />
+          <NavigationProperty Name="Vendor" Relationship="Self.FK__Products__Vendor__278EDA44" FromRole="Products" ToRole="Vendors" />
           <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
         </EntityType>
         <EntityType Name="ProductVideo">
@@ -491,6 +545,15 @@
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="Subscriptions" ToRole="CampaignRecords" />
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Subscriptions" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="Vendor">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="APIKey" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Products" Relationship="Self.FK__Products__Vendor__278EDA44" FromRole="Vendors" ToRole="Products" />
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
@@ -628,6 +691,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__Products__Vendor__278EDA44">
+          <End Role="Vendors" Type="Self.Vendor" Multiplicity="1" />
+          <End Role="Products" Type="Self.Product" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Vendors">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Products">
+              <PropertyRef Name="VendorID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideo" Multiplicity="*" />
@@ -653,6 +728,7 @@
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
+          <EntitySet Name="Vendors" EntityType="Self.Vendor" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
@@ -696,6 +772,10 @@
           <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Products__Vendor__278EDA44" Association="Self.FK__Products__Vendor__278EDA44">
+            <End Role="Vendors" EntitySet="Vendors" />
+            <End Role="Products" EntitySet="Products" />
           </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
@@ -816,6 +896,20 @@
                 <ScalarProperty Name="Order" ColumnName="Order" />
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Image" ColumnName="Image" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="VendorID" ColumnName="VendorID" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="DigitalDownload" ColumnName="DigitalDownload" />
+                <ScalarProperty Name="Shippable" ColumnName="Shippable" />
+                <ScalarProperty Name="German" ColumnName="German" />
+                <ScalarProperty Name="English" ColumnName="English" />
+                <ScalarProperty Name="Spanish" ColumnName="Spanish" />
+                <ScalarProperty Name="French" ColumnName="French" />
+                <ScalarProperty Name="Italian" ColumnName="Italian" />
+                <ScalarProperty Name="Portuguese" ColumnName="Portuguese" />
+                <ScalarProperty Name="SinglePayment" ColumnName="SinglePayment" />
+                <ScalarProperty Name="Subscription" ColumnName="Subscription" />
+                <ScalarProperty Name="Trial" ColumnName="Trial" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -837,6 +931,15 @@
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
                 <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Vendors">
+            <EntityTypeMapping TypeName="MarketingModel.Vendor">
+              <MappingFragment StoreEntitySet="Vendors">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="APIKey" ColumnName="APIKey" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
