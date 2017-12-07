@@ -84,20 +84,23 @@ namespace MarketingServer
             return Ok(products);
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int page)
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "")
         {
             int resultsPerPage = 20;
             int numProducts;
             int currentPage;
             string[] searchWords = query.Split(' ');
+            string[] languages = language == string.Empty ? new string[0] : language.Split(',');
+            string[] productTypes = productType == string.Empty ? new string[0] : productType.Split(',');
+            string[] billingTypes = billing == string.Empty ? new string[0] : billing.Split(',');
 
             var data = new
             {
                 resultsPerPage = resultsPerPage,
-                totalProducts = numProducts = await db.Products.Where(db, searchWords, category).CountAsync(),
+                totalProducts = numProducts = await db.Products.Where(db, searchWords, category, languages, productTypes, billingTypes).CountAsync(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)numProducts / resultsPerPage) ? page : 1,
                 products = await db.Products
-                .Where(db, searchWords, category)
+                .Where(db, searchWords, category, languages, productTypes, billingTypes)
                 .Select(x => new {
                     id = x.ID,
                     name = x.Name,

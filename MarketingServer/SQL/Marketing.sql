@@ -113,7 +113,7 @@ select * from vendors
 
 delete Products
 
-select name from products where name like '%Dietary%' and name like '%1%'
+select * from products where name like '%a%' and SinglePayment = 1 and Subscription = 1 and trial = 1 and Shippable = 1 and DigitalDownload = 1 and English = 1 and German = 1 and Spanish = 1 and French = 1 and Italian = 1 and Portuguese = 1
 
 update products set Trial = 0
 
