@@ -84,43 +84,71 @@ namespace MarketingServer
             return Ok(products);
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "")
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "", int nicheId = 0)
         {
             int resultsPerPage = 20;
-            int numProducts;
             int currentPage;
             string[] searchWords = query.Split(' ');
             string[] languages = language == string.Empty ? new string[0] : language.Split(',');
             string[] productTypes = productType == string.Empty ? new string[0] : productType.Split(',');
             string[] billingTypes = billing == string.Empty ? new string[0] : billing.Split(',');
 
+            var products = await db.Products.Where(db, searchWords, category, languages, productTypes, billingTypes, nicheId).Select(a => a.NicheID).ToListAsync();
             var data = new
             {
                 resultsPerPage = resultsPerPage,
-                totalProducts = numProducts = await db.Products.Where(db, searchWords, category, languages, productTypes, billingTypes).CountAsync(),
-                page = currentPage = page > 0 && page <= Math.Ceiling((double)numProducts / resultsPerPage) ? page : 1,
+                totalProducts = products.Count(),
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / resultsPerPage) ? page : 1,
                 products = await db.Products
-                .Where(db, searchWords, category, languages, productTypes, billingTypes)
-                .Select(x => new {
-                    id = x.ID,
-                    name = x.Name,
-                    hopLink = x.HopLink,
-                    description = x.Description,
-                    image = x.Image,
-                    price = x.Price,
-                    videos = db.ProductVideos
-                        .Where(y => y.ProductID == x.ID)
-                        .Select(y => y.Url)
+                    .Where(db, searchWords, category, languages, productTypes, billingTypes, nicheId)
+                    .Select(x => new
+                    {
+                        id = x.ID,
+                        name = x.Name,
+                        hopLink = x.HopLink,
+                        description = x.Description,
+                        image = x.Image,
+                        price = x.Price,
+                        videos = db.ProductVideos
+                            .Where(y => y.ProductID == x.ID)
+                            .Select(y => y.Url)
+                            .ToList()
+                    })
+                    .OrderBy(x => x.name)
+                    .Skip((currentPage - 1) * resultsPerPage)
+                    .Take(resultsPerPage)
+                    .ToListAsync(),
+                categories = await db.Categories
+                    .Where(x => x.Niches
+                        .Where(z => products
+                            .Contains(z.ID)
+                        )
+                        .Select(y => y.CategoryID)
                         .ToList()
-                })
-                .OrderBy(x => x.name)
-                .Skip((currentPage - 1) * resultsPerPage)
-                .Take(resultsPerPage)
-                .ToListAsync()
+                        .Contains(x.ID)
+                    )
+                    .Select(x => new
+                    {
+                        id = x.ID,
+                        name = x.Name,
+                        niches = x.Niches
+                        .Where(z => products
+                            .Contains(z.ID)
+                        )
+                        .Select(c => new {
+                            id = c.ID,
+                            name = c.Name
+                        })
+                        .ToList()
+                    })
+                    .ToListAsync()
+
             };
 
             return Ok(data);
         }
+
+        
 
         // PUT: api/Products/5
         [ResponseType(typeof(void))]

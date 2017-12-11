@@ -115,6 +115,8 @@ delete Products
 
 select * from products where name like '%a%' and SinglePayment = 1 and Subscription = 1 and trial = 1 and Shippable = 1 and DigitalDownload = 1 and English = 1 and German = 1 and Spanish = 1 and French = 1 and Italian = 1 and Portuguese = 1
 
+select name from Categories where id in (select categoryid from Niches where id in (select nicheid from Products where name like '%diet%'))
+
 update products set Trial = 0
 
 alter table products alter column DigitalDownload bit not null

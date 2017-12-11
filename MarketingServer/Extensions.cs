@@ -7,10 +7,11 @@ namespace MarketingServer
 {
     public static class Extensions
     {
-        public static IQueryable<Product> Where(this IQueryable<Product> query, MarketingEntities db, string[] searchWords, int category, string[] languages, string[] productTypes, string[] billingTypes)
+        public static IQueryable<Product> Where(this IQueryable<Product> query, MarketingEntities db, string[] searchWords, int category, string[] languages, string[] productTypes, string[] billingTypes, int nicheId)
         {
             return db.Products.Where(x =>
                 x.Active &&
+                (nicheId > 0 ? x.NicheID == nicheId : true) &&
                 searchWords.All(z => x.Name.Contains(z)) && 
                 (category != 0 ? x.Nich.CategoryID == category : true) &&
                 (languages.Count() > 0 ? 
