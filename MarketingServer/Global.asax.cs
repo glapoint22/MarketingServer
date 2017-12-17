@@ -114,7 +114,7 @@ namespace MarketingServer
                             currentCampaignRecord.Ended = true;
 
                             //Get a new product
-                            string newProduct = await Campaign.GetProduct(subscription.ID);
+                            string newProduct = await Campaign.GetProduct(subscription);
 
                             /*
                             If the product is null, this means there are no more products in this 

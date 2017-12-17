@@ -42,7 +42,7 @@ namespace MarketingServer.Controllers
                     //Get a new subscription
                     subscription = CreateSubscription(customer.ID, subscriptionInfo.nicheId);
                     db.Subscriptions.Add(subscription);
-                    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID));
+                    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription));
                 }
                 else
                 {
@@ -71,7 +71,21 @@ namespace MarketingServer.Controllers
                 //mail.Send();
 
 
-                 response = new
+                //If there are any changes, update the database
+                if (db.ChangeTracker.HasChanges())
+                {
+                    try
+                    {
+                        await db.SaveChangesAsync();
+                    }
+                    catch (DbUpdateException)
+                    {
+                        throw;
+                    }
+                }
+
+
+                response = new
                 {
                     leadMagnet = subscriptionInfo.leadMagnet,
                     customer = new
@@ -95,19 +109,6 @@ namespace MarketingServer.Controllers
                 };
             }
 
-
-            //If there are any changes, update the database
-            if (db.ChangeTracker.HasChanges())
-            {
-                try
-                {
-                    await db.SaveChangesAsync();
-                }
-                catch (DbUpdateException)
-                {
-                    throw;
-                }
-            }
 
             return Ok(response);
         }

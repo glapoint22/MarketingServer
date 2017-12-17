@@ -10,18 +10,15 @@ namespace MarketingServer
 {
     public class Campaign
     {
-        public static async Task<string> GetProduct(string subscriptionId)
+        public static async Task<string> GetProduct(Subscription subscription)
         {
             MarketingEntities db = new MarketingEntities();
 
             return await db.Products
                 .OrderBy(x => x.Order)
-                .Where(x => x.NicheID == db.Subscriptions
-                        .Where(z => z.ID == subscriptionId)
-                        .Select(z => z.NicheID)
-                        .FirstOrDefault()
+                .Where(x => x.NicheID == subscription.NicheID
                         && !x.CampaignRecords
-                            .Where(z => z.SubscriptionID == subscriptionId)
+                            .Where(z => z.SubscriptionID == subscription.ID)
                             .Select(z => z.ProductID)
                             .ToList()
                             .Contains(x.ID))
@@ -29,15 +26,15 @@ namespace MarketingServer
                 .FirstOrDefaultAsync();
         }
 
-        public static async Task<CampaignRecord> CreateCampaignRecord(string subscriptionId)
+        public static async Task<CampaignRecord> CreateCampaignRecord(Subscription subscription)
         {
             MarketingEntities db = new MarketingEntities();
 
             return new CampaignRecord
             {
-                SubscriptionID = subscriptionId,
+                SubscriptionID = subscription.ID,
                 Date = DateTime.Now,
-                ProductID = await GetProduct(subscriptionId),
+                ProductID = await GetProduct(subscription),
                 Day = 0
             };
         }

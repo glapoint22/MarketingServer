@@ -84,23 +84,128 @@ namespace MarketingServer
             return Ok(products);
         }
 
+        
+
+        IQueryable<Product> SearchProducts(string searchWords, int category, string language, string productType, string billing, int nicheId)
+        {
+            IQueryable<Product> query = db.Products.Where(x => x.Active);
+
+            //Search words
+            string[] searchWordsArray = searchWords.Split(' ');
+            query = query.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
+
+            //Category
+            if (category > 0)
+            {
+                query = query.Where(x => x.Nich.CategoryID == category);
+            }
+
+            //Language
+            if(language != string.Empty)
+            {
+                string[] languages = language.Split(',');
+
+                //English
+                if (languages.Contains("English"))
+                {
+                    query = query.Where(x => x.English);
+                }
+
+                //German
+                if (languages.Contains("German"))
+                {
+                    query = query.Where(x => x.German);
+                }
+
+                //Spanish
+                if (languages.Contains("Spanish"))
+                {
+                    query = query.Where(x => x.Spanish);
+                }
+
+                //French
+                if (languages.Contains("French"))
+                {
+                    query = query.Where(x => x.French);
+                }
+
+                //Italian
+                if (languages.Contains("Italian"))
+                {
+                    query = query.Where(x => x.Italian);
+                }
+
+                //Portuguese
+                if (languages.Contains("Portuguese"))
+                {
+                    query = query.Where(x => x.Portuguese);
+                }
+            }
+
+            //Product Types
+            if(productType != string.Empty)
+            {
+                string[] productTypes = productType.Split(',');
+
+                //Digital Download
+                if (productTypes.Contains("Digital Download"))
+                {
+                    query = query.Where(x => x.DigitalDownload);
+                }
+
+                //Shippable
+                if (productTypes.Contains("Shippable"))
+                {
+                    query = query.Where(x => x.Shippable);
+                }
+            }
+
+            //Billing
+            if (billing != string.Empty)
+            {
+                string[] billingTypes = billing.Split(',');
+
+                //Single Payment
+                if (billingTypes.Contains("Single Payment"))
+                {
+                    query = query.Where(x => x.SinglePayment);
+                }
+
+                //Subscription
+                if (billingTypes.Contains("Subscription"))
+                {
+                    query = query.Where(x => x.Subscription);
+                }
+
+                //Trial
+                if (billingTypes.Contains("Trial"))
+                {
+                    query = query.Where(x => x.Trial);
+                }
+            }
+
+            //Niche
+            if(nicheId > 0)
+            {
+                query = query.Where(x => x.NicheID == nicheId);
+            }
+
+            return query;
+        }
+
         public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "", int nicheId = 0)
         {
             int resultsPerPage = 20;
             int currentPage;
-            string[] searchWords = query.Split(' ');
-            string[] languages = language == string.Empty ? new string[0] : language.Split(',');
-            string[] productTypes = productType == string.Empty ? new string[0] : productType.Split(',');
-            string[] billingTypes = billing == string.Empty ? new string[0] : billing.Split(',');
+            IQueryable<Product> productsQuery = SearchProducts(query, category, language, productType, billing, nicheId);
+            var products = await productsQuery.Select(a => a.NicheID).ToListAsync();
 
-            var products = await db.Products.Where(db, searchWords, category, languages, productTypes, billingTypes, nicheId).Select(a => a.NicheID).ToListAsync();
             var data = new
             {
                 resultsPerPage = resultsPerPage,
                 totalProducts = products.Count(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / resultsPerPage) ? page : 1,
-                products = await db.Products
-                    .Where(db, searchWords, category, languages, productTypes, billingTypes, nicheId)
+                products = await productsQuery
                     .Select(x => new
                     {
                         id = x.ID,
@@ -136,6 +241,7 @@ namespace MarketingServer
                             .Contains(z.ID)
                         )
                         .Select(c => new {
+                            productCount = productsQuery.Where(a => a.NicheID == c.ID).Count(),
                             id = c.ID,
                             name = c.Name
                         })
@@ -148,7 +254,14 @@ namespace MarketingServer
             return Ok(data);
         }
 
-        
+
+        IQueryable<Product> Foo(IQueryable<Product> query, int nicheId)
+        {
+            query = query.Where(x => x.NicheID == nicheId);
+
+            return query;
+        }
+
 
         // PUT: api/Products/5
         [ResponseType(typeof(void))]

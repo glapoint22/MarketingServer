@@ -69,7 +69,7 @@ namespace MarketingServer.Controllers
                             campaignRecord.ProductPurchased = true;
 
                             //Get a new product we can email to the customer
-                            string newProduct = await Campaign.GetProduct(campaignRecord.SubscriptionID);
+                            string newProduct = await Campaign.GetProduct(campaignRecord.Subscription);
 
 
                             if (newProduct != null)
