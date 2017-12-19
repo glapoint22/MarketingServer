@@ -109,9 +109,29 @@ select * from ProductVideos
 select * from CategoryImages
 select * from ProductBanners
 select * from vendors
+select * from Filters
+select * from FilterLabels
+select * from ProductFilters
+select * from priceRange
 
 
-delete Products
+
+
+CREATE TABLE PriceRange(
+	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
+	Caption varchar(255) NOT NULL,
+	Min Money NOT NULL,
+	Max Money NOT NULL
+);
+
+CREATE TABLE ProductFilterOptions(
+	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
+	ProductID VARCHAR(10) NOT NULL,
+	FilterOptionID int NOT NULL,
+	FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE,
+	FOREIGN KEY (FilterOptionID) REFERENCES FilterOptions(ID),
+);
+
 
 select * from products where name like '%a%' and SinglePayment = 1 and Subscription = 1 and trial = 1 and Shippable = 1 and DigitalDownload = 1 and English = 1 and German = 1 and Spanish = 1 and French = 1 and Italian = 1 and Portuguese = 1
 

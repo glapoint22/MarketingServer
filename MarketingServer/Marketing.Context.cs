@@ -30,13 +30,17 @@ namespace MarketingServer
         public virtual DbSet<CategoryImage> CategoryImages { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<EmailCampaign> EmailCampaigns { get; set; }
+        public virtual DbSet<FilterLabel> FilterLabels { get; set; }
+        public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<LeadMagnetEmail> LeadMagnetEmails { get; set; }
         public virtual DbSet<Lead> Leads { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
         public virtual DbSet<ProductBanner> ProductBanners { get; set; }
+        public virtual DbSet<ProductFilter> ProductFilters { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductVideo> ProductVideos { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
         public virtual DbSet<Vendor> Vendors { get; set; }
+        public virtual DbSet<PriceRange> PriceRanges { get; set; }
     }
 }

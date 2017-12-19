@@ -162,6 +162,12 @@
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Encryption.cs" />
+    <Compile Include="Filter.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FilterLabel.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -192,10 +198,16 @@
     <Compile Include="Nich.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="PriceRange.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
     <Compile Include="Product.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="ProductBanner.cs">
+      <DependentUpon>Marketing.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ProductFilter.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="ProductVideo.cs">

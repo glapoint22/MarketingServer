@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Collections.Generic;
 
 namespace MarketingServer
 {
@@ -101,88 +100,88 @@ namespace MarketingServer
             }
 
             //Language
-            if(language != string.Empty)
-            {
-                string[] languages = language.Split(',');
+            //if(language != string.Empty)
+            //{
+            //    string[] languages = language.Split(',');
 
-                //English
-                if (languages.Contains("English"))
-                {
-                    query = query.Where(x => x.English);
-                }
+            //    //English
+            //    if (languages.Contains("English"))
+            //    {
+            //        query = query.Where(x => x.English);
+            //    }
 
-                //German
-                if (languages.Contains("German"))
-                {
-                    query = query.Where(x => x.German);
-                }
+            //    //German
+            //    if (languages.Contains("German"))
+            //    {
+            //        query = query.Where(x => x.German);
+            //    }
 
-                //Spanish
-                if (languages.Contains("Spanish"))
-                {
-                    query = query.Where(x => x.Spanish);
-                }
+            //    //Spanish
+            //    if (languages.Contains("Spanish"))
+            //    {
+            //        query = query.Where(x => x.Spanish);
+            //    }
 
-                //French
-                if (languages.Contains("French"))
-                {
-                    query = query.Where(x => x.French);
-                }
+            //    //French
+            //    if (languages.Contains("French"))
+            //    {
+            //        query = query.Where(x => x.French);
+            //    }
 
-                //Italian
-                if (languages.Contains("Italian"))
-                {
-                    query = query.Where(x => x.Italian);
-                }
+            //    //Italian
+            //    if (languages.Contains("Italian"))
+            //    {
+            //        query = query.Where(x => x.Italian);
+            //    }
 
-                //Portuguese
-                if (languages.Contains("Portuguese"))
-                {
-                    query = query.Where(x => x.Portuguese);
-                }
-            }
+            //    //Portuguese
+            //    if (languages.Contains("Portuguese"))
+            //    {
+            //        query = query.Where(x => x.Portuguese);
+            //    }
+            //}
 
-            //Product Types
-            if(productType != string.Empty)
-            {
-                string[] productTypes = productType.Split(',');
+            ////Product Types
+            //if(productType != string.Empty)
+            //{
+            //    string[] productTypes = productType.Split(',');
 
-                //Digital Download
-                if (productTypes.Contains("Digital Download"))
-                {
-                    query = query.Where(x => x.DigitalDownload);
-                }
+            //    //Digital Download
+            //    if (productTypes.Contains("Digital Download"))
+            //    {
+            //        query = query.Where(x => x.DigitalDownload);
+            //    }
 
-                //Shippable
-                if (productTypes.Contains("Shippable"))
-                {
-                    query = query.Where(x => x.Shippable);
-                }
-            }
+            //    //Shippable
+            //    if (productTypes.Contains("Shippable"))
+            //    {
+            //        query = query.Where(x => x.Shippable);
+            //    }
+            //}
 
-            //Billing
-            if (billing != string.Empty)
-            {
-                string[] billingTypes = billing.Split(',');
+            ////Billing
+            //if (billing != string.Empty)
+            //{
+            //    string[] billingTypes = billing.Split(',');
 
-                //Single Payment
-                if (billingTypes.Contains("Single Payment"))
-                {
-                    query = query.Where(x => x.SinglePayment);
-                }
+            //    //Single Payment
+            //    if (billingTypes.Contains("Single Payment"))
+            //    {
+            //        query = query.Where(x => x.SinglePayment);
+            //    }
 
-                //Subscription
-                if (billingTypes.Contains("Subscription"))
-                {
-                    query = query.Where(x => x.Subscription);
-                }
+            //    //Subscription
+            //    if (billingTypes.Contains("Subscription"))
+            //    {
+            //        query = query.Where(x => x.Subscription);
+            //    }
 
-                //Trial
-                if (billingTypes.Contains("Trial"))
-                {
-                    query = query.Where(x => x.Trial);
-                }
-            }
+            //    //Trial
+            //    if (billingTypes.Contains("Trial"))
+            //    {
+            //        query = query.Where(x => x.Trial);
+            //    }
+            //}
 
             //Niche
             if(nicheId > 0)
@@ -191,6 +190,82 @@ namespace MarketingServer
             }
 
             return query;
+        }
+
+
+        private async Task<List<FilterData>> GetFilters(IQueryable<Product> productsQuery)
+        {
+            List<FilterData> filters = new List<FilterData>();
+            List<Label> labels;
+            FilterData filter;
+
+            //Create labels for the price filter
+            //List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
+            labels = new List<Label>();
+            foreach (PriceRange priceRange in await db.PriceRanges.ToListAsync())
+            {
+                int count = await productsQuery.CountAsync(x => x.Price >= priceRange.Min && x.Price <= priceRange.Max);
+                if (count > 0)
+                {
+                    Label label = new Label
+                    {
+                        name = priceRange.Label,
+                        productCount = count
+                    };
+                    labels.Add(label);
+                }
+            }
+
+            //Create the price filter
+            filter = new FilterData
+            {
+                caption = "Price",
+                labels = labels
+            };
+
+            filters.Add(filter);
+
+
+            //Iterate through all the custom filters
+            List<Filter> filterList = await db.Filters.ToListAsync();
+            foreach (Filter currentFilter in filterList)
+            {
+                //Create the labels for the current filter
+                labels = new List<Label>();
+                foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
+                {
+                    int count = await productsQuery.CountAsync(x => x.ProductFilters
+                        .Where(z => z.FilterLabelID == filterLabel.ID)
+                        .Select(z => z.ProductID)
+                        .ToList()
+                        .Contains(x.ID)
+                    );
+                    //If the count is greater than zero, create the label
+                    if (count > 0)
+                    {
+                        Label label = new Label
+                        {
+                            name = filterLabel.Name,
+                            productCount = count
+                        };
+                        labels.Add(label);
+                    }
+                }
+
+                //If there are any labels, create the filter
+                if (labels.Count > 0)
+                {
+                    filter = new FilterData
+                    {
+                        caption = currentFilter.Name,
+                        labels = labels
+                    };
+
+                    filters.Add(filter);
+                }
+            }
+
+            return filters;
         }
 
         public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "", int nicheId = 0)
@@ -241,13 +316,14 @@ namespace MarketingServer
                             .Contains(z.ID)
                         )
                         .Select(c => new {
-                            productCount = productsQuery.Where(a => a.NicheID == c.ID).Count(),
+                            productCount = productsQuery.Count(a => a.NicheID == c.ID),
                             id = c.ID,
                             name = c.Name
                         })
                         .ToList()
                     })
-                    .ToListAsync()
+                    .ToListAsync(),
+                filters = await GetFilters(productsQuery)
 
             };
 
@@ -302,6 +378,27 @@ namespace MarketingServer
         //[ResponseType(typeof(Product))]
         //public async Task<IHttpActionResult> PostProduct(Product product)
         //{
+        //    string[] banners = new string[] {
+        //        "Fall.jpg",
+        //        "Costumes.png",
+        //        "2WeekDiet.png",
+        //        "Halloween.png",
+        //        "Delight.jpg"
+        //    };
+
+        //    string[] videos = new string[] {
+        //        "//player.vimeo.com/video/203810510?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/195471382?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/196271312?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/195492285?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/197072042?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/195506334?title=0&byline=0&portrait=0&color=ffffff",
+        //        "//player.vimeo.com/video/195494203?title=0&byline=0&portrait=0&color=ffffff"
+        //    };
+
+
+        //    int totalProducts = 0;
+
         //    var categories = await db.Categories
         //        .Select(x => new
         //        {
@@ -343,18 +440,37 @@ namespace MarketingServer
         //                    Active = true,
         //                    VendorID = 1,
         //                    Price = (decimal)(rnd.NextDouble() * (100.00 - 3.00) + 3.00),
-        //                    DigitalDownload = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Shippable = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    German = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    English = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Spanish = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    French = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Italian = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Portuguese = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    SinglePayment = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Subscription = Convert.ToBoolean(rnd.Next(0, 2)),
-        //                    Trial = Convert.ToBoolean(rnd.Next(0, 2))
         //                };
+
+        //                if (rnd.Next(0, 2) == 1)
+        //                {
+        //                    for(int z = 0; z < videos.Length; z++)
+        //                    {
+        //                        if (rnd.Next(0, 2) == 1)
+        //                        {
+        //                            ProductVideo productVideo = new ProductVideo
+        //                            {
+        //                                ProductID = p.ID,
+        //                                Url = videos[z]
+        //                            };
+        //                            db.ProductVideos.Add(productVideo);
+        //                        }
+        //                    }
+                            
+        //                }
+
+        //                    for (int k = 17; k < 28; k++)
+        //                {
+        //                    if(rnd.Next(0, 2) == 1)
+        //                    {
+        //                        ProductFilterOption productFilterOption = new ProductFilterOption
+        //                        {
+        //                            ProductID = p.ID,
+        //                            FilterOptionID = k
+        //                        };
+        //                        db.ProductFilterOptions.Add(productFilterOption);
+        //                    }
+        //                }
 
         //                int day = 1;
         //                for (int j = 0; j < 4; j++)
@@ -373,10 +489,28 @@ namespace MarketingServer
 
         //                db.Products.Add(p);
         //                order++;
+        //                totalProducts++;
+        //                if (totalProducts < 6)
+        //                {
+                            
+        //                    ProductBanner productBanner = new ProductBanner
+        //                    {
+        //                        ProductID = p.ID,
+        //                        Name = banners[totalProducts - 1],
+        //                        Selected = true
+        //                    };
+
+        //                    db.ProductBanners.Add(productBanner);
+                            
+        //                }
         //            }
         //        }
         //    }
 
+            
+            
+
+            
 
         //    try
         //    {
@@ -419,6 +553,19 @@ namespace MarketingServer
         {
             return db.Products.Count(e => e.ID == id) > 0;
         }
+    }
+
+    
+    public struct Label
+    {
+        public string name;
+        public int productCount;
+    }
+
+    public struct FilterData
+    {
+        public string caption;
+        public List<Label> labels;
     }
 }
 

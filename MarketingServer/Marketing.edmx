@@ -53,6 +53,21 @@
           <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="Body" Type="varchar(max)" Nullable="false" />
         </EntityType>
+        <EntityType Name="FilterLabels">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="FilterID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Filters">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
         <EntityType Name="LeadMagnetEmails">
           <Key>
             <PropertyRef Name="ID" />
@@ -88,6 +103,18 @@
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
         </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="PriceRange">
+          <Key>
+            <PropertyRef Name="Label" />
+            <PropertyRef Name="Min" />
+            <PropertyRef Name="Max" />
+          </Key>
+          <Property Name="Label" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Min" Type="float" Nullable="false" />
+          <Property Name="Max" Type="float" Nullable="false" />
+        </EntityType>
         <EntityType Name="ProductBanners">
           <Key>
             <PropertyRef Name="ProductID" />
@@ -97,6 +124,14 @@
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Selected" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="ProductFilters">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="FilterLabelID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Products">
           <Key>
             <PropertyRef Name="ID" />
@@ -104,24 +139,13 @@
           <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
-          <Property Name="HopLink" Type="varchar" MaxLength="255" />
+          <Property Name="HopLink" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Order" Type="int" Nullable="false" />
           <Property Name="Description" Type="varchar(max)" Nullable="false" />
           <Property Name="Image" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Active" Type="bit" Nullable="false" />
           <Property Name="VendorID" Type="int" Nullable="false" />
-          <Property Name="Price" Type="money" Nullable="false" />
-          <Property Name="DigitalDownload" Type="bit" Nullable="false" />
-          <Property Name="Shippable" Type="bit" Nullable="false" />
-          <Property Name="German" Type="bit" Nullable="false" />
-          <Property Name="English" Type="bit" Nullable="false" />
-          <Property Name="Spanish" Type="bit" Nullable="false" />
-          <Property Name="French" Type="bit" Nullable="false" />
-          <Property Name="Italian" Type="bit" Nullable="false" />
-          <Property Name="Portuguese" Type="bit" Nullable="false" />
-          <Property Name="SinglePayment" Type="bit" Nullable="false" />
-          <Property Name="Subscription" Type="bit" Nullable="false" />
-          <Property Name="Trial" Type="bit" Nullable="false" />
+          <Property Name="Price" Type="float" Nullable="false" />
         </EntityType>
         <EntityType Name="ProductVideos">
           <Key>
@@ -213,6 +237,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__FilterOpt__Filte__3B95D2F1">
+          <End Role="Filters" Type="Self.Filters" Multiplicity="1" />
+          <End Role="FilterLabels" Type="Self.FilterLabels" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Filters">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="FilterLabels">
+              <PropertyRef Name="FilterID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__LeadMagne__Niche__370627FE">
           <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
           <End Role="LeadMagnetEmails" Type="Self.LeadMagnetEmails" Multiplicity="*" />
@@ -257,6 +293,32 @@
               <PropertyRef Name="ID" />
             </Principal>
             <Dependent Role="ProductBanners">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Filte__4F9CCB9E">
+          <End Role="FilterLabels" Type="Self.FilterLabels" Multiplicity="1" />
+          <End Role="ProductFilters" Type="Self.ProductFilters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FilterLabels">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="FilterLabelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Produ__4EA8A765">
+          <End Role="Products" Type="Self.Products" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductFilters" Type="Self.ProductFilters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
               <PropertyRef Name="ProductID" />
             </Dependent>
           </ReferentialConstraint>
@@ -317,14 +379,24 @@
           <EntitySet Name="CategoryImages" EntityType="Self.CategoryImages" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FilterLabels" EntityType="Self.FilterLabels" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Filters" EntityType="Self.Filters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmails" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanners" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductFilters" EntityType="Self.ProductFilters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Vendors" EntityType="Self.Vendors" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PriceRange" EntityType="Self.PriceRange" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [PriceRange].[Label] AS [Label], 
+    [PriceRange].[Min] AS [Min], 
+    [PriceRange].[Max] AS [Max]
+    FROM [dbo].[PriceRange] AS [PriceRange]</DefiningQuery>
+          </EntitySet>
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
@@ -345,6 +417,10 @@
             <End Role="Products" EntitySet="Products" />
             <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
           </AssociationSet>
+          <AssociationSet Name="FK__FilterOpt__Filte__3B95D2F1" Association="Self.FK__FilterOpt__Filte__3B95D2F1">
+            <End Role="Filters" EntitySet="Filters" />
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+          </AssociationSet>
           <AssociationSet Name="FK__LeadMagne__Niche__370627FE" Association="Self.FK__LeadMagne__Niche__370627FE">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
@@ -360,6 +436,14 @@
           <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Filte__4F9CCB9E" Association="Self.FK__ProductFi__Filte__4F9CCB9E">
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
           </AssociationSet>
           <AssociationSet Name="FK__Products__Vendor__278EDA44" Association="Self.FK__Products__Vendor__278EDA44">
             <End Role="Vendors" EntitySet="Vendors" />
@@ -438,6 +522,24 @@
           <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Product" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="EmailCampaigns" ToRole="Products" />
         </EntityType>
+        <EntityType Name="FilterLabel">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FilterID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Filter" Relationship="Self.FK__FilterOpt__Filte__3B95D2F1" FromRole="FilterLabels" ToRole="Filters" />
+          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Filte__4F9CCB9E" FromRole="FilterLabels" ToRole="ProductFilters" />
+        </EntityType>
+        <EntityType Name="Filter">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="FilterLabels" Relationship="Self.FK__FilterOpt__Filte__3B95D2F1" FromRole="Filters" ToRole="FilterLabels" />
+        </EntityType>
         <EntityType Name="LeadMagnetEmail">
           <Key>
             <PropertyRef Name="ID" />
@@ -490,6 +592,16 @@
           <Property Name="Selected" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Product" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="ProductBanners" ToRole="Products" />
         </EntityType>
+        <EntityType Name="ProductFilter">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FilterLabelID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="FilterLabel" Relationship="Self.FK__ProductFi__Filte__4F9CCB9E" FromRole="ProductFilters" ToRole="FilterLabels" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="ProductFilters" ToRole="Products" />
+        </EntityType>
         <EntityType Name="Product">
           <Key>
             <PropertyRef Name="ID" />
@@ -497,28 +609,18 @@
           <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="NicheID" Type="Int32" Nullable="false" />
-          <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Order" Type="Int32" Nullable="false" />
           <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Active" Type="Boolean" Nullable="false" />
           <Property Name="VendorID" Type="Int32" Nullable="false" />
-          <Property Name="Price" Type="Decimal" Precision="19" Scale="4" Nullable="false" />
-          <Property Name="DigitalDownload" Type="Boolean" Nullable="false" />
-          <Property Name="Shippable" Type="Boolean" Nullable="false" />
-          <Property Name="German" Type="Boolean" Nullable="false" />
-          <Property Name="English" Type="Boolean" Nullable="false" />
-          <Property Name="Spanish" Type="Boolean" Nullable="false" />
-          <Property Name="French" Type="Boolean" Nullable="false" />
-          <Property Name="Italian" Type="Boolean" Nullable="false" />
-          <Property Name="Portuguese" Type="Boolean" Nullable="false" />
-          <Property Name="SinglePayment" Type="Boolean" Nullable="false" />
-          <Property Name="Subscription" Type="Boolean" Nullable="false" />
-          <Property Name="Trial" Type="Boolean" Nullable="false" />
+          <Property Name="Price" Type="Double" Nullable="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
           <NavigationProperty Name="ProductBanners" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="Products" ToRole="ProductBanners" />
+          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="Products" ToRole="ProductFilters" />
           <NavigationProperty Name="Vendor" Relationship="Self.FK__Products__Vendor__278EDA44" FromRole="Products" ToRole="Vendors" />
           <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
         </EntityType>
@@ -554,6 +656,16 @@
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="APIKey" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Products" Relationship="Self.FK__Products__Vendor__278EDA44" FromRole="Vendors" ToRole="Products" />
+        </EntityType>
+        <EntityType Name="PriceRange">
+          <Key>
+            <PropertyRef Name="Label" />
+            <PropertyRef Name="Min" />
+            <PropertyRef Name="Max" />
+          </Key>
+          <Property Name="Label" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Min" Type="Double" Nullable="false" />
+          <Property Name="Max" Type="Double" Nullable="false" />
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
@@ -631,6 +743,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__FilterOpt__Filte__3B95D2F1">
+          <End Role="Filters" Type="Self.Filter" Multiplicity="1" />
+          <End Role="FilterLabels" Type="Self.FilterLabel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Filters">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="FilterLabels">
+              <PropertyRef Name="FilterID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Filte__4F9CCB9E">
+          <End Role="FilterLabels" Type="Self.FilterLabel" Multiplicity="1" />
+          <End Role="ProductFilters" Type="Self.ProductFilter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FilterLabels">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="FilterLabelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__LeadMagne__Niche__370627FE">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
           <End Role="LeadMagnetEmails" Type="Self.LeadMagnetEmail" Multiplicity="*" />
@@ -691,6 +827,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__ProductFi__Produ__4EA8A765">
+          <End Role="Products" Type="Self.Product" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductFilters" Type="Self.ProductFilter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Products__Vendor__278EDA44">
           <End Role="Vendors" Type="Self.Vendor" Multiplicity="1" />
           <End Role="Products" Type="Self.Product" Multiplicity="*" />
@@ -721,14 +871,18 @@
           <EntitySet Name="CategoryImages" EntityType="Self.CategoryImage" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
+          <EntitySet Name="FilterLabels" EntityType="Self.FilterLabel" />
+          <EntitySet Name="Filters" EntityType="Self.Filter" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmail" />
           <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanner" />
+          <EntitySet Name="ProductFilters" EntityType="Self.ProductFilter" />
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
           <EntitySet Name="Vendors" EntityType="Self.Vendor" />
+          <EntitySet Name="PriceRanges" EntityType="Self.PriceRange" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
@@ -753,6 +907,14 @@
             <End Role="Products" EntitySet="Products" />
             <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
           </AssociationSet>
+          <AssociationSet Name="FK__FilterOpt__Filte__3B95D2F1" Association="Self.FK__FilterOpt__Filte__3B95D2F1">
+            <End Role="Filters" EntitySet="Filters" />
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Filte__4F9CCB9E" Association="Self.FK__ProductFi__Filte__4F9CCB9E">
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
           <AssociationSet Name="FK__LeadMagne__Niche__370627FE" Association="Self.FK__LeadMagne__Niche__370627FE">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
@@ -772,6 +934,10 @@
           <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
           </AssociationSet>
           <AssociationSet Name="FK__Products__Vendor__278EDA44" Association="Self.FK__Products__Vendor__278EDA44">
             <End Role="Vendors" EntitySet="Vendors" />
@@ -839,6 +1005,23 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="FilterLabels">
+            <EntityTypeMapping TypeName="MarketingModel.FilterLabel">
+              <MappingFragment StoreEntitySet="FilterLabels">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="FilterID" ColumnName="FilterID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Filters">
+            <EntityTypeMapping TypeName="MarketingModel.Filter">
+              <MappingFragment StoreEntitySet="Filters">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="LeadMagnetEmails">
             <EntityTypeMapping TypeName="MarketingModel.LeadMagnetEmail">
               <MappingFragment StoreEntitySet="LeadMagnetEmails">
@@ -886,6 +1069,15 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="ProductFilters">
+            <EntityTypeMapping TypeName="MarketingModel.ProductFilter">
+              <MappingFragment StoreEntitySet="ProductFilters">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="FilterLabelID" ColumnName="FilterLabelID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Products">
             <EntityTypeMapping TypeName="MarketingModel.Product">
               <MappingFragment StoreEntitySet="Products">
@@ -899,17 +1091,6 @@
                 <ScalarProperty Name="Active" ColumnName="Active" />
                 <ScalarProperty Name="VendorID" ColumnName="VendorID" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
-                <ScalarProperty Name="DigitalDownload" ColumnName="DigitalDownload" />
-                <ScalarProperty Name="Shippable" ColumnName="Shippable" />
-                <ScalarProperty Name="German" ColumnName="German" />
-                <ScalarProperty Name="English" ColumnName="English" />
-                <ScalarProperty Name="Spanish" ColumnName="Spanish" />
-                <ScalarProperty Name="French" ColumnName="French" />
-                <ScalarProperty Name="Italian" ColumnName="Italian" />
-                <ScalarProperty Name="Portuguese" ColumnName="Portuguese" />
-                <ScalarProperty Name="SinglePayment" ColumnName="SinglePayment" />
-                <ScalarProperty Name="Subscription" ColumnName="Subscription" />
-                <ScalarProperty Name="Trial" ColumnName="Trial" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -940,6 +1121,15 @@
                 <ScalarProperty Name="ID" ColumnName="ID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="APIKey" ColumnName="APIKey" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PriceRanges">
+            <EntityTypeMapping TypeName="MarketingModel.PriceRange">
+              <MappingFragment StoreEntitySet="PriceRange">
+                <ScalarProperty Name="Label" ColumnName="Label" />
+                <ScalarProperty Name="Min" ColumnName="Min" />
+                <ScalarProperty Name="Max" ColumnName="Max" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

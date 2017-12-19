@@ -20,6 +20,7 @@ namespace MarketingServer
             this.CampaignRecords = new HashSet<CampaignRecord>();
             this.EmailCampaigns = new HashSet<EmailCampaign>();
             this.ProductBanners = new HashSet<ProductBanner>();
+            this.ProductFilters = new HashSet<ProductFilter>();
             this.ProductVideos = new HashSet<ProductVideo>();
         }
     
@@ -32,18 +33,7 @@ namespace MarketingServer
         public string Image { get; set; }
         public bool Active { get; set; }
         public int VendorID { get; set; }
-        public decimal Price { get; set; }
-        public bool DigitalDownload { get; set; }
-        public bool Shippable { get; set; }
-        public bool German { get; set; }
-        public bool English { get; set; }
-        public bool Spanish { get; set; }
-        public bool French { get; set; }
-        public bool Italian { get; set; }
-        public bool Portuguese { get; set; }
-        public bool SinglePayment { get; set; }
-        public bool Subscription { get; set; }
-        public bool Trial { get; set; }
+        public double Price { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }
@@ -52,6 +42,8 @@ namespace MarketingServer
         public virtual Nich Nich { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProductBanner> ProductBanners { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<ProductFilter> ProductFilters { get; set; }
         public virtual Vendor Vendor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProductVideo> ProductVideos { get; set; }
