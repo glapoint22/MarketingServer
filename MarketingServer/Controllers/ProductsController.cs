@@ -200,9 +200,9 @@ namespace MarketingServer
             FilterData filter;
 
             //Create labels for the price filter
-            //List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
+            List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
             labels = new List<Label>();
-            foreach (PriceRange priceRange in await db.PriceRanges.ToListAsync())
+            foreach (PriceRange priceRange in priceRanges)
             {
                 int count = await productsQuery.CountAsync(x => x.Price >= priceRange.Min && x.Price <= priceRange.Max);
                 if (count > 0)
@@ -246,7 +246,7 @@ namespace MarketingServer
                         Label label = new Label
                         {
                             name = filterLabel.Name,
-                            productCount = count
+                            productCount = count,
                         };
                         labels.Add(label);
                     }
@@ -560,6 +560,7 @@ namespace MarketingServer
     {
         public string name;
         public int productCount;
+        public bool @checked;
     }
 
     public struct FilterData
