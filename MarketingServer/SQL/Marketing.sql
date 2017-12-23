@@ -114,8 +114,11 @@ select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
 
+select count(id) from products where name like '%diet%' and id in (select productID from ProductFilters where FilterLabelID in(25, 26, 27))
 
+select * from ProductFilters where FilterLabelID = 27
 
+delete ProductFilters where FilterLabelID = 27 and ProductID != '9151B3E80C'
 
 CREATE TABLE PriceRange(
 	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
@@ -133,7 +136,7 @@ CREATE TABLE ProductFilterOptions(
 );
 
 
-select * from products where name like '%a%' and SinglePayment = 1 and Subscription = 1 and trial = 1 and Shippable = 1 and DigitalDownload = 1 and English = 1 and German = 1 and Spanish = 1 and French = 1 and Italian = 1 and Portuguese = 1
+
 
 select name from Categories where id in (select categoryid from Niches where id in (select nicheid from Products where name like '%diet%'))
 

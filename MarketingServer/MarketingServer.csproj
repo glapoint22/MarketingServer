@@ -162,6 +162,7 @@
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Encryption.cs" />
+    <Compile Include="ExpressionBuilder.cs" />
     <Compile Include="Filter.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

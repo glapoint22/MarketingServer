@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq.Expressions;
 
 namespace MarketingServer
 {
@@ -62,7 +64,8 @@ namespace MarketingServer
                             .Select(a => a.ProductID)
                             .ToList()
                             .Contains(z.ID) && z.Active)
-                        .Select(z => new {
+                        .Select(z => new
+                        {
                             id = z.ID,
                             name = z.Name,
                             hopLink = z.HopLink + "?tid=" + customerId + z.ID,
@@ -77,15 +80,15 @@ namespace MarketingServer
                         .ToList()
                 })
                 .ToListAsync();
-            
+
 
 
             return Ok(products);
         }
 
-        
 
-        IQueryable<Product> SearchProducts(string searchWords, int category, string language, string productType, string billing, int nicheId)
+
+        IQueryable<Product> SearchProducts(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges)
         {
             IQueryable<Product> query = db.Products.Where(x => x.Active);
 
@@ -99,121 +102,111 @@ namespace MarketingServer
                 query = query.Where(x => x.Nich.CategoryID == category);
             }
 
-            //Language
-            //if(language != string.Empty)
-            //{
-            //    string[] languages = language.Split(',');
-
-            //    //English
-            //    if (languages.Contains("English"))
-            //    {
-            //        query = query.Where(x => x.English);
-            //    }
-
-            //    //German
-            //    if (languages.Contains("German"))
-            //    {
-            //        query = query.Where(x => x.German);
-            //    }
-
-            //    //Spanish
-            //    if (languages.Contains("Spanish"))
-            //    {
-            //        query = query.Where(x => x.Spanish);
-            //    }
-
-            //    //French
-            //    if (languages.Contains("French"))
-            //    {
-            //        query = query.Where(x => x.French);
-            //    }
-
-            //    //Italian
-            //    if (languages.Contains("Italian"))
-            //    {
-            //        query = query.Where(x => x.Italian);
-            //    }
-
-            //    //Portuguese
-            //    if (languages.Contains("Portuguese"))
-            //    {
-            //        query = query.Where(x => x.Portuguese);
-            //    }
-            //}
-
-            ////Product Types
-            //if(productType != string.Empty)
-            //{
-            //    string[] productTypes = productType.Split(',');
-
-            //    //Digital Download
-            //    if (productTypes.Contains("Digital Download"))
-            //    {
-            //        query = query.Where(x => x.DigitalDownload);
-            //    }
-
-            //    //Shippable
-            //    if (productTypes.Contains("Shippable"))
-            //    {
-            //        query = query.Where(x => x.Shippable);
-            //    }
-            //}
-
-            ////Billing
-            //if (billing != string.Empty)
-            //{
-            //    string[] billingTypes = billing.Split(',');
-
-            //    //Single Payment
-            //    if (billingTypes.Contains("Single Payment"))
-            //    {
-            //        query = query.Where(x => x.SinglePayment);
-            //    }
-
-            //    //Subscription
-            //    if (billingTypes.Contains("Subscription"))
-            //    {
-            //        query = query.Where(x => x.Subscription);
-            //    }
-
-            //    //Trial
-            //    if (billingTypes.Contains("Trial"))
-            //    {
-            //        query = query.Where(x => x.Trial);
-            //    }
-            //}
-
+            
             //Niche
-            if(nicheId > 0)
+            if (nicheId > 0)
             {
                 query = query.Where(x => x.NicheID == nicheId);
             }
 
+            if (queryFilters != string.Empty)
+            {
+                Match result;
+
+                //Price Filter
+                result = Regex.Match(queryFilters, GetRegExPattern("Price"));
+                if (result.Length > 0)
+                {
+                    string[] priceRangeArray = result.Groups[2].Value.Split('~');
+                    List<PriceRange> priceRangeList = priceRanges
+                        .Where(x => priceRangeArray.Contains(x.Label))
+                        .Select(x => new PriceRange
+                        {
+                            Min = x.Min,
+                            Max = x.Max
+                        }).ToList();
+
+                    Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
+
+                    foreach (PriceRange priceRange in priceRangeList)
+                    {
+                        PriceRange temp = priceRange;
+                        predicate = predicate.Or(x => x.Price >= temp.Min && x.Price <= temp.Max);
+                    }
+
+                    query = query.Where(predicate);
+                }
+
+
+                //Custom Filters
+                foreach (Filter currentFilter in filterList)
+                {
+                    result = Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name));
+                    
+                    if (result.Length > 0)
+                    {
+                        //Get the options chosen from this filter
+                        string[] optionsArray = result.Groups[2].Value.Split('~');
+
+                        //Get a list of ids from the options array
+                        List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
+
+                        //Set the query
+                        query = query
+                            .Where(x => x.ProductFilters
+                                .Where(z => optionIdList.Contains(z.FilterLabelID))
+                                .Select(z => z.ProductID)
+                                .ToList()
+                                .Contains(x.ID)
+                            );
+                            
+                    }
+                    
+                }
+            }
+
+
             return query;
         }
 
+        private string GetRegExPattern(string filterName)
+        {
+            return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
+        }
 
-        private async Task<List<FilterData>> GetFilters(IQueryable<Product> productsQuery)
+        private async Task<List<FilterData>> GetFilters(IQueryable<Product> productsQuery, List<Filter> filterList, List<PriceRange> priceRanges)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
             FilterData filter;
 
+
+
+
+
+            //productsQuery = db.Products.Where(x => x.Active);
+            ////Search words
+            //string[] searchWordsArray = new string[] { "diet" };
+            //productsQuery = productsQuery.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
+
+
+
+
+
             //Create labels for the price filter
-            List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
             labels = new List<Label>();
             foreach (PriceRange priceRange in priceRanges)
             {
                 int count = await productsQuery.CountAsync(x => x.Price >= priceRange.Min && x.Price <= priceRange.Max);
-                if (count > 0)
-                {
+                //if (count > 0)
+                //{
                     Label label = new Label
                     {
                         name = priceRange.Label,
                         productCount = count
                     };
                     labels.Add(label);
-                }
+                //}
             }
 
             //Create the price filter
@@ -226,8 +219,7 @@ namespace MarketingServer
             filters.Add(filter);
 
 
-            //Iterate through all the custom filters
-            List<Filter> filterList = await db.Filters.ToListAsync();
+
             foreach (Filter currentFilter in filterList)
             {
                 //Create the labels for the current filter
@@ -268,11 +260,15 @@ namespace MarketingServer
             return filters;
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string language = "", int page = 1, string productType = "", string billing = "", int nicheId = 0)
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int nicheId = 0, int page = 1, string filter = "")
         {
             int resultsPerPage = 20;
             int currentPage;
-            IQueryable<Product> productsQuery = SearchProducts(query, category, language, productType, billing, nicheId);
+
+
+            List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
+            List<Filter> filterList = await db.Filters.ToListAsync();
+            IQueryable<Product> productsQuery = SearchProducts(query, category, nicheId, filter, filterList, priceRanges);
             var products = await productsQuery.Select(a => a.NicheID).ToListAsync();
 
             var data = new
@@ -315,7 +311,8 @@ namespace MarketingServer
                         .Where(z => products
                             .Contains(z.ID)
                         )
-                        .Select(c => new {
+                        .Select(c => new
+                        {
                             productCount = productsQuery.Count(a => a.NicheID == c.ID),
                             id = c.ID,
                             name = c.Name
@@ -323,7 +320,7 @@ namespace MarketingServer
                         .ToList()
                     })
                     .ToListAsync(),
-                filters = await GetFilters(productsQuery)
+                filters = await GetFilters(productsQuery, filterList, priceRanges)
 
             };
 
@@ -456,7 +453,7 @@ namespace MarketingServer
         //                            db.ProductVideos.Add(productVideo);
         //                        }
         //                    }
-                            
+
         //                }
 
         //                    for (int k = 17; k < 28; k++)
@@ -492,7 +489,7 @@ namespace MarketingServer
         //                totalProducts++;
         //                if (totalProducts < 6)
         //                {
-                            
+
         //                    ProductBanner productBanner = new ProductBanner
         //                    {
         //                        ProductID = p.ID,
@@ -501,16 +498,16 @@ namespace MarketingServer
         //                    };
 
         //                    db.ProductBanners.Add(productBanner);
-                            
+
         //                }
         //            }
         //        }
         //    }
 
-            
-            
 
-            
+
+
+
 
         //    try
         //    {
@@ -555,7 +552,7 @@ namespace MarketingServer
         }
     }
 
-    
+
     public struct Label
     {
         public string name;
@@ -568,5 +565,19 @@ namespace MarketingServer
         public string caption;
         public List<Label> labels;
     }
+
+    //class SwapVisitor : System.Linq.Expressions.ExpressionVisitor
+    //{
+    //    private readonly Expression from, to;
+    //    public SwapVisitor(Expression from, Expression to)
+    //    {
+    //        this.from = from;
+    //        this.to = to;
+    //    }
+    //    public override Expression Visit(Expression node)
+    //    {
+    //        return node == from ? to : base.Visit(node);
+    //    }
+    //}
 }
 
