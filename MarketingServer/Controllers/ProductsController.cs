@@ -130,6 +130,20 @@ namespace MarketingServer
                                 Max = x.Max
                             }).ToList();
 
+                        foreach(string price in priceRangeArray)
+                        {
+                            result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
+                            if (result.Length > 0)
+                            {
+                                PriceRange range = new PriceRange
+                                {
+                                    Min = double.Parse(result.Groups[1].Value),
+                                    Max = double.Parse(result.Groups[2].Value),
+                                };
+                                priceRangeList.Add(range);
+                            }
+                        }
+
                         Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
 
                         foreach (PriceRange priceRange in priceRangeList)
