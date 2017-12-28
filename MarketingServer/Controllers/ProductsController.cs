@@ -91,6 +91,7 @@ namespace MarketingServer
         IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
         {
             IQueryable<Product> query = db.Products.Where(x => x.Active);
+            char separator = '^';
 
             //Search words
             string[] searchWordsArray = searchWords.Split(' ');
@@ -121,7 +122,7 @@ namespace MarketingServer
                     result = Regex.Match(queryFilters, GetRegExPattern("Price"));
                     if (result.Length > 0)
                     {
-                        string[] priceRangeArray = result.Groups[2].Value.Split('~');
+                        string[] priceRangeArray = result.Groups[2].Value.Split(separator);
                         List<PriceRange> priceRangeList = priceRanges
                             .Where(x => priceRangeArray.Contains(x.Label))
                             .Select(x => new PriceRange
@@ -168,7 +169,7 @@ namespace MarketingServer
                         if (result.Length > 0)
                         {
                             //Get the options chosen from this filter
-                            string[] optionsArray = result.Groups[2].Value.Split('~');
+                            string[] optionsArray = result.Groups[2].Value.Split(separator);
 
                             //Get a list of ids from the options array
                             List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
