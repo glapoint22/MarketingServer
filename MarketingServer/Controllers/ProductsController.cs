@@ -280,7 +280,7 @@ namespace MarketingServer
             return filters;
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int nicheId = 0, int page = 1, string filter = "")
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int nicheId = 0, int page = 1, string filter = "", string sort = "relevance")
         {
             int resultsPerPage = 20;
             int currentPage;
@@ -290,13 +290,13 @@ namespace MarketingServer
             List<Filter> filterList = await db.Filters.ToListAsync();
             IQueryable<Product> productsQuery = BuildQuery(query, category, nicheId, filter, filterList, priceRanges);
             var products = await productsQuery.Select(a => a.NicheID).ToListAsync();
-
             var data = new
             {
                 resultsPerPage = resultsPerPage,
                 totalProducts = products.Count(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / resultsPerPage) ? page : 1,
                 products = await productsQuery
+                    .OrderBy(sort, query)
                     .Select(x => new
                     {
                         id = x.ID,
@@ -310,7 +310,6 @@ namespace MarketingServer
                             .Select(y => y.Url)
                             .ToList()
                     })
-                    .OrderBy(x => x.name)
                     .Skip((currentPage - 1) * resultsPerPage)
                     .Take(resultsPerPage)
                     .ToListAsync(),
