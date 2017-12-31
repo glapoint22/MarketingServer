@@ -280,21 +280,19 @@ namespace MarketingServer
             return filters;
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, int nicheId = 0, int page = 1, string filter = "", string sort = "relevance")
+        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string sort, int limit, int nicheId = 0, int page = 1, string filter = "")
         {
-            int resultsPerPage = 20;
             int currentPage;
-
 
             List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
             List<Filter> filterList = await db.Filters.ToListAsync();
             IQueryable<Product> productsQuery = BuildQuery(query, category, nicheId, filter, filterList, priceRanges);
-            var products = await productsQuery.Select(a => a.NicheID).ToListAsync();
+            List<int> products = await productsQuery.Select(a => a.NicheID).ToListAsync();
+
             var data = new
             {
-                resultsPerPage = resultsPerPage,
                 totalProducts = products.Count(),
-                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / resultsPerPage) ? page : 1,
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
                 products = await productsQuery
                     .OrderBy(sort, query)
                     .Select(x => new
@@ -310,8 +308,8 @@ namespace MarketingServer
                             .Select(y => y.Url)
                             .ToList()
                     })
-                    .Skip((currentPage - 1) * resultsPerPage)
-                    .Take(resultsPerPage)
+                    .Skip((currentPage - 1) * limit)
+                    .Take(limit)
                     .ToListAsync(),
                 categories = await db.Categories
                     .Where(x => x.Niches
