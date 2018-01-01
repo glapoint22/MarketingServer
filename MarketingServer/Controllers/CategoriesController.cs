@@ -35,13 +35,13 @@ namespace MarketingServer.Controllers
                         .Select(z => new {
                             id = z.ID,
                             name = z.Name,
-                            products = z.Products
-                                .Select(p => new {
-                                    id = p.ID,
-                                    name = p.Name,
-                                    hopLink = p.HopLink
-                                }).Take(4)
-                                .ToList()
+                            //products = z.Products
+                            //    .Select(p => new {
+                            //        id = p.ID,
+                            //        name = p.Name,
+                            //        hopLink = p.HopLink
+                            //    }).Take(4)
+                            //    .ToList()
                         }).ToList()
                 }
             )

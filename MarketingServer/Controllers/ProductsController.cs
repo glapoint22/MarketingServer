@@ -94,8 +94,12 @@ namespace MarketingServer
             char separator = '^';
 
             //Search words
-            string[] searchWordsArray = searchWords.Split(' ');
-            query = query.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
+            if(searchWords != string.Empty)
+            {
+                string[] searchWordsArray = searchWords.Split(' ');
+                query = query.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
+            }
+            
 
             //Category
             if (category > 0)
@@ -280,7 +284,7 @@ namespace MarketingServer
             return filters;
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(string query, int category, string sort, int limit, int nicheId = 0, int page = 1, string filter = "")
+        public async Task<IHttpActionResult> GetProductsFromSearch(int category, string sort, int limit, string query = "", int nicheId = 0, int page = 1, string filter = "")
         {
             int currentPage;
 
