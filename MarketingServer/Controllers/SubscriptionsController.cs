@@ -15,16 +15,16 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
-        //public async Task<IHttpActionResult> Get(Guid customerId)
-        //{
-        //    Customer customer = await db.Customers.FindAsync(customerId);
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
+        public async Task<IHttpActionResult> Get(string customerId)
+        {
+            Customer customer = await db.Customers.FindAsync(customerId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
 
-        //    return Ok(await GetPreferences(customer));
-        //}
+            return Ok(await GetPreferences(customer));
+        }
 
         public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
         {
@@ -93,9 +93,9 @@ namespace MarketingServer.Controllers
                         id = customer.ID,
                         email = customer.Email,
                         name = customer.Name,
-                        emailSendFrequency = customer.EmailSendFrequency
+                        //emailSendFrequency = customer.EmailSendFrequency
                     },
-                     subscriptions = await GetSubscriptions(customer.ID)
+                     //subscriptions = await GetSubscriptions(customer.ID)
                  };
             }
             else
@@ -247,20 +247,20 @@ namespace MarketingServer.Controllers
                 .ToListAsync();
         }
 
-        //private async Task<object> GetPreferences(Customer customer)
-        //{
-        //    return new
-        //    {
-        //        customer = new
-        //        {
-        //            id = customer.ID,
-        //            email = customer.Email,
-        //            name = customer.Name,
-        //            emailSendFrequency = customer.EmailSendFrequency
-        //        },
-        //        subscriptions = await GetSubscriptions(customer.ID)
-        //    };
-        //}
+        private async Task<object> GetPreferences(Customer customer)
+        {
+            return new
+            {
+                customer = new
+                {
+                    id = customer.ID,
+                    email = customer.Email,
+                    name = customer.Name,
+                    emailSendFrequency = customer.EmailSendFrequency
+                },
+                subscriptions = await GetSubscriptions(customer.ID)
+            };
+        }
     }
 }
 
