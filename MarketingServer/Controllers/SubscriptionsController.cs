@@ -105,6 +105,8 @@ namespace MarketingServer.Controllers
                     customer = new
                     {
                         id = customer.ID,
+                        name = customer.Name,
+                        subscriptionCount =  await db.Subscriptions.CountAsync(x => x.CustomerID == customer.ID)
                     }
                 };
             }

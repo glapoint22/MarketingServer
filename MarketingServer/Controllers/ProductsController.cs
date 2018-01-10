@@ -50,7 +50,7 @@ namespace MarketingServer
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
-                            videos = db.ProductVideos
+                            videos = z.ProductVideos
                                 .Where(y => y.ProductID == z.ID)
                                 .Select(y => y.Url)
                                 .ToList()
@@ -80,7 +80,7 @@ namespace MarketingServer
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
-                            videos = db.ProductVideos
+                            videos = z.ProductVideos
                                 .Where(y => y.ProductID == z.ID)
                                 .Select(y => y.Url)
                                 .ToList()
