@@ -4,7 +4,7 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="9d00ea656b5e4e548d84f3d8c68a5f52" Name="Diagram1">
+      <Diagram DiagramId="5c89c345feb24ebc9a9d63dce9a54db3" Name="Diagram1">
         <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="10.5" PointY="12.25" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="14.5" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.CategoryImage" Width="1.5" PointX="3" PointY="10.875" IsExpanded="true" />
@@ -17,7 +17,7 @@
         <EntityTypeShape EntityType="MarketingModel.Nich" Width="1.5" PointX="3" PointY="15.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.ProductBanner" Width="1.5" PointX="10.5" PointY="19.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.ProductFilter" Width="1.5" PointX="13.5" PointY="15.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="8.25" PointY="14.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="8.25" PointY="14.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.ProductVideo" Width="1.5" PointX="10.5" PointY="24.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Subscription" Width="1.5" PointX="8.25" PointY="10.25" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Vendor" Width="1.5" PointX="6" PointY="20.75" IsExpanded="true" />

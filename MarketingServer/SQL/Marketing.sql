@@ -114,25 +114,24 @@ select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
 
+
 select count(id) from products where name like '%diet%' and id in (select productID from ProductFilters where FilterLabelID in(25, 26, 27))
 
 select * from ProductFilters where FilterLabelID = 27
 
 delete ProductFilters where FilterLabelID = 27 and ProductID != '9151B3E80C'
 
-CREATE TABLE PriceRange(
+CREATE TABLE Groups(
 	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
-	Caption varchar(255) NOT NULL,
-	Min Money NOT NULL,
-	Max Money NOT NULL
+	Name varchar(255) NOT NULL
 );
 
-CREATE TABLE ProductFilterOptions(
+CREATE TABLE ProductGroups(
 	ID int NOT NULL PRIMARY KEY IDENTITY(1,1),
 	ProductID VARCHAR(10) NOT NULL,
-	FilterOptionID int NOT NULL,
+	GroupID int NOT NULL,
 	FOREIGN KEY (ProductID) REFERENCES Products(ID) ON DELETE CASCADE,
-	FOREIGN KEY (FilterOptionID) REFERENCES FilterOptions(ID),
+	FOREIGN KEY (GroupID) REFERENCES Groups(ID)
 );
 
 

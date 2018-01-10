@@ -34,6 +34,7 @@ namespace MarketingServer
         public bool Active { get; set; }
         public int VendorID { get; set; }
         public double Price { get; set; }
+        public bool Featured { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }

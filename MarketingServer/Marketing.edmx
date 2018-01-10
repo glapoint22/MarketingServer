@@ -146,6 +146,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Active" Type="bit" Nullable="false" />
           <Property Name="VendorID" Type="int" Nullable="false" />
           <Property Name="Price" Type="float" Nullable="false" />
+          <Property Name="Featured" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="ProductVideos">
           <Key>
@@ -616,6 +617,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Active" Type="Boolean" Nullable="false" />
           <Property Name="VendorID" Type="Int32" Nullable="false" />
           <Property Name="Price" Type="Double" Nullable="false" />
+          <Property Name="Featured" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
@@ -1091,6 +1093,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Active" ColumnName="Active" />
                 <ScalarProperty Name="VendorID" ColumnName="VendorID" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Featured" ColumnName="Featured" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

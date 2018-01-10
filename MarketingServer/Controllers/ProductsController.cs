@@ -21,30 +21,8 @@ namespace MarketingServer
         [ResponseType(typeof(Product))]
         public async Task<IHttpActionResult> GetProducts()
         {
-            var products = await db.Niches
-                .OrderByDescending(x => x.Products.Count())
-                .Take(2)
-                .Select(x => new
-                {
-                    caption = x.Name,
-                    products = db.Products
-                        .Where(z => z.NicheID == x.ID && z.Active)
-                        .Select(z => new
-                        {
-                            id = z.ID,
-                            name = z.Name,
-                            hopLink = z.HopLink,
-                            description = z.Description,
-                            image = z.Image,
-                            price = z.Price,
-                            videos = db.ProductVideos
-                                .Where(y => y.ProductID == z.ID)
-                                .Select(y => y.Url)
-                                .ToList()
-                        })
-                        .ToList()
-                })
-                .ToListAsync();
+            List<object> products = new List<object>();
+            products.Add(await GetFeaturedProducts());
 
             return Ok(products);
         }
@@ -82,10 +60,34 @@ namespace MarketingServer
                 .ToListAsync();
 
 
+            products.Insert(0, await GetFeaturedProducts());
 
             return Ok(products);
         }
 
+        private async Task<dynamic> GetFeaturedProducts()
+        {
+            return new
+            {
+                caption = "Check out our featured products",
+                products = await db.Products
+                        .Where(x => x.Active && x.Featured)
+                        .Select(z => new
+                        {
+                            id = z.ID,
+                            name = z.Name,
+                            hopLink = z.HopLink,
+                            description = z.Description,
+                            image = z.Image,
+                            price = z.Price,
+                            videos = db.ProductVideos
+                                .Where(y => y.ProductID == z.ID)
+                                .Select(y => y.Url)
+                                .ToList()
+                        })
+                        .ToListAsync()
+            };
+        }
 
 
         IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
