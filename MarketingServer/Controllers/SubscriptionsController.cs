@@ -29,9 +29,14 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
         {
             var response = new object();
+            bool isExistingCustomer = false;
 
-            //Set the customer
-            Customer customer = await SetCustomer(subscriptionInfo.name, subscriptionInfo.email);
+            //See if we have an existing customer
+            string id = await db.Customers.Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
+            if (id != null) isExistingCustomer = true;
+
+             //Set the customer
+             Customer customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email);
 
             if(subscriptionInfo.leadMagnet != null)
             {
@@ -71,18 +76,7 @@ namespace MarketingServer.Controllers
                 //mail.Send();
 
 
-                //If there are any changes, update the database
-                if (db.ChangeTracker.HasChanges())
-                {
-                    try
-                    {
-                        await db.SaveChangesAsync();
-                    }
-                    catch (DbUpdateException)
-                    {
-                        throw;
-                    }
-                }
+                
 
 
                 response = new
@@ -106,11 +100,24 @@ namespace MarketingServer.Controllers
                     {
                         id = customer.ID,
                         name = customer.Name,
-                        subscriptionCount =  await db.Subscriptions.CountAsync(x => x.CustomerID == customer.ID)
+                        isExistingCustomer = isExistingCustomer
                     }
                 };
             }
 
+
+            //If there are any changes, update the database
+            if (db.ChangeTracker.HasChanges())
+            {
+                try
+                {
+                    await db.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    throw;
+                }
+            }
 
             return Ok(response);
         }
@@ -187,13 +194,9 @@ namespace MarketingServer.Controllers
             return subscription;
         }
 
-        private async Task<Customer> SetCustomer(string name, string email)
+        private async Task<Customer> SetCustomer(string id, string name, string email)
         {
             Customer customer;
-
-            //See if we have an existing customer
-            string id = await db.Customers.Where(c => c.Email == email).Select(c => c.ID).FirstOrDefaultAsync();
-
 
             //If the customer DOES NOT exist in the database
             if (id == null)

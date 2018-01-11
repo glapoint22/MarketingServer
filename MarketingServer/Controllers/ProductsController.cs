@@ -60,12 +60,12 @@ namespace MarketingServer
                 .ToListAsync();
 
 
-            products.Insert(0, await GetFeaturedProducts());
+            products.Insert(0, await GetFeaturedProducts(customerId));
 
             return Ok(products);
         }
 
-        private async Task<dynamic> GetFeaturedProducts()
+        private async Task<dynamic> GetFeaturedProducts(string customerId = "")
         {
             return new
             {
@@ -76,7 +76,7 @@ namespace MarketingServer
                         {
                             id = z.ID,
                             name = z.Name,
-                            hopLink = z.HopLink,
+                            hopLink = z.HopLink + (customerId != "" ? "?tid=" + customerId + z.ID: ""),
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
