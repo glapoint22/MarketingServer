@@ -32,7 +32,7 @@ namespace MarketingServer
         public async Task<IHttpActionResult> GetProducts(string customerId)
         {
             var products = await db.Subscriptions
-                .Where(x => x.CustomerID == customerId)
+                .Where(x => x.CustomerID == customerId && x.Subscribed)
                 .Select(x => new
                 {
                     caption = "Recommendations for you in " + x.Nich.Name,
