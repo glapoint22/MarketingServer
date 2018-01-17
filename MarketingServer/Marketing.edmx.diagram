@@ -4,9 +4,9 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="5c89c345feb24ebc9a9d63dce9a54db3" Name="Diagram1">
+      <Diagram DiagramId="d322afd3665d4252aaaa4d4451c2007f" Name="Diagram1">
         <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="10.5" PointY="12.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="14.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="14.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.CategoryImage" Width="1.5" PointX="3" PointY="10.875" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="9.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.EmailCampaign" Width="1.5" PointX="10.5" PointY="16.5" IsExpanded="true" />

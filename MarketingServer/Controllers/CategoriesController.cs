@@ -24,6 +24,8 @@ namespace MarketingServer.Controllers
                 .Select(x => new {
                     id = x.ID,
                     name = x.Name,
+                    featured = x.Featured,
+                    icon = x.Icon,
                     categoryImage = x.CategoryImages
                         .Where(c => c.Selected)
                         .Select(c => new {

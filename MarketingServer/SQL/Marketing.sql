@@ -88,8 +88,7 @@ FROM Emails
 WHERE CampaignID = 13 AND Day = 2
 
 
-alter table niches
-alter column Name varchar(255) not null
+alter table Categories alter column Icon varchar(255) not null
 
 
 
@@ -139,7 +138,7 @@ CREATE TABLE ProductGroups(
 
 select name from Categories where id in (select categoryid from Niches where id in (select nicheid from Products where name like '%diet%'))
 
-update products set Trial = 0
+update Categories set Icon = 'Health&Fitness.png'
 
 alter table products alter column DigitalDownload bit not null
 alter table products alter column Shippable bit not null
