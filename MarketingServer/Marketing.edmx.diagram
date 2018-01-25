@@ -4,8 +4,8 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="d322afd3665d4252aaaa4d4451c2007f" Name="Diagram1">
-        <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="10.5" PointY="12.25" IsExpanded="true" />
+      <Diagram DiagramId="0fb65d7fe18141778b6f5a6ae9858540" Name="Diagram1">
+        <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="10.5" PointY="12.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="14.375" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.CategoryImage" Width="1.5" PointX="3" PointY="10.875" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="9.625" IsExpanded="true" />
@@ -36,7 +36,7 @@
         <AssociationConnector Association="MarketingModel.FK__Subscript__Niche__6E565CE8" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__ProductBa__Produ__16644E42" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__ProductFi__Produ__4EA8A765" ManuallyRouted="false" />
-        <AssociationConnector Association="MarketingModel.FK__Products__Vendor__278EDA44" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Products__Vendor__2C1E8537" ManuallyRouted="false" />
         <AssociationConnector Association="MarketingModel.FK__ProductVi__Produ__00750D23" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>

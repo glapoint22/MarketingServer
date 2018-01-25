@@ -113,6 +113,10 @@ select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
 
+alter table products alter column vendorId int null
+
+update products set VendorID = null
+
 
 select count(id) from products where name like '%diet%' and id in (select productID from ProductFilters where FilterLabelID in(25, 26, 27))
 
@@ -152,9 +156,11 @@ alter table products alter column SinglePayment bit not null
 alter table products alter column Subscription bit not null
 alter table products alter column Trial bit not null
 
+alter table products add FOREIGN KEY (vendorId) REFERENCES Vendors(ID)
 
+drop table Vendors
 create table Vendors(
-	ID int primary key not null,
+	ID int primary key identity(1,1) not null,
 	Name varchar(255) not null,
 	APIKey varchar(255) not null
 )
