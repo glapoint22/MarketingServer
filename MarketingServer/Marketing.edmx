@@ -146,10 +146,8 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Description" Type="varchar(max)" Nullable="false" />
           <Property Name="Image" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Active" Type="bit" Nullable="false" />
-          <Property Name="VendorID" Type="int" />
           <Property Name="Price" Type="float" Nullable="false" />
           <Property Name="Featured" Type="bit" Nullable="false" />
-          <Property Name="Sku" Type="varchar" MaxLength="50" />
         </EntityType>
         <EntityType Name="ProductVideos">
           <Key>
@@ -170,14 +168,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Suspended" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
           <Property Name="DateUnsubscribed" Type="datetime" />
-        </EntityType>
-        <EntityType Name="Vendors">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="APIKey" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <Association Name="FK__CampaignL__Produ__39E294A9">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
@@ -327,18 +317,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Products__Vendor__2C1E8537">
-          <End Role="Vendors" Type="Self.Vendors" Multiplicity="0..1" />
-          <End Role="Products" Type="Self.Products" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Vendors">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Products">
-              <PropertyRef Name="VendorID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideos" Multiplicity="*" />
@@ -393,7 +371,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Vendors" EntityType="Self.Vendors" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PriceRange" EntityType="Self.PriceRange" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [PriceRange].[Label] AS [Label], 
@@ -448,10 +425,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductFilters" EntitySet="ProductFilters" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Products__Vendor__2C1E8537" Association="Self.FK__Products__Vendor__2C1E8537">
-            <End Role="Vendors" EntitySet="Vendors" />
-            <End Role="Products" EntitySet="Products" />
           </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
@@ -620,16 +593,13 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Active" Type="Boolean" Nullable="false" />
-          <Property Name="VendorID" Type="Int32" />
           <Property Name="Price" Type="Double" Nullable="false" />
           <Property Name="Featured" Type="Boolean" Nullable="false" />
-          <Property Name="Sku" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
           <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
           <NavigationProperty Name="ProductBanners" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="Products" ToRole="ProductBanners" />
           <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="Products" ToRole="ProductFilters" />
-          <NavigationProperty Name="Vendor" Relationship="Self.FK__Products__Vendor__2C1E8537" FromRole="Products" ToRole="Vendors" />
           <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
         </EntityType>
         <EntityType Name="ProductVideo">
@@ -655,15 +625,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="Subscriptions" ToRole="CampaignRecords" />
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Subscriptions" ToRole="Niches" />
-        </EntityType>
-        <EntityType Name="Vendor">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="APIKey" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="Products" Relationship="Self.FK__Products__Vendor__2C1E8537" FromRole="Vendors" ToRole="Products" />
         </EntityType>
         <EntityType Name="PriceRange">
           <Key>
@@ -849,18 +810,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Products__Vendor__2C1E8537">
-          <End Role="Vendors" Type="Self.Vendor" Multiplicity="0..1" />
-          <End Role="Products" Type="Self.Product" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Vendors">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Products">
-              <PropertyRef Name="VendorID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__ProductVi__Produ__00750D23">
           <End Role="Products" Type="Self.Product" Multiplicity="1" />
           <End Role="ProductVideos" Type="Self.ProductVideo" Multiplicity="*" />
@@ -889,7 +838,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
-          <EntitySet Name="Vendors" EntityType="Self.Vendor" />
           <EntitySet Name="PriceRanges" EntityType="Self.PriceRange" />
           <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
             <End Role="Products" EntitySet="Products" />
@@ -946,10 +894,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductFilters" EntitySet="ProductFilters" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Products__Vendor__2C1E8537" Association="Self.FK__Products__Vendor__2C1E8537">
-            <End Role="Vendors" EntitySet="Vendors" />
-            <End Role="Products" EntitySet="Products" />
           </AssociationSet>
           <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
             <End Role="Products" EntitySet="Products" />
@@ -1099,10 +1043,8 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Image" ColumnName="Image" />
                 <ScalarProperty Name="Active" ColumnName="Active" />
-                <ScalarProperty Name="VendorID" ColumnName="VendorID" />
                 <ScalarProperty Name="Price" ColumnName="Price" />
                 <ScalarProperty Name="Featured" ColumnName="Featured" />
-                <ScalarProperty Name="Sku" ColumnName="Sku" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1124,15 +1066,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
                 <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Vendors">
-            <EntityTypeMapping TypeName="MarketingModel.Vendor">
-              <MappingFragment StoreEntitySet="Vendors">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="APIKey" ColumnName="APIKey" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

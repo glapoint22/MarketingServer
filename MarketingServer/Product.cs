@@ -32,10 +32,8 @@ namespace MarketingServer
         public string Description { get; set; }
         public string Image { get; set; }
         public bool Active { get; set; }
-        public Nullable<int> VendorID { get; set; }
         public double Price { get; set; }
         public bool Featured { get; set; }
-        public string Sku { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<CampaignRecord> CampaignRecords { get; set; }
@@ -46,7 +44,6 @@ namespace MarketingServer
         public virtual ICollection<ProductBanner> ProductBanners { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProductFilter> ProductFilters { get; set; }
-        public virtual Vendor Vendor { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ProductVideo> ProductVideos { get; set; }
     }

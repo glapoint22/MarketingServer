@@ -107,13 +107,14 @@ select * from LeadMagnetEmails
 select * from ProductVideos
 select * from CategoryImages
 select * from ProductBanners
-select * from vendors
 select * from Filters
 select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
 
-alter table products alter column vendorId int null
+alter table products drop column sku
+drop table vendors
+
 
 update products set VendorID = null
 
@@ -156,7 +157,7 @@ alter table products alter column SinglePayment bit not null
 alter table products alter column Subscription bit not null
 alter table products alter column Trial bit not null
 
-alter table products add FOREIGN KEY (vendorId) REFERENCES Vendors(ID)
+alter table products drop constraint [FK__Products__Vendor__2C1E8537]
 
 drop table Vendors
 create table Vendors(

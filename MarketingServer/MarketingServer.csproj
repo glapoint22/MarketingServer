@@ -220,9 +220,6 @@
     <Compile Include="Subscription.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="Vendor.cs">
-      <DependentUpon>Marketing.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
