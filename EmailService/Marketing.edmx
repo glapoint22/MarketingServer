@@ -1,0 +1,1104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="MarketingModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="CampaignRecords">
+          <Key>
+            <PropertyRef Name="SubscriptionID" />
+            <PropertyRef Name="Date" />
+          </Key>
+          <Property Name="SubscriptionID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Date" Type="datetime" Nullable="false" />
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Day" Type="int" Nullable="false" />
+          <Property Name="ProductPurchased" Type="bit" Nullable="false" />
+          <Property Name="Ended" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Categories">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Icon" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Featured" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CategoryImages">
+          <Key>
+            <PropertyRef Name="CategoryID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="CategoryID" Type="int" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Selected" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Customers">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Email" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="EmailSendFrequency" Type="int" Nullable="false" />
+          <Property Name="EmailSentDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="EmailCampaigns">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Day" Type="int" />
+          <Property Name="Subject" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Body" Type="varchar(max)" Nullable="false" />
+        </EntityType>
+        <EntityType Name="FilterLabels">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="FilterID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Filters">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="LeadMagnetEmails">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Subject" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Body" Type="varchar(max)" Nullable="false" />
+          <Property Name="NicheID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Leads">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="LeadPage" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="LeadMagnet" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="MainStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Image" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Text" Type="varchar(max)" Nullable="false" />
+          <Property Name="TextStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="BarStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="BarText" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="ButtonStyle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="ButtonText" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="FormButtonText" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="NicheID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Niches">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="CategoryID" Type="int" Nullable="false" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="PriceRange">
+          <Key>
+            <PropertyRef Name="Label" />
+            <PropertyRef Name="Min" />
+            <PropertyRef Name="Max" />
+          </Key>
+          <Property Name="Label" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Min" Type="float" Nullable="false" />
+          <Property Name="Max" Type="float" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductBanners">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Selected" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductFilters">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="FilterLabelID" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Products">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="NicheID" Type="int" Nullable="false" />
+          <Property Name="HopLink" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Order" Type="int" Nullable="false" />
+          <Property Name="Description" Type="varchar(max)" Nullable="false" />
+          <Property Name="Image" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+          <Property Name="Price" Type="float" Nullable="false" />
+          <Property Name="Featured" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ProductVideos">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Url" />
+          </Key>
+          <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Url" Type="varchar" MaxLength="255" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Subscriptions">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="CustomerID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="NicheID" Type="int" Nullable="false" />
+          <Property Name="Subscribed" Type="bit" Nullable="false" />
+          <Property Name="Suspended" Type="bit" Nullable="false" />
+          <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
+          <Property Name="DateUnsubscribed" Type="datetime" />
+        </EntityType>
+        <Association Name="FK__CampaignL__Produ__39E294A9">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="CampaignRecords" Type="Self.CampaignRecords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CampaignRecords">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CampaignR__Subsc__703EA55A">
+          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CampaignRecords" Type="Self.CampaignRecords" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Subscriptions">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CampaignRecords">
+              <PropertyRef Name="SubscriptionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Campaigns__Niche__440B1D61">
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="Products" Type="Self.Products" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Products">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CategoryI__Categ__1387E197">
+          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
+          <End Role="CategoryImages" Type="Self.CategoryImages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CategoryImages">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Emails__ProductI__38EE7070">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="EmailCampaigns" Type="Self.EmailCampaigns" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="EmailCampaigns">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__FilterOpt__Filte__3B95D2F1">
+          <End Role="Filters" Type="Self.Filters" Multiplicity="1" />
+          <End Role="FilterLabels" Type="Self.FilterLabels" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Filters">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="FilterLabels">
+              <PropertyRef Name="FilterID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__LeadMagne__Niche__370627FE">
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="LeadMagnetEmails" Type="Self.LeadMagnetEmails" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="LeadMagnetEmails">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Leads__NicheID__37FA4C37">
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="Leads" Type="Self.Leads" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Leads">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Niches__Category__625A9A57">
+          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
+          <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Niches">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductBa__Produ__16644E42">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="ProductBanners" Type="Self.ProductBanners" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductBanners">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Filte__4F9CCB9E">
+          <End Role="FilterLabels" Type="Self.FilterLabels" Multiplicity="1" />
+          <End Role="ProductFilters" Type="Self.ProductFilters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FilterLabels">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="FilterLabelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Produ__4EA8A765">
+          <End Role="Products" Type="Self.Products" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductFilters" Type="Self.ProductFilters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductVi__Produ__00750D23">
+          <End Role="Products" Type="Self.Products" Multiplicity="1" />
+          <End Role="ProductVideos" Type="Self.ProductVideos" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductVideos">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__Custo__6D6238AF">
+          <End Role="Customers" Type="Self.Customers" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customers">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__Niche__6E565CE8">
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1" />
+          <End Role="Subscriptions" Type="Self.Subscriptions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MarketingModelStoreContainer">
+          <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecords" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="FilterLabels" EntityType="Self.FilterLabels" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Filters" EntityType="Self.Filters" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmails" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductBanners" EntityType="Self.ProductBanners" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductFilters" EntityType="Self.ProductFilters" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="PriceRange" EntityType="Self.PriceRange" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [PriceRange].[Label] AS [Label], 
+    [PriceRange].[Min] AS [Min], 
+    [PriceRange].[Max] AS [Max]
+    FROM [dbo].[PriceRange] AS [PriceRange]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Products" EntitySet="Products" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="CategoryImages" EntitySet="CategoryImages" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Emails__ProductI__38EE7070" Association="Self.FK__Emails__ProductI__38EE7070">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
+          </AssociationSet>
+          <AssociationSet Name="FK__FilterOpt__Filte__3B95D2F1" Association="Self.FK__FilterOpt__Filte__3B95D2F1">
+            <End Role="Filters" EntitySet="Filters" />
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LeadMagne__Niche__370627FE" Association="Self.FK__LeadMagne__Niche__370627FE">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Leads__NicheID__37FA4C37" Association="Self.FK__Leads__NicheID__37FA4C37">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Leads" EntitySet="Leads" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Filte__4F9CCB9E" Association="Self.FK__ProductFi__Filte__4F9CCB9E">
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductVideos" EntitySet="ProductVideos" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__Custo__6D6238AF" Association="Self.FK__Subscript__Custo__6D6238AF">
+            <End Role="Customers" EntitySet="Customers" />
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__Niche__6E565CE8" Association="Self.FK__Subscript__Niche__6E565CE8">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="MarketingModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="CampaignRecord">
+          <Key>
+            <PropertyRef Name="SubscriptionID" />
+            <PropertyRef Name="Date" />
+          </Key>
+          <Property Name="SubscriptionID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Date" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Day" Type="Int32" Nullable="false" />
+          <Property Name="ProductPurchased" Type="Boolean" Nullable="false" />
+          <Property Name="Ended" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="CampaignRecords" ToRole="Products" />
+          <NavigationProperty Name="Subscription" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="CampaignRecords" ToRole="Subscriptions" />
+        </EntityType>
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Featured" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="Categories" ToRole="CategoryImages" />
+          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Categories" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="CategoryImage">
+          <Key>
+            <PropertyRef Name="CategoryID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Selected" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="CategoryImages" ToRole="Categories" />
+        </EntityType>
+        <EntityType Name="Customer">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
+          <Property Name="EmailSentDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Customers" ToRole="Subscriptions" />
+        </EntityType>
+        <EntityType Name="EmailCampaign">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Day" Type="Int32" />
+          <Property Name="Subject" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="EmailCampaigns" ToRole="Products" />
+        </EntityType>
+        <EntityType Name="FilterLabel">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FilterID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Filter" Relationship="Self.FK__FilterOpt__Filte__3B95D2F1" FromRole="FilterLabels" ToRole="Filters" />
+          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Filte__4F9CCB9E" FromRole="FilterLabels" ToRole="ProductFilters" />
+        </EntityType>
+        <EntityType Name="Filter">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="FilterLabels" Relationship="Self.FK__FilterOpt__Filte__3B95D2F1" FromRole="Filters" ToRole="FilterLabels" />
+        </EntityType>
+        <EntityType Name="LeadMagnetEmail">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Subject" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__LeadMagne__Niche__370627FE" FromRole="LeadMagnetEmails" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="Lead">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="MainStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Image" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Text" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="TextStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BarStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="BarText" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ButtonStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FormButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__Leads__NicheID__37FA4C37" FromRole="Leads" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="Nich">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CategoryID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Niches" ToRole="Categories" />
+          <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__370627FE" FromRole="Niches" ToRole="LeadMagnetEmails" />
+          <NavigationProperty Name="Leads" Relationship="Self.FK__Leads__NicheID__37FA4C37" FromRole="Niches" ToRole="Leads" />
+          <NavigationProperty Name="Products" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Products" />
+          <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Niches" ToRole="Subscriptions" />
+        </EntityType>
+        <EntityType Name="ProductBanner">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Name" />
+          </Key>
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Selected" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="ProductBanners" ToRole="Products" />
+        </EntityType>
+        <EntityType Name="ProductFilter">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="FilterLabelID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="FilterLabel" Relationship="Self.FK__ProductFi__Filte__4F9CCB9E" FromRole="ProductFilters" ToRole="FilterLabels" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="ProductFilters" ToRole="Products" />
+        </EntityType>
+        <EntityType Name="Product">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="HopLink" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Order" Type="Int32" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Image" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <Property Name="Price" Type="Double" Nullable="false" />
+          <Property Name="Featured" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignL__Produ__39E294A9" FromRole="Products" ToRole="CampaignRecords" />
+          <NavigationProperty Name="EmailCampaigns" Relationship="Self.FK__Emails__ProductI__38EE7070" FromRole="Products" ToRole="EmailCampaigns" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Products" ToRole="Niches" />
+          <NavigationProperty Name="ProductBanners" Relationship="Self.FK__ProductBa__Produ__16644E42" FromRole="Products" ToRole="ProductBanners" />
+          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="Products" ToRole="ProductFilters" />
+          <NavigationProperty Name="ProductVideos" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="Products" ToRole="ProductVideos" />
+        </EntityType>
+        <EntityType Name="ProductVideo">
+          <Key>
+            <PropertyRef Name="ProductID" />
+            <PropertyRef Name="Url" />
+          </Key>
+          <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Url" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Product" Relationship="Self.FK__ProductVi__Produ__00750D23" FromRole="ProductVideos" ToRole="Products" />
+        </EntityType>
+        <EntityType Name="Subscription">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CustomerID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <Property Name="Subscribed" Type="Boolean" Nullable="false" />
+          <Property Name="Suspended" Type="Boolean" Nullable="false" />
+          <Property Name="DateSubscribed" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="DateUnsubscribed" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="Subscriptions" ToRole="CampaignRecords" />
+          <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__6E565CE8" FromRole="Subscriptions" ToRole="Niches" />
+        </EntityType>
+        <EntityType Name="PriceRange">
+          <Key>
+            <PropertyRef Name="Label" />
+            <PropertyRef Name="Min" />
+            <PropertyRef Name="Max" />
+          </Key>
+          <Property Name="Label" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Min" Type="Double" Nullable="false" />
+          <Property Name="Max" Type="Double" Nullable="false" />
+        </EntityType>
+        <Association Name="FK__CampaignL__Produ__39E294A9">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="CampaignRecords" Type="Self.CampaignRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CampaignRecords">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CampaignR__Subsc__703EA55A">
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CampaignRecords" Type="Self.CampaignRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Subscriptions">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CampaignRecords">
+              <PropertyRef Name="SubscriptionID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CategoryI__Categ__1387E197">
+          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
+          <End Role="CategoryImages" Type="Self.CategoryImage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="CategoryImages">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Niches__Category__625A9A57">
+          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
+          <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Categories">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Niches">
+              <PropertyRef Name="CategoryID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__Custo__6D6238AF">
+          <End Role="Customers" Type="Self.Customer" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Customers">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="CustomerID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Emails__ProductI__38EE7070">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="EmailCampaigns" Type="Self.EmailCampaign" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="EmailCampaigns">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__FilterOpt__Filte__3B95D2F1">
+          <End Role="Filters" Type="Self.Filter" Multiplicity="1" />
+          <End Role="FilterLabels" Type="Self.FilterLabel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Filters">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="FilterLabels">
+              <PropertyRef Name="FilterID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Filte__4F9CCB9E">
+          <End Role="FilterLabels" Type="Self.FilterLabel" Multiplicity="1" />
+          <End Role="ProductFilters" Type="Self.ProductFilter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="FilterLabels">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="FilterLabelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__LeadMagne__Niche__370627FE">
+          <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
+          <End Role="LeadMagnetEmails" Type="Self.LeadMagnetEmail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="LeadMagnetEmails">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Leads__NicheID__37FA4C37">
+          <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
+          <End Role="Leads" Type="Self.Lead" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Leads">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Campaigns__Niche__440B1D61">
+          <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
+          <End Role="Products" Type="Self.Product" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Products">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Subscript__Niche__6E565CE8">
+          <End Role="Niches" Type="Self.Nich" Multiplicity="1" />
+          <End Role="Subscriptions" Type="Self.Subscription" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="Subscriptions">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductBa__Produ__16644E42">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="ProductBanners" Type="Self.ProductBanner" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductBanners">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductFi__Produ__4EA8A765">
+          <End Role="Products" Type="Self.Product" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ProductFilters" Type="Self.ProductFilter" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductFilters">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__ProductVi__Produ__00750D23">
+          <End Role="Products" Type="Self.Product" Multiplicity="1" />
+          <End Role="ProductVideos" Type="Self.ProductVideo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Products">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="ProductVideos">
+              <PropertyRef Name="ProductID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
+          <EntitySet Name="Categories" EntityType="Self.Category" />
+          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImage" />
+          <EntitySet Name="Customers" EntityType="Self.Customer" />
+          <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
+          <EntitySet Name="FilterLabels" EntityType="Self.FilterLabel" />
+          <EntitySet Name="Filters" EntityType="Self.Filter" />
+          <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmail" />
+          <EntitySet Name="Leads" EntityType="Self.Lead" />
+          <EntitySet Name="Niches" EntityType="Self.Nich" />
+          <EntitySet Name="ProductBanners" EntityType="Self.ProductBanner" />
+          <EntitySet Name="ProductFilters" EntityType="Self.ProductFilter" />
+          <EntitySet Name="Products" EntityType="Self.Product" />
+          <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
+          <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
+          <EntitySet Name="PriceRanges" EntityType="Self.PriceRange" />
+          <AssociationSet Name="FK__CampaignL__Produ__39E294A9" Association="Self.FK__CampaignL__Produ__39E294A9">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+            <End Role="CampaignRecords" EntitySet="CampaignRecords" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="CategoryImages" EntitySet="CategoryImages" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
+            <End Role="Categories" EntitySet="Categories" />
+            <End Role="Niches" EntitySet="Niches" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__Custo__6D6238AF" Association="Self.FK__Subscript__Custo__6D6238AF">
+            <End Role="Customers" EntitySet="Customers" />
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Emails__ProductI__38EE7070" Association="Self.FK__Emails__ProductI__38EE7070">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
+          </AssociationSet>
+          <AssociationSet Name="FK__FilterOpt__Filte__3B95D2F1" Association="Self.FK__FilterOpt__Filte__3B95D2F1">
+            <End Role="Filters" EntitySet="Filters" />
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Filte__4F9CCB9E" Association="Self.FK__ProductFi__Filte__4F9CCB9E">
+            <End Role="FilterLabels" EntitySet="FilterLabels" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LeadMagne__Niche__370627FE" Association="Self.FK__LeadMagne__Niche__370627FE">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Leads__NicheID__37FA4C37" Association="Self.FK__Leads__NicheID__37FA4C37">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Leads" EntitySet="Leads" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Campaigns__Niche__440B1D61" Association="Self.FK__Campaigns__Niche__440B1D61">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Products" EntitySet="Products" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Subscript__Niche__6E565CE8" Association="Self.FK__Subscript__Niche__6E565CE8">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="Subscriptions" EntitySet="Subscriptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductBa__Produ__16644E42" Association="Self.FK__ProductBa__Produ__16644E42">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductBanners" EntitySet="ProductBanners" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductFi__Produ__4EA8A765" Association="Self.FK__ProductFi__Produ__4EA8A765">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductFilters" EntitySet="ProductFilters" />
+          </AssociationSet>
+          <AssociationSet Name="FK__ProductVi__Produ__00750D23" Association="Self.FK__ProductVi__Produ__00750D23">
+            <End Role="Products" EntitySet="Products" />
+            <End Role="ProductVideos" EntitySet="ProductVideos" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="MarketingModelStoreContainer" CdmEntityContainer="MarketingEntities">
+          <EntitySetMapping Name="CampaignRecords">
+            <EntityTypeMapping TypeName="MarketingModel.CampaignRecord">
+              <MappingFragment StoreEntitySet="CampaignRecords">
+                <ScalarProperty Name="SubscriptionID" ColumnName="SubscriptionID" />
+                <ScalarProperty Name="Date" ColumnName="Date" />
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Day" ColumnName="Day" />
+                <ScalarProperty Name="ProductPurchased" ColumnName="ProductPurchased" />
+                <ScalarProperty Name="Ended" ColumnName="Ended" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Categories">
+            <EntityTypeMapping TypeName="MarketingModel.Category">
+              <MappingFragment StoreEntitySet="Categories">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Icon" ColumnName="Icon" />
+                <ScalarProperty Name="Featured" ColumnName="Featured" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CategoryImages">
+            <EntityTypeMapping TypeName="MarketingModel.CategoryImage">
+              <MappingFragment StoreEntitySet="CategoryImages">
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Selected" ColumnName="Selected" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Customers">
+            <EntityTypeMapping TypeName="MarketingModel.Customer">
+              <MappingFragment StoreEntitySet="Customers">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Email" ColumnName="Email" />
+                <ScalarProperty Name="EmailSendFrequency" ColumnName="EmailSendFrequency" />
+                <ScalarProperty Name="EmailSentDate" ColumnName="EmailSentDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="EmailCampaigns">
+            <EntityTypeMapping TypeName="MarketingModel.EmailCampaign">
+              <MappingFragment StoreEntitySet="EmailCampaigns">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Day" ColumnName="Day" />
+                <ScalarProperty Name="Subject" ColumnName="Subject" />
+                <ScalarProperty Name="Body" ColumnName="Body" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="FilterLabels">
+            <EntityTypeMapping TypeName="MarketingModel.FilterLabel">
+              <MappingFragment StoreEntitySet="FilterLabels">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="FilterID" ColumnName="FilterID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Filters">
+            <EntityTypeMapping TypeName="MarketingModel.Filter">
+              <MappingFragment StoreEntitySet="Filters">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LeadMagnetEmails">
+            <EntityTypeMapping TypeName="MarketingModel.LeadMagnetEmail">
+              <MappingFragment StoreEntitySet="LeadMagnetEmails">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Subject" ColumnName="Subject" />
+                <ScalarProperty Name="Body" ColumnName="Body" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Leads">
+            <EntityTypeMapping TypeName="MarketingModel.Lead">
+              <MappingFragment StoreEntitySet="Leads">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
+                <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
+                <ScalarProperty Name="MainStyle" ColumnName="MainStyle" />
+                <ScalarProperty Name="Image" ColumnName="Image" />
+                <ScalarProperty Name="Text" ColumnName="Text" />
+                <ScalarProperty Name="TextStyle" ColumnName="TextStyle" />
+                <ScalarProperty Name="BarStyle" ColumnName="BarStyle" />
+                <ScalarProperty Name="BarText" ColumnName="BarText" />
+                <ScalarProperty Name="ButtonStyle" ColumnName="ButtonStyle" />
+                <ScalarProperty Name="ButtonText" ColumnName="ButtonText" />
+                <ScalarProperty Name="FormButtonText" ColumnName="FormButtonText" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Niches">
+            <EntityTypeMapping TypeName="MarketingModel.Nich">
+              <MappingFragment StoreEntitySet="Niches">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductBanners">
+            <EntityTypeMapping TypeName="MarketingModel.ProductBanner">
+              <MappingFragment StoreEntitySet="ProductBanners">
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Selected" ColumnName="Selected" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductFilters">
+            <EntityTypeMapping TypeName="MarketingModel.ProductFilter">
+              <MappingFragment StoreEntitySet="ProductFilters">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="FilterLabelID" ColumnName="FilterLabelID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Products">
+            <EntityTypeMapping TypeName="MarketingModel.Product">
+              <MappingFragment StoreEntitySet="Products">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+                <ScalarProperty Name="HopLink" ColumnName="HopLink" />
+                <ScalarProperty Name="Order" ColumnName="Order" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Image" ColumnName="Image" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+                <ScalarProperty Name="Price" ColumnName="Price" />
+                <ScalarProperty Name="Featured" ColumnName="Featured" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ProductVideos">
+            <EntityTypeMapping TypeName="MarketingModel.ProductVideo">
+              <MappingFragment StoreEntitySet="ProductVideos">
+                <ScalarProperty Name="ProductID" ColumnName="ProductID" />
+                <ScalarProperty Name="Url" ColumnName="Url" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Subscriptions">
+            <EntityTypeMapping TypeName="MarketingModel.Subscription">
+              <MappingFragment StoreEntitySet="Subscriptions">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="CustomerID" ColumnName="CustomerID" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+                <ScalarProperty Name="Subscribed" ColumnName="Subscribed" />
+                <ScalarProperty Name="Suspended" ColumnName="Suspended" />
+                <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
+                <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PriceRanges">
+            <EntityTypeMapping TypeName="MarketingModel.PriceRange">
+              <MappingFragment StoreEntitySet="PriceRange">
+                <ScalarProperty Name="Label" ColumnName="Label" />
+                <ScalarProperty Name="Min" ColumnName="Min" />
+                <ScalarProperty Name="Max" ColumnName="Max" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

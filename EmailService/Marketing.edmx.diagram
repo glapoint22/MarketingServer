@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="b040d10bcb5740f8b25828fd18dbd815" Name="Diagram1">
+        <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="7.5" PointY="16" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="14.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.CategoryImage" Width="1.5" PointX="3" PointY="7" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="6.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.EmailCampaign" Width="1.5" PointX="7.5" PointY="20" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.FilterLabel" Width="1.5" PointX="8.25" PointY="31.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Filter" Width="1.5" PointX="6" PointY="31.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.LeadMagnetEmail" Width="1.5" PointX="5.25" PointY="9.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Lead" Width="1.5" PointX="5.25" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Nich" Width="1.5" PointX="3" PointY="15.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.ProductBanner" Width="1.5" PointX="7.5" PointY="23" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.ProductFilter" Width="1.5" PointX="10.5" PointY="19.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Product" Width="1.5" PointX="5.25" PointY="18.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.ProductVideo" Width="1.5" PointX="7.5" PointY="28.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Subscription" Width="1.5" PointX="8.25" PointY="12.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.PriceRange" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
+        <AssociationConnector Association="MarketingModel.FK__CampaignL__Produ__39E294A9" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__CampaignR__Subsc__703EA55A" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__CategoryI__Categ__1387E197" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Niches__Category__625A9A57" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Subscript__Custo__6D6238AF" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Emails__ProductI__38EE7070" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__FilterOpt__Filte__3B95D2F1" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__ProductFi__Filte__4F9CCB9E" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__LeadMagne__Niche__370627FE" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Leads__NicheID__37FA4C37" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Campaigns__Niche__440B1D61" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__Subscript__Niche__6E565CE8" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__ProductBa__Produ__16644E42" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__ProductFi__Produ__4EA8A765" ManuallyRouted="false" />
+        <AssociationConnector Association="MarketingModel.FK__ProductVi__Produ__00750D23" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
