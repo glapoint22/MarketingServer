@@ -25,7 +25,6 @@ namespace EmailService
                 new Service1()
             };
             ServiceBase.Run(ServicesToRun);
-
 #endif
         }
     }

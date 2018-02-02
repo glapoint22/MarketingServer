@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.SqlServer;
-using System.Diagnostics;
 using System.Linq;
 using System.ServiceProcess;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +40,20 @@ namespace EmailService
         {
             while (true)
             {
-                //await Task.Delay(TimeSpan.FromMinutes(1), token);
+                //Calculate the minutes when we send emails
+                DateTime date1 = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 11, 0, 0, 0);
+                DateTime date2 = DateTime.Now;
+                double minutes = date1.Subtract(date2).TotalMinutes;
+
+                //If minutes is a negative number, that means we are passed the time. Add a day and calculte the minutes
+                if (minutes < 0)
+                {
+                    date1 = date1.AddDays(1);
+                    minutes = date1.Subtract(date2).TotalMinutes;
+                }
+
+                await Task.Delay(TimeSpan.FromMinutes(minutes), token);
+
 
                 //Get a list of customers that we will be sending emails to
                 List<Customer> customers = await db.Customers
@@ -137,7 +147,7 @@ namespace EmailService
 
                         Mail mail = new Mail(email.id, customer, email.subject, email.body);
                         await mail.Send();
-                        //customer.EmailSentDate = DateTime.Today;
+                        customer.EmailSentDate = DateTime.Today;
 
                         //Add the new record
                         db.CampaignRecords.Add(newCampaignRecord);

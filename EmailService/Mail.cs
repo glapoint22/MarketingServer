@@ -17,7 +17,6 @@ namespace EmailService
         public string subject;
         public string body;
         
-
         public Mail(string emailId, Customer customer, string subject, string body)
         {
             smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
@@ -34,7 +33,6 @@ namespace EmailService
             from = "glapoint22@gmail.com";
         }
 
-        
         public async Task Send()
         {
             MailMessage mailMessage = new MailMessage(from, to, subject, body);
