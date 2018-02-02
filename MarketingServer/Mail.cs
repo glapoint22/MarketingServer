@@ -3,20 +3,18 @@ using System.Configuration;
 using System.Web.Configuration;
 using System.Net.Configuration;
 using System.Net.Mail;
-using System;
+using System.Threading.Tasks;
 
 namespace MarketingServer
 {
     public class Mail
     {
         private SmtpClient smtpClient = new SmtpClient();
-        //private string DomainName = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority);
         public string from;
         public string to;
         public string subject;
         public string body;
         
-
         public Mail(string emailId, Customer customer, string subject, string body)
         {
             Configuration configurationFile = WebConfigurationManager.OpenWebConfiguration(HttpRuntime.AppDomainAppVirtualPath);
@@ -29,12 +27,11 @@ namespace MarketingServer
             from = mailSettings.Smtp.Network.UserName;
         }
 
-        
-        public void Send()
+        public async Task Send()
         {
             MailMessage mailMessage = new MailMessage(from, to, subject, body);
             mailMessage.IsBodyHtml = true;
-            smtpClient.Send(mailMessage);
+            await smtpClient.SendMailAsync(mailMessage);
         }
     }
 }

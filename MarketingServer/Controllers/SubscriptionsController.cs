@@ -7,7 +7,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
-using System.Collections.Generic;
 
 namespace MarketingServer.Controllers
 {
@@ -73,11 +72,7 @@ namespace MarketingServer.Controllers
                 ).SingleAsync();
 
                 Mail mail = new Mail(email.id, customer, email.subject, email.body);
-                //mail.Send();
-
-
-                
-
+                await mail.Send();
 
                 response = new
                 {
@@ -87,9 +82,7 @@ namespace MarketingServer.Controllers
                         id = customer.ID,
                         email = customer.Email,
                         name = customer.Name,
-                        //emailSendFrequency = customer.EmailSendFrequency
                     },
-                     //subscriptions = await GetSubscriptions(customer.ID)
                  };
             }
             else
@@ -122,9 +115,6 @@ namespace MarketingServer.Controllers
             return Ok(response);
         }
 
-       
-
-
 
         public async Task<IHttpActionResult> Put(Preferences preferences)
         {
@@ -151,21 +141,11 @@ namespace MarketingServer.Controllers
             {
                 Subscription subscription;
 
-                ////If subscribing to a new subscription
-                //if (updatedSubscription.subscriptionId == 0)
-                //{
-                //    subscription = CreateSubscription(customer.ID, updatedSubscription.nicheId);
-                //    db.Subscriptions.Add(subscription);
-                //    db.CampaignRecords.Add(await Campaign.CreateCampaignRecord(subscription.ID, subscription.NicheID));
-                //}
-                //else
-                //{
-                    //Update the existing subscription
-                    subscription = await db.Subscriptions.FindAsync(updatedSubscription.subscriptionId);
-                    subscription.Subscribed = !subscription.Subscribed;
-                    if (!subscription.Subscribed) subscription.DateUnsubscribed = DateTime.Today;
-                    db.Entry(subscription).State = EntityState.Modified;
-                //}
+                //Update the existing subscription
+                subscription = await db.Subscriptions.FindAsync(updatedSubscription.subscriptionId);
+                subscription.Subscribed = !subscription.Subscribed;
+                if (!subscription.Subscribed) subscription.DateUnsubscribed = DateTime.Today;
+                db.Entry(subscription).State = EntityState.Modified;
             }
 
             try
