@@ -21,7 +21,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetFilters()
         {
             var filters = await db.Filters.Select(x => new {
-                filterId = x.ID,
+                id = x.ID,
                 name = x.Name,
                 options = x.FilterLabels
                     .Where(y => y.FilterID == x.ID)
