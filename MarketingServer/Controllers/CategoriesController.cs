@@ -77,23 +77,10 @@ namespace MarketingServer.Controllers
                                     hopLink = p.HopLink,
                                     description = p.Description,
                                     price = p.Price,
+                                    featured = p.Featured,
                                     filters = db.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
                                         .Select(q => q.FilterLabelID)
-                                    //filters = db.Filters.Select(q => new
-                                    //{
-                                    //    id = q.ID,
-                                    //    name = q.Name,
-                                    //    options = q.FilterLabels
-                                    //        .Where(w => w.FilterID == q.ID)
-                                    //        .Select(w => new
-                                    //        {
-                                    //            id = w.ID,
-                                    //            name = w.Name,
-                                    //            isSelected = w.ProductFilters.Any(e => e.FilterLabelID == w.ID && e.ProductID == p.ID)
-                                    //        }).ToList()
-                                    //})
-                                    //.ToList()
                                 })
                                 .ToList()
                         }).ToList()
