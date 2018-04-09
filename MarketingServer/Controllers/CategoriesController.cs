@@ -56,14 +56,13 @@ namespace MarketingServer.Controllers
                     name = x.Name,
                     featured = x.Featured,
                     icon = x.Icon,
-                    categoryImage = x.CategoryImages
-                        .Where(c => c.Selected)
+                    categoryImages = x.CategoryImages
                         .Select(c => new
                         {
                             categoryId = c.CategoryID,
                             name = c.Name
                         })
-                        .FirstOrDefault(),
+                        .ToList(),
                     niches = x.Niches
                         .Select(z => new
                         {

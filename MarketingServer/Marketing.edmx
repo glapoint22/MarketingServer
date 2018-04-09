@@ -23,7 +23,7 @@
           </Key>
           <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="Icon" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Icon" Type="varchar" MaxLength="255" />
           <Property Name="Featured" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="CategoryImages">
@@ -464,7 +464,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           </Key>
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Featured" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="Categories" ToRole="CategoryImages" />
           <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Categories" ToRole="Niches" />
