@@ -36,7 +36,8 @@ namespace MarketingServer.Controllers
                     niches = x.Niches
                         .Select(z => new {
                             id = z.ID,
-                            name = z.Name
+                            name = z.Name,
+                            icon = z.Icon
                         }).ToList()
                 }
             )
@@ -59,8 +60,9 @@ namespace MarketingServer.Controllers
                     categoryImages = x.CategoryImages
                         .Select(c => new
                         {
-                            categoryId = c.CategoryID,
-                            name = c.Name
+                            //categoryId = c.CategoryID,
+                            name = c.Name,
+                            isSelected = c.Selected
                         })
                         .ToList(),
                     niches = x.Niches
@@ -68,6 +70,7 @@ namespace MarketingServer.Controllers
                         {
                             id = z.ID,
                             name = z.Name,
+                            icon = z.Icon,
                             products = z.Products
                                 .Select(p => new
                                 {
@@ -75,11 +78,26 @@ namespace MarketingServer.Controllers
                                     name = p.Name,
                                     hopLink = p.HopLink,
                                     description = p.Description,
+                                    image = p.Image,
                                     price = p.Price,
                                     featured = p.Featured,
-                                    filters = db.ProductFilters
+                                    videos = p.ProductVideos
+                                        .Where(s => s.ProductID == p.ID)
+                                        .Select(s => new
+                                        {
+                                            url = s.Url
+                                        })
+                                        .ToList(),
+                                    banners = p.ProductBanners
+                                        .Where(r => r.ProductID == p.ID)
+                                        .Select(r => new {
+                                            name = r.Name
+                                        })
+                                        .ToList(),
+                                    filters = p.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
                                         .Select(q => q.FilterLabelID)
+                                        .ToList()
                                 })
                                 .ToList()
                         }).ToList()
