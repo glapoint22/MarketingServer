@@ -83,10 +83,7 @@ namespace MarketingServer.Controllers
                                     featured = p.Featured,
                                     videos = p.ProductVideos
                                         .Where(s => s.ProductID == p.ID)
-                                        .Select(s => new
-                                        {
-                                            url = s.Url
-                                        })
+                                        .Select(s => s.Url)
                                         .ToList(),
                                     banners = p.ProductBanners
                                         .Where(r => r.ProductID == p.ID)
