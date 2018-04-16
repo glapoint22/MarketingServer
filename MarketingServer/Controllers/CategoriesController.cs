@@ -51,6 +51,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetCategories(bool includeProducts)
         {
             var categories = await db.Categories
+                .OrderBy(x => x.Name)
                 .Select(x => new
                 {
                     id = x.ID,
@@ -88,7 +89,8 @@ namespace MarketingServer.Controllers
                                     banners = p.ProductBanners
                                         .Where(r => r.ProductID == p.ID)
                                         .Select(r => new {
-                                            name = r.Name
+                                            name = r.Name,
+                                            isSelected = r.Selected
                                         })
                                         .ToList(),
                                     filters = p.ProductFilters
@@ -172,7 +174,7 @@ namespace MarketingServer.Controllers
             db.Categories.Add(category);
             await db.SaveChangesAsync();
 
-            return CreatedAtRoute("DefaultApi", new { id = category.ID }, category);
+            return StatusCode(HttpStatusCode.Created);
         }
 
         // DELETE: api/Categories/5

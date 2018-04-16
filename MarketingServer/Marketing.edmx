@@ -21,7 +21,7 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ID" Type="int" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Icon" Type="varchar" MaxLength="255" />
           <Property Name="Featured" Type="bit" Nullable="false" />
@@ -208,8 +208,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CategoryI__Categ__1387E197">
-          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
+        <Association Name="FK__CategoryI__Categ__4119A21D">
+          <End Role="Categories" Type="Self.Categories" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="CategoryImages" Type="Self.CategoryImages" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Categories">
@@ -268,8 +270,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Niches__Category__625A9A57">
-          <End Role="Categories" Type="Self.Categories" Multiplicity="1" />
+        <Association Name="FK__Niches__Category__40257DE4">
+          <End Role="Categories" Type="Self.Categories" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="Niches" Type="Self.Niches" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Categories">
@@ -391,7 +395,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Products" EntitySet="Products" />
           </AssociationSet>
-          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+          <AssociationSet Name="FK__CategoryI__Categ__4119A21D" Association="Self.FK__CategoryI__Categ__4119A21D">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
@@ -411,7 +415,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Niches" EntitySet="Niches" />
             <End Role="Leads" EntitySet="Leads" />
           </AssociationSet>
-          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
+          <AssociationSet Name="FK__Niches__Category__40257DE4" Association="Self.FK__Niches__Category__40257DE4">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
@@ -463,12 +467,12 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ID" Type="Int32" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Featured" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="Categories" ToRole="CategoryImages" />
-          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Categories" ToRole="Niches" />
+          <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__4119A21D" FromRole="Categories" ToRole="CategoryImages" />
+          <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Categories" ToRole="Niches" />
         </EntityType>
         <EntityType Name="CategoryImage">
           <Key>
@@ -478,7 +482,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Selected" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__1387E197" FromRole="CategoryImages" ToRole="Categories" />
+          <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__4119A21D" FromRole="CategoryImages" ToRole="Categories" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
@@ -557,7 +561,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__625A9A57" FromRole="Niches" ToRole="Categories" />
+          <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Niches" ToRole="Categories" />
           <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__370627FE" FromRole="Niches" ToRole="LeadMagnetEmails" />
           <NavigationProperty Name="Leads" Relationship="Self.FK__Leads__NicheID__37FA4C37" FromRole="Niches" ToRole="Leads" />
           <NavigationProperty Name="Products" Relationship="Self.FK__Campaigns__Niche__440B1D61" FromRole="Niches" ToRole="Products" />
@@ -664,8 +668,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CategoryI__Categ__1387E197">
-          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
+        <Association Name="FK__CategoryI__Categ__4119A21D">
+          <End Role="Categories" Type="Self.Category" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="CategoryImages" Type="Self.CategoryImage" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Categories">
@@ -676,8 +682,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Niches__Category__625A9A57">
-          <End Role="Categories" Type="Self.Category" Multiplicity="1" />
+        <Association Name="FK__Niches__Category__40257DE4">
+          <End Role="Categories" Type="Self.Category" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="Niches" Type="Self.Nich" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Categories">
@@ -849,11 +857,11 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Subscriptions" EntitySet="Subscriptions" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
           </AssociationSet>
-          <AssociationSet Name="FK__CategoryI__Categ__1387E197" Association="Self.FK__CategoryI__Categ__1387E197">
+          <AssociationSet Name="FK__CategoryI__Categ__4119A21D" Association="Self.FK__CategoryI__Categ__4119A21D">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
-          <AssociationSet Name="FK__Niches__Category__625A9A57" Association="Self.FK__Niches__Category__625A9A57">
+          <AssociationSet Name="FK__Niches__Category__40257DE4" Association="Self.FK__Niches__Category__40257DE4">
             <End Role="Categories" EntitySet="Categories" />
             <End Role="Niches" EntitySet="Niches" />
           </AssociationSet>
