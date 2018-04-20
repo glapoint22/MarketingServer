@@ -159,38 +159,46 @@ namespace MarketingServer.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok();
         }
 
         // POST: api/Categories
         [ResponseType(typeof(Category))]
-        public async Task<IHttpActionResult> PostCategory(Category category)
+        public async Task<IHttpActionResult> PostCategory(Category[] categories)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Categories.Add(category);
-            await db.SaveChangesAsync();
+            foreach(Category category in categories)
+            {
+                db.Categories.Add(category);
+                await db.SaveChangesAsync();
+            }
 
-            return StatusCode(HttpStatusCode.Created);
+            return Ok();
         }
 
         // DELETE: api/Categories/5
         [ResponseType(typeof(Category))]
-        public async Task<IHttpActionResult> DeleteCategory(int id)
+        public async Task<IHttpActionResult> DeleteCategory(int[] ids)
         {
-            Category category = await db.Categories.FindAsync(id);
-            if (category == null)
+            foreach(int id in ids)
             {
-                return NotFound();
+                Category category = await db.Categories.FindAsync(id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+
+                db.Categories.Remove(category);
+                await db.SaveChangesAsync();
             }
 
-            db.Categories.Remove(category);
-            await db.SaveChangesAsync();
 
-            return Ok(category);
+
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

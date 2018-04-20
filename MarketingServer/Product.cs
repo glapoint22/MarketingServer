@@ -28,10 +28,8 @@ namespace MarketingServer
         public string Name { get; set; }
         public int NicheID { get; set; }
         public string HopLink { get; set; }
-        public int Order { get; set; }
         public string Description { get; set; }
         public string Image { get; set; }
-        public bool Active { get; set; }
         public double Price { get; set; }
         public bool Featured { get; set; }
     

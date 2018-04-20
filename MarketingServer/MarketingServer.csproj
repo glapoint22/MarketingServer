@@ -154,6 +154,7 @@
     <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Controllers\LeadsController.cs" />
     <Compile Include="Controllers\MailController.cs" />
+    <Compile Include="Controllers\NichesController.cs" />
     <Compile Include="Controllers\NotificationsController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
     <Compile Include="Customer.cs">

@@ -44,7 +44,7 @@ namespace MarketingServer
                             .Where(a => a.SubscriptionID == x.ID)
                             .Select(a => a.ProductID)
                             .ToList()
-                            .Contains(z.ID) && z.Active)
+                            .Contains(z.ID))
                         .Select(z => new
                         {
                             id = z.ID,
@@ -74,7 +74,7 @@ namespace MarketingServer
             {
                 caption = "Check out our featured products",
                 products = await db.Products
-                        .Where(x => x.Active && x.Featured)
+                        .Where(x => x.Featured)
                         .Select(z => new
                         {
                             id = z.ID,
@@ -95,7 +95,7 @@ namespace MarketingServer
 
         IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
         {
-            IQueryable<Product> query = db.Products.Where(x => x.Active);
+            IQueryable<Product> query = db.Products;
             char separator = '^';
 
             //Search words
@@ -538,6 +538,24 @@ namespace MarketingServer
 
         //    return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
         //}
+
+        //POST: api/Products
+        [ResponseType(typeof(Product))]
+        public async Task<IHttpActionResult> PostProduct(Product[] products)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            foreach (Product product in products)
+            {
+                db.Products.Add(product);
+                await db.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
 
         // DELETE: api/Products/5
         [ResponseType(typeof(Product))]

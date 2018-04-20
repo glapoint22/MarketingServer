@@ -101,7 +101,7 @@ select * from emailCampaigns order by ProductID,day
 select * from customers
 select * from Subscriptions
 select * from CampaignRecords order by subscriptionid, date desc
-select * from Products order by nicheid, [order]
+select * from Products order by nicheid
 select * from leads
 select * from LeadMagnetEmails
 select * from ProductVideos
