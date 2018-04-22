@@ -38,37 +38,20 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Niches/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutNich(int id, Nich nich)
+        public async Task<IHttpActionResult> PutNich(Nich[] niches)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != nich.ID)
+            foreach (Nich niche in niches)
             {
-                return BadRequest();
+                db.Entry(niche).State = EntityState.Modified;
             }
 
-            db.Entry(nich).State = EntityState.Modified;
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!NichExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            await db.SaveChangesAsync();
+            return Ok();
         }
 
         // POST: api/Niches
@@ -83,26 +66,29 @@ namespace MarketingServer.Controllers
             foreach(Nich niche in niches)
             {
                 db.Niches.Add(niche);
-                await db.SaveChangesAsync();
             }
 
+            await db.SaveChangesAsync();
             return Ok();
         }
 
         // DELETE: api/Niches/5
         [ResponseType(typeof(Nich))]
-        public async Task<IHttpActionResult> DeleteNich(int id)
+        public async Task<IHttpActionResult> DeleteNich(int[] ids)
         {
-            Nich nich = await db.Niches.FindAsync(id);
-            if (nich == null)
+            foreach(int id in ids)
             {
-                return NotFound();
+                Nich nich = await db.Niches.FindAsync(id);
+                if (nich == null)
+                {
+                    return NotFound();
+                }
+
+                db.Niches.Remove(nich);
             }
 
-            db.Niches.Remove(nich);
             await db.SaveChangesAsync();
-
-            return Ok(nich);
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

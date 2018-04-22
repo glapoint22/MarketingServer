@@ -129,36 +129,19 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Categories/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutCategory(int id, Category category)
+        public async Task<IHttpActionResult> PutCategory(Category[] categories)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != category.ID)
+            foreach(Category category in categories)
             {
-                return BadRequest();
+                db.Entry(category).State = EntityState.Modified;
             }
 
-            db.Entry(category).State = EntityState.Modified;
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CategoryExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await db.SaveChangesAsync();
             return Ok();
         }
 
@@ -174,9 +157,9 @@ namespace MarketingServer.Controllers
             foreach(Category category in categories)
             {
                 db.Categories.Add(category);
-                await db.SaveChangesAsync();
             }
 
+            await db.SaveChangesAsync();
             return Ok();
         }
 
@@ -193,11 +176,9 @@ namespace MarketingServer.Controllers
                 }
 
                 db.Categories.Remove(category);
-                await db.SaveChangesAsync();
             }
 
-
-
+            await db.SaveChangesAsync();
             return Ok();
         }
 

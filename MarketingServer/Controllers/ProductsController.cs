@@ -356,37 +356,20 @@ namespace MarketingServer
 
         // PUT: api/Products/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutProduct(string id, Product product)
+        public async Task<IHttpActionResult> PutProduct(Product[] products)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != product.ID)
+            foreach (Product product in products)
             {
-                return BadRequest();
+                db.Entry(product).State = EntityState.Modified;
             }
 
-            db.Entry(product).State = EntityState.Modified;
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            await db.SaveChangesAsync();
+            return Ok();
         }
 
         //POST: api/Products
@@ -551,26 +534,29 @@ namespace MarketingServer
             foreach (Product product in products)
             {
                 db.Products.Add(product);
-                await db.SaveChangesAsync();
             }
 
+            await db.SaveChangesAsync();
             return Ok();
         }
 
         // DELETE: api/Products/5
         [ResponseType(typeof(Product))]
-        public async Task<IHttpActionResult> DeleteProduct(string id)
+        public async Task<IHttpActionResult> DeleteProduct(string[] ids)
         {
-            Product product = await db.Products.FindAsync(id);
-            if (product == null)
+            foreach(string id in ids)
             {
-                return NotFound();
+                Product product = await db.Products.FindAsync(id);
+                if (product == null)
+                {
+                    return NotFound();
+                }
+
+                db.Products.Remove(product);
             }
 
-            db.Products.Remove(product);
             await db.SaveChangesAsync();
-
-            return Ok(product);
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)
