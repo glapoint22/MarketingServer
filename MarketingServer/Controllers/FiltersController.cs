@@ -51,68 +51,57 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Filters/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutFilter(int id, Filter filter)
+        public async Task<IHttpActionResult> PutFilter(Filter[] filters)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != filter.ID)
+            foreach(Filter filter in filters)
             {
-                return BadRequest();
+                db.Entry(filter).State = EntityState.Modified;
             }
 
-            db.Entry(filter).State = EntityState.Modified;
-
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FilterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            await db.SaveChangesAsync();
+            return Ok();
         }
 
         // POST: api/Filters
         [ResponseType(typeof(Filter))]
-        public async Task<IHttpActionResult> PostFilter(Filter filter)
+        public async Task<IHttpActionResult> PostFilter(Filter[] filters)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Filters.Add(filter);
+            foreach(Filter filter in filters)
+            {
+                db.Filters.Add(filter);
+            }
+            
             await db.SaveChangesAsync();
-
-            return CreatedAtRoute("DefaultApi", new { id = filter.ID }, filter);
+            return Ok();
         }
 
         // DELETE: api/Filters/5
         [ResponseType(typeof(Filter))]
-        public async Task<IHttpActionResult> DeleteFilter(int id)
-        {
-            Filter filter = await db.Filters.FindAsync(id);
-            if (filter == null)
+        public async Task<IHttpActionResult> DeleteFilter(int[] ids)
+        {   
+            foreach(int id in ids)
             {
-                return NotFound();
+                Filter filter = await db.Filters.FindAsync(id);
+                if (filter == null)
+                {
+                    return NotFound();
+                }
+
+                db.Filters.Remove(filter);
             }
-
-            db.Filters.Remove(filter);
+            
             await db.SaveChangesAsync();
-
-            return Ok(filter);
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

@@ -59,7 +59,7 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ID" Type="int" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="FilterID" Type="int" Nullable="false" />
         </EntityType>
@@ -67,7 +67,7 @@
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ID" Type="int" Nullable="false" />
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
         <EntityType Name="LeadMagnetEmails">
@@ -222,7 +222,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__FilterLab__Filte__57FD0775">
+        <Association Name="FK__FilterLab__Filte__673F4B05">
           <End Role="Filters" Type="Self.Filters" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -292,7 +292,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ProductFi__Filte__58F12BAE">
+        <Association Name="FK__ProductFi__Filte__68336F3E">
           <End Role="FilterLabels" Type="Self.FilterLabels" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -415,7 +415,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Products" EntitySet="Products" />
             <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__FilterLab__Filte__57FD0775" Association="Self.FK__FilterLab__Filte__57FD0775">
+          <AssociationSet Name="FK__FilterLab__Filte__673F4B05" Association="Self.FK__FilterLab__Filte__673F4B05">
             <End Role="Filters" EntitySet="Filters" />
             <End Role="FilterLabels" EntitySet="FilterLabels" />
           </AssociationSet>
@@ -435,7 +435,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Products" EntitySet="Products" />
             <End Role="ProductBanners" EntitySet="ProductBanners" />
           </AssociationSet>
-          <AssociationSet Name="FK__ProductFi__Filte__58F12BAE" Association="Self.FK__ProductFi__Filte__58F12BAE">
+          <AssociationSet Name="FK__ProductFi__Filte__68336F3E" Association="Self.FK__ProductFi__Filte__68336F3E">
             <End Role="FilterLabels" EntitySet="FilterLabels" />
             <End Role="ProductFilters" EntitySet="ProductFilters" />
           </AssociationSet>
@@ -526,19 +526,19 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ID" Type="Int32" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FilterID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Filter" Relationship="Self.FK__FilterLab__Filte__57FD0775" FromRole="FilterLabels" ToRole="Filters" />
-          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Filte__58F12BAE" FromRole="FilterLabels" ToRole="ProductFilters" />
+          <NavigationProperty Name="Filter" Relationship="Self.FK__FilterLab__Filte__673F4B05" FromRole="FilterLabels" ToRole="Filters" />
+          <NavigationProperty Name="ProductFilters" Relationship="Self.FK__ProductFi__Filte__68336F3E" FromRole="FilterLabels" ToRole="ProductFilters" />
         </EntityType>
         <EntityType Name="Filter">
           <Key>
             <PropertyRef Name="ID" />
           </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ID" Type="Int32" Nullable="false" />
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <NavigationProperty Name="FilterLabels" Relationship="Self.FK__FilterLab__Filte__57FD0775" FromRole="Filters" ToRole="FilterLabels" />
+          <NavigationProperty Name="FilterLabels" Relationship="Self.FK__FilterLab__Filte__673F4B05" FromRole="Filters" ToRole="FilterLabels" />
         </EntityType>
         <EntityType Name="LeadMagnetEmail">
           <Key>
@@ -600,7 +600,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ProductID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="FilterLabelID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="FilterLabel" Relationship="Self.FK__ProductFi__Filte__58F12BAE" FromRole="ProductFilters" ToRole="FilterLabels" />
+          <NavigationProperty Name="FilterLabel" Relationship="Self.FK__ProductFi__Filte__68336F3E" FromRole="ProductFilters" ToRole="FilterLabels" />
           <NavigationProperty Name="Product" Relationship="Self.FK__ProductFi__Produ__4EA8A765" FromRole="ProductFilters" ToRole="Products" />
         </EntityType>
         <EntityType Name="Product">
@@ -738,7 +738,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__FilterLab__Filte__57FD0775">
+        <Association Name="FK__FilterLab__Filte__673F4B05">
           <End Role="Filters" Type="Self.Filter" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -752,7 +752,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__ProductFi__Filte__58F12BAE">
+        <Association Name="FK__ProductFi__Filte__68336F3E">
           <End Role="FilterLabels" Type="Self.FilterLabel" Multiplicity="1">
             <OnDelete Action="Cascade" />
           </End>
@@ -905,11 +905,11 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             <End Role="Products" EntitySet="Products" />
             <End Role="EmailCampaigns" EntitySet="EmailCampaigns" />
           </AssociationSet>
-          <AssociationSet Name="FK__FilterLab__Filte__57FD0775" Association="Self.FK__FilterLab__Filte__57FD0775">
+          <AssociationSet Name="FK__FilterLab__Filte__673F4B05" Association="Self.FK__FilterLab__Filte__673F4B05">
             <End Role="Filters" EntitySet="Filters" />
             <End Role="FilterLabels" EntitySet="FilterLabels" />
           </AssociationSet>
-          <AssociationSet Name="FK__ProductFi__Filte__58F12BAE" Association="Self.FK__ProductFi__Filte__58F12BAE">
+          <AssociationSet Name="FK__ProductFi__Filte__68336F3E" Association="Self.FK__ProductFi__Filte__68336F3E">
             <End Role="FilterLabels" EntitySet="FilterLabels" />
             <End Role="ProductFilters" EntitySet="ProductFilters" />
           </AssociationSet>
