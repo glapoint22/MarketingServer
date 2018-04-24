@@ -95,7 +95,10 @@ namespace MarketingServer.Controllers
                                         .ToList(),
                                     filters = p.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
-                                        .Select(q => q.FilterLabelID)
+                                        .Select(q => new {
+                                            id = q.ID,
+                                            filterOption = q.FilterLabelID
+                                        })
                                         .ToList()
                                 })
                                 .ToList()
@@ -136,12 +139,53 @@ namespace MarketingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            foreach(Category category in categories)
+            foreach (Category category in categories)
             {
-                db.Entry(category).State = EntityState.Modified;
+                // Get a list of category images for this category that is stored in the database
+                List<CategoryImage> dbCategoryImages = await db.CategoryImages.ToListAsync();
+                
+                // Check to see if any category images have been deleted
+                foreach (CategoryImage dbCategoryImage in dbCategoryImages)
+                {
+                    if(!category.CategoryImages.Select(x => x.Name).ToList().Contains(dbCategoryImage.Name))
+                    {
+                        db.CategoryImages.Remove(dbCategoryImage);
+                    }
+                }
+
+                // Check to see if any category images need to be added or have been modified
+                foreach (CategoryImage categoryImage in category.CategoryImages)
+                {
+                    if (!(db.CategoryImages.Count(x => x.Name == categoryImage.Name) > 0))
+                    {
+                        db.Entry(categoryImage).State = EntityState.Added;
+                    }
+                    else
+                    {
+                        CategoryImage dbCategoryImage = db.CategoryImages.FirstOrDefault(x => x.Name == categoryImage.Name);
+                        db.Entry(dbCategoryImage).State = EntityState.Detached;
+                        if (dbCategoryImage.Selected != categoryImage.Selected)
+                        {
+                            db.Entry(categoryImage).State = EntityState.Modified;
+                        }
+                    }
+                }
+
+                // Check to see if this category has been modified
+                Category dbCategory = db.Categories.FirstOrDefault(x => x.ID == category.ID);
+                db.Entry(dbCategory).State = EntityState.Detached;
+
+                if (dbCategory.Name != category.Name || dbCategory.Icon != category.Icon)
+                {
+                    db.Entry(category).State = EntityState.Modified;
+                }
             }
 
-            await db.SaveChangesAsync();
+            if (db.ChangeTracker.HasChanges())
+            {
+                await db.SaveChangesAsync();
+            }
+
             return Ok();
         }
 
