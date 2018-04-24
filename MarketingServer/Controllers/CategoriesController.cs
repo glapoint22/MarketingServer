@@ -46,9 +46,7 @@ namespace MarketingServer.Controllers
             return Ok(categories);
         }
 
-
-
-        public async Task<IHttpActionResult> GetCategories(bool includeProducts)
+        public async Task<IHttpActionResult> GetCategories(bool isManager)
         {
             var categories = await db.Categories
                 .OrderBy(x => x.Name)
@@ -61,7 +59,6 @@ namespace MarketingServer.Controllers
                     categoryImages = x.CategoryImages
                         .Select(c => new
                         {
-                            //categoryId = c.CategoryID,
                             name = c.Name,
                             isSelected = c.Selected
                         })
@@ -88,14 +85,16 @@ namespace MarketingServer.Controllers
                                         .ToList(),
                                     banners = p.ProductBanners
                                         .Where(r => r.ProductID == p.ID)
-                                        .Select(r => new {
+                                        .Select(r => new
+                                        {
                                             name = r.Name,
                                             isSelected = r.Selected
                                         })
                                         .ToList(),
                                     filters = p.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
-                                        .Select(q => new {
+                                        .Select(q => new
+                                        {
                                             id = q.ID,
                                             filterOption = q.FilterLabelID
                                         })
@@ -109,13 +108,6 @@ namespace MarketingServer.Controllers
 
             return Ok(categories);
         }
-
-
-
-
-
-
-
 
         // GET: api/Categories/5
         [ResponseType(typeof(Category))]
@@ -150,6 +142,7 @@ namespace MarketingServer.Controllers
                     if(!category.CategoryImages.Select(x => x.Name).ToList().Contains(dbCategoryImage.Name))
                     {
                         db.CategoryImages.Remove(dbCategoryImage);
+                        ImageController.DeleteImageFile(dbCategoryImage.Name);
                     }
                 }
 
@@ -213,12 +206,35 @@ namespace MarketingServer.Controllers
         {
             foreach(int id in ids)
             {
+                // Get the current category
                 Category category = await db.Categories.FindAsync(id);
                 if (category == null)
                 {
                     return NotFound();
                 }
 
+                // List of images to delete from the images directory
+                List<string> imagesToDelete = new List<string>();
+
+                // Add category images to the list
+                if (category.Icon != null) imagesToDelete.Add(category.Icon);
+                category.CategoryImages.ToList().ForEach(x => imagesToDelete.Add(x.Name));
+
+                // Add niche and product images to the list
+                category.Niches.ToList().ForEach(x =>
+                {
+                    if (x.Icon != null) imagesToDelete.Add(x.Icon);
+                    x.Products.ToList().ForEach(y =>
+                    {
+                        if (y.Image != null) imagesToDelete.Add(y.Image);
+                        y.ProductBanners.ToList().ForEach(z => imagesToDelete.Add(z.Name));
+                    });
+                });
+
+                // Delete the images
+                imagesToDelete.ForEach(x => ImageController.DeleteImageFile(x));
+
+                // Remove this category from the database
                 db.Categories.Remove(category);
             }
 

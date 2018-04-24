@@ -552,6 +552,17 @@ namespace MarketingServer
                     return NotFound();
                 }
 
+                // List of images to delete from the images directory
+                List<string> imagesToDelete = new List<string>();
+
+                // Add product images to the list
+                if (product.Image != null) imagesToDelete.Add(product.Image);
+                product.ProductBanners.ToList().ForEach(y => imagesToDelete.Add(y.Name));
+                
+                // Delete the images
+                imagesToDelete.ForEach(x => ImageController.DeleteImageFile(x));
+
+                // Remove this product from the database
                 db.Products.Remove(product);
             }
 

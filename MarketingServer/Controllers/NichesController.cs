@@ -76,15 +76,32 @@ namespace MarketingServer.Controllers
         [ResponseType(typeof(Nich))]
         public async Task<IHttpActionResult> DeleteNich(int[] ids)
         {
-            foreach(int id in ids)
+            foreach (int id in ids)
             {
-                Nich nich = await db.Niches.FindAsync(id);
-                if (nich == null)
+                Nich niche = await db.Niches.FindAsync(id);
+                if (niche == null)
                 {
                     return NotFound();
                 }
 
-                db.Niches.Remove(nich);
+                // List of images to delete from the images directory
+                List<string> imagesToDelete = new List<string>();
+
+                // Add the niche icon to the list
+                if (niche.Icon != null) imagesToDelete.Add(niche.Icon);
+
+                // Add product images to the list
+                niche.Products.ToList().ForEach(x =>
+                {
+                    if (x.Image != null) imagesToDelete.Add(x.Image);
+                    x.ProductBanners.ToList().ForEach(y => imagesToDelete.Add(y.Name));
+                });
+
+                // Delete the images
+                imagesToDelete.ForEach(x => ImageController.DeleteImageFile(x));
+
+                // Remove this niche from the database
+                db.Niches.Remove(niche);
             }
 
             await db.SaveChangesAsync();

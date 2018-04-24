@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -30,6 +31,12 @@ namespace MarketingServer
 
 
             return Request.CreateResponse(HttpStatusCode.OK, newImageName);
+        }
+
+        public static void DeleteImageFile(string image)
+        {
+            string filePath = HttpContext.Current.Server.MapPath("~/Images/" + image);
+            File.Delete(filePath);
         }
     }
 }
