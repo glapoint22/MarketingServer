@@ -134,7 +134,7 @@ namespace MarketingServer.Controllers
             foreach (Category category in categories)
             {
                 // Get a list of category images for this category that is stored in the database
-                List<CategoryImage> dbCategoryImages = await db.CategoryImages.ToListAsync();
+                List<CategoryImage> dbCategoryImages = await db.CategoryImages.Where(x => x.CategoryID == category.ID).ToListAsync();
                 
                 // Check to see if any category images have been deleted
                 foreach (CategoryImage dbCategoryImage in dbCategoryImages)
@@ -149,13 +149,13 @@ namespace MarketingServer.Controllers
                 // Check to see if any category images need to be added or have been modified
                 foreach (CategoryImage categoryImage in category.CategoryImages)
                 {
-                    if (!(db.CategoryImages.Count(x => x.Name == categoryImage.Name) > 0))
+                    if (!(dbCategoryImages.Count(x => x.Name == categoryImage.Name) > 0))
                     {
                         db.Entry(categoryImage).State = EntityState.Added;
                     }
                     else
                     {
-                        CategoryImage dbCategoryImage = db.CategoryImages.FirstOrDefault(x => x.Name == categoryImage.Name);
+                        CategoryImage dbCategoryImage = dbCategoryImages.FirstOrDefault(x => x.Name == categoryImage.Name);
                         db.Entry(dbCategoryImage).State = EntityState.Detached;
                         if (dbCategoryImage.Selected != categoryImage.Selected)
                         {
