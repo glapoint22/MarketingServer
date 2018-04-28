@@ -93,11 +93,7 @@ namespace MarketingServer.Controllers
                                         .ToList(),
                                     filters = p.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
-                                        .Select(q => new
-                                        {
-                                            id = q.ID,
-                                            filterOption = q.FilterLabelID
-                                        })
+                                        .Select(q => q.FilterLabelID)
                                         .ToList()
                                 })
                                 .ToList()
