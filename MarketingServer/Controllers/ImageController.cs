@@ -38,5 +38,10 @@ namespace MarketingServer
             string filePath = HttpContext.Current.Server.MapPath("~/Images/" + image);
             File.Delete(filePath);
         }
+
+        public void DeleteImage(string[] image)
+        {
+            DeleteImageFile(image[0]);
+        }
     }
 }
