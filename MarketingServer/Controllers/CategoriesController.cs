@@ -164,7 +164,7 @@ namespace MarketingServer.Controllers
                 Category dbCategory = db.Categories.FirstOrDefault(x => x.ID == category.ID);
                 db.Entry(dbCategory).State = EntityState.Detached;
 
-                if (dbCategory.Name != category.Name || dbCategory.Icon != category.Icon)
+                if (dbCategory.Name != category.Name || dbCategory.Icon != category.Icon || dbCategory.Featured != category.Featured)
                 {
                     db.Entry(category).State = EntityState.Modified;
                 }
