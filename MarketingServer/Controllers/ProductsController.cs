@@ -622,9 +622,11 @@ namespace MarketingServer
 
         // DELETE: api/Products/5
         [ResponseType(typeof(Product))]
-        public async Task<IHttpActionResult> DeleteProduct(string[] ids)
+        public async Task<IHttpActionResult> DeleteProduct(string itemIds)
         {
-            foreach(string id in ids)
+            string[] ids = itemIds.Split(',');
+
+            foreach (string id in ids)
             {
                 Product product = await db.Products.FindAsync(id);
                 if (product == null)

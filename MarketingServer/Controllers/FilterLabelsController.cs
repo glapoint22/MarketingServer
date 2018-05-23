@@ -74,11 +74,13 @@ namespace MarketingServer.Controllers
 
         // DELETE: api/FilterLabels/5
         [ResponseType(typeof(FilterLabel))]
-        public async Task<IHttpActionResult> DeleteFilterLabel(int[] ids)
+        public async Task<IHttpActionResult> DeleteFilterLabel(string itemIds)
         {
-            foreach(int id in ids)
+            string[] ids = itemIds.Split(',');
+
+            foreach (string id in ids)
             {
-                FilterLabel filterLabel = await db.FilterLabels.FindAsync(id);
+                FilterLabel filterLabel = await db.FilterLabels.FindAsync(int.Parse(id));
                 if (filterLabel == null)
                 {
                     return NotFound();

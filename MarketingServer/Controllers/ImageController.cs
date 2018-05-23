@@ -39,9 +39,9 @@ namespace MarketingServer
             File.Delete(filePath);
         }
 
-        public void DeleteImage(string[] image)
+        public void DeleteImage(string itemIds)
         {
-            DeleteImageFile(image[0]);
+            DeleteImageFile(itemIds);
         }
     }
 }

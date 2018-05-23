@@ -198,12 +198,15 @@ namespace MarketingServer.Controllers
 
         // DELETE: api/Categories/5
         [ResponseType(typeof(Category))]
-        public async Task<IHttpActionResult> DeleteCategory(int[] ids)
+        public async Task<IHttpActionResult> DeleteCategory(string itemIds)
         {
-            foreach(int id in ids)
+            string[] ids = itemIds.Split(',');
+            
+            foreach(string id in ids)
             {
+
                 // Get the current category
-                Category category = await db.Categories.FindAsync(id);
+                Category category = await db.Categories.FindAsync(int.Parse(id));
                 if (category == null)
                 {
                     return NotFound();

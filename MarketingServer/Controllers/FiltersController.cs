@@ -87,11 +87,13 @@ namespace MarketingServer.Controllers
 
         // DELETE: api/Filters/5
         [ResponseType(typeof(Filter))]
-        public async Task<IHttpActionResult> DeleteFilter(int[] ids)
-        {   
-            foreach(int id in ids)
+        public async Task<IHttpActionResult> DeleteFilter(string itemIds)
+        {
+            string[] ids = itemIds.Split(',');
+
+            foreach (string id in ids)
             {
-                Filter filter = await db.Filters.FindAsync(id);
+                Filter filter = await db.Filters.FindAsync(int.Parse(id));
                 if (filter == null)
                 {
                     return NotFound();

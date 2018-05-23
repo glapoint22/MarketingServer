@@ -74,11 +74,13 @@ namespace MarketingServer.Controllers
 
         // DELETE: api/Niches/5
         [ResponseType(typeof(Nich))]
-        public async Task<IHttpActionResult> DeleteNich(int[] ids)
+        public async Task<IHttpActionResult> DeleteNich(string itemIds)
         {
-            foreach (int id in ids)
+            string[] ids = itemIds.Split(',');
+
+            foreach (string id in ids)
             {
-                Nich niche = await db.Niches.FindAsync(id);
+                Nich niche = await db.Niches.FindAsync(int.Parse(id));
                 if (niche == null)
                 {
                     return NotFound();
