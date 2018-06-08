@@ -21,6 +21,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetCategories()
         {
             var categories = await db.Categories
+                .OrderBy(x => x.Name)
                 .Select(x => new {
                     id = x.ID,
                     name = x.Name,
