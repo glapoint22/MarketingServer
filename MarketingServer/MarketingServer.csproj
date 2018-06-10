@@ -149,7 +149,6 @@
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="Controllers\CategoriesController.cs" />
-    <Compile Include="Controllers\ContactController.cs" />
     <Compile Include="Controllers\FilterLabelsController.cs" />
     <Compile Include="Controllers\FiltersController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
