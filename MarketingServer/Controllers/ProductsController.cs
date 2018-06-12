@@ -22,20 +22,59 @@ namespace MarketingServer
 
         // GET: api/Products
         [ResponseType(typeof(Product))]
-        public async Task<IHttpActionResult> GetProducts()
+        public async Task<IHttpActionResult> GetProducts(string customerId, string productIds)
         {
+            // Featured products
             List<object> products = new List<object>();
-            products.Add(await GetFeaturedProducts());
+            products.Add(await GetFeaturedProducts(customerId));
+
+            // Recommended Products
+            if (customerId != null)
+            {
+                var recommendedProducts = await GetRecommendedProducts(customerId);
+
+                for (int i = 0; i < recommendedProducts.Count; i++)
+                {
+                    products.Add(recommendedProducts[i]);
+                }
+            }
+
+            if(productIds != null)
+            {
+                products.Add(await GetRelatedProducts(productIds, customerId));
+            }
 
             return Ok(products);
         }
 
-        // GET: api/Products/5
-        [ResponseType(typeof(Product))]
-        public async Task<IHttpActionResult> GetProducts(string customerId)
+        private async Task<dynamic> GetFeaturedProducts(string customerId)
+        {
+            return new
+            {
+                caption = "Check out our featured products",
+                products = await db.Products
+                        .Where(x => x.Featured)
+                        .Select(z => new
+                        {
+                            id = z.ID,
+                            name = z.Name,
+                            hopLink = z.HopLink + (customerId != null ? "?tid=" + customerId + z.ID: ""),
+                            description = z.Description,
+                            image = z.Image,
+                            price = z.Price,
+                            videos = z.ProductVideos
+                                .Where(y => y.ProductID == z.ID)
+                                .Select(y => y.Url)
+                                .ToList()
+                        })
+                        .ToListAsync()
+            };
+        }
+
+        private async Task<dynamic> GetRecommendedProducts(string customerId)
         {
             var products = await db.Subscriptions
-                .Where(x => x.CustomerID == customerId && x.Subscribed)
+                .Where(x => x.CustomerID == customerId && x.Subscribed && !x.Suspended)
                 .Select(x => new
                 {
                     caption = "Recommendations for you in " + x.Nich.Name,
@@ -62,34 +101,44 @@ namespace MarketingServer
                 })
                 .ToListAsync();
 
-
-            products.Insert(0, await GetFeaturedProducts(customerId));
-
-            return Ok(products);
+            return products;
         }
 
-        private async Task<dynamic> GetFeaturedProducts(string customerId = "")
+        private async Task<dynamic> GetRelatedProducts(string productIds, string customerId)
         {
+            string[] ids = productIds.Split('~');
+
+            var nicheIds = await db.Products.Where(x => ids.Contains(x.ID)).Select(x => x.NicheID).Distinct().ToListAsync();
+
+            int count = 20 / nicheIds.Count;
+
             return new
             {
-                caption = "Check out our featured products",
+                caption = "Products you may like",
                 products = await db.Products
-                        .Where(x => x.Featured)
-                        .Select(z => new
-                        {
-                            id = z.ID,
-                            name = z.Name,
-                            hopLink = z.HopLink + (customerId != "" ? "?tid=" + customerId + z.ID: ""),
-                            description = z.Description,
-                            image = z.Image,
-                            price = z.Price,
-                            videos = z.ProductVideos
-                                .Where(y => y.ProductID == z.ID)
+                .Where(x => nicheIds.Contains(x.NicheID))
+                .GroupBy(x => x.NicheID)
+                .Select(x => x.OrderBy(e => e.NicheID)
+                    .Take(count))
+                .SelectMany(e => e)
+                .Select(x => new {
+                    id = x.ID,
+                    name = x.Name,
+                    hopLink = x.HopLink + "?tid=" + customerId + x.ID,
+                    description = x.Description,
+                    image = x.Image,
+                    price = x.Price,
+                    videos = x.ProductVideos
+                                .Where(y => y.ProductID == x.ID)
                                 .Select(y => y.Url)
                                 .ToList()
-                        })
-                        .ToListAsync()
+                })
+                .ToListAsync()
             };
+
+            
+
+            
         }
 
 
