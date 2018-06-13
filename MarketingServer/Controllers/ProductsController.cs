@@ -24,14 +24,17 @@ namespace MarketingServer
         [ResponseType(typeof(Product))]
         public async Task<IHttpActionResult> GetProducts(string customerId, string productIds)
         {
+            List<ProductGroup> products = new List<ProductGroup>();
+
             // Featured products
-            List<object> products = new List<object>();
             products.Add(await GetFeaturedProducts(customerId));
+
+            
 
             // Recommended Products
             if (customerId != null)
             {
-                var recommendedProducts = await GetRecommendedProducts(customerId);
+                List<ProductGroup> recommendedProducts = await GetRecommendedProducts(customerId, products.SelectMany(x => x.products.Select(y => y.id)).ToList());
 
                 for (int i = 0; i < recommendedProducts.Count; i++)
                 {
@@ -39,22 +42,23 @@ namespace MarketingServer
                 }
             }
 
-            if(productIds != null)
+            // Related products
+            if (productIds != null)
             {
-                products.Add(await GetRelatedProducts(productIds, customerId));
+                products.Add(await GetRelatedProducts(productIds, customerId, products.SelectMany(x => x.products.Select(y => y.id)).ToList()));
             }
 
             return Ok(products);
         }
 
-        private async Task<dynamic> GetFeaturedProducts(string customerId)
+        private async Task<ProductGroup> GetFeaturedProducts(string customerId)
         {
-            return new
+            return new ProductGroup
             {
                 caption = "Check out our featured products",
                 products = await db.Products
                         .Where(x => x.Featured)
-                        .Select(z => new
+                        .Select(z => new Prod
                         {
                             id = z.ID,
                             name = z.Name,
@@ -71,20 +75,20 @@ namespace MarketingServer
             };
         }
 
-        private async Task<dynamic> GetRecommendedProducts(string customerId)
+        private async Task<List<ProductGroup>> GetRecommendedProducts(string customerId, List<string> usedIds)
         {
-            var products = await db.Subscriptions
+            return await db.Subscriptions
                 .Where(x => x.CustomerID == customerId && x.Subscribed && !x.Suspended)
-                .Select(x => new
+                .Select(x => new ProductGroup
                 {
                     caption = "Recommendations for you in " + x.Nich.Name,
                     products = db.Products
                         .Where(z => z.NicheID == x.NicheID && !z.CampaignRecords
-                            .Where(a => a.SubscriptionID == x.ID)
+                            .Where(a => a.SubscriptionID == x.ID && a.ProductPurchased)
                             .Select(a => a.ProductID)
                             .ToList()
-                            .Contains(z.ID))
-                        .Select(z => new
+                            .Contains(z.ID) && !usedIds.Contains(z.ID))
+                        .Select(z => new Prod
                         {
                             id = z.ID,
                             name = z.Name,
@@ -100,11 +104,9 @@ namespace MarketingServer
                         .ToList()
                 })
                 .ToListAsync();
-
-            return products;
         }
 
-        private async Task<dynamic> GetRelatedProducts(string productIds, string customerId)
+        private async Task<ProductGroup> GetRelatedProducts(string productIds, string customerId, List<string> usedIds)
         {
             string[] ids = productIds.Split('~');
 
@@ -112,19 +114,30 @@ namespace MarketingServer
 
             int count = 20 / nicheIds.Count;
 
-            return new
+            return new ProductGroup
             {
                 caption = "Products you may like",
                 products = await db.Products
-                .Where(x => nicheIds.Contains(x.NicheID))
+                .Where(x => nicheIds.Contains(x.NicheID) && !usedIds.Contains(x.ID) && !x.CampaignRecords
+                            .Where(a => db.Subscriptions
+                                .Where(y => y.CustomerID == customerId)
+                                .Select(y => y.ID)
+                                .ToList()
+                                .Contains(a.SubscriptionID) && a.ProductPurchased)
+                            .Select(a => a.ProductID)
+                            .ToList()
+                            .Contains(x.ID))
                 .GroupBy(x => x.NicheID)
                 .Select(x => x.OrderBy(e => e.NicheID)
                     .Take(count))
                 .SelectMany(e => e)
-                .Select(x => new {
+                .Union(db.Products.Where(z => ids.Contains(z.ID)))
+                .OrderBy(x => x.Name) 
+                .Select(x => new Prod
+                {
                     id = x.ID,
                     name = x.Name,
-                    hopLink = x.HopLink + "?tid=" + customerId + x.ID,
+                    hopLink = x.HopLink + (customerId != null ? "?tid=" + customerId + x.ID : ""),
                     description = x.Description,
                     image = x.Image,
                     price = x.Price,
@@ -135,10 +148,6 @@ namespace MarketingServer
                 })
                 .ToListAsync()
             };
-
-            
-
-            
         }
 
 
@@ -730,18 +739,20 @@ namespace MarketingServer
         public List<Label> labels;
     }
 
-    //class SwapVisitor : System.Linq.Expressions.ExpressionVisitor
-    //{
-    //    private readonly Expression from, to;
-    //    public SwapVisitor(Expression from, Expression to)
-    //    {
-    //        this.from = from;
-    //        this.to = to;
-    //    }
-    //    public override Expression Visit(Expression node)
-    //    {
-    //        return node == from ? to : base.Visit(node);
-    //    }
-    //}
-}
+    public class ProductGroup
+    {
+        public string caption;
+        public List<Prod> products;
+    }
 
+    public class Prod
+    {
+        public string id;
+        public string name;
+        public string hopLink;
+        public string description;
+        public string image;
+        public double price;
+        public List<string> videos;
+    }
+}
