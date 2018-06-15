@@ -1,18 +1,13 @@
 using System;
 using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq.Expressions;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json.Linq;
 
 namespace MarketingServer
 {
@@ -24,31 +19,30 @@ namespace MarketingServer
         [ResponseType(typeof(Product))]
         public async Task<IHttpActionResult> GetProducts(string customerId, string productIds)
         {
-            List<ProductGroup> products = new List<ProductGroup>();
+            List<ProductGroup> productGroups = new List<ProductGroup>();
+            List<ProductGroup> recommendedProducts = await GetRecommendedProducts(customerId);
 
             // Featured products
-            products.Add(await GetFeaturedProducts(customerId));
+            productGroups.Add(await GetFeaturedProducts(customerId));
 
-            
 
             // Recommended Products
             if (customerId != null)
             {
-                List<ProductGroup> recommendedProducts = await GetRecommendedProducts(customerId, products.SelectMany(x => x.products.Select(y => y.id)).ToList());
-
                 for (int i = 0; i < recommendedProducts.Count; i++)
                 {
-                    products.Add(recommendedProducts[i]);
+                    if (recommendedProducts[i].products.Count > 0) productGroups.Add(recommendedProducts[i]);
                 }
             }
 
-            // Related products
+            // Browsed products
             if (productIds != null)
             {
-                products.Add(await GetRelatedProducts(productIds, customerId, products.SelectMany(x => x.products.Select(y => y.id)).ToList()));
+                ProductGroup browsedProducts = await GetBrowsedProducts(productIds, customerId, recommendedProducts.SelectMany(x => x.products.Select(y => y.id)).ToList());
+                if (browsedProducts.products.Count > 0) productGroups.Add(browsedProducts);
             }
 
-            return Ok(products);
+            return Ok(productGroups);
         }
 
         private async Task<ProductGroup> GetFeaturedProducts(string customerId)
@@ -58,11 +52,12 @@ namespace MarketingServer
                 caption = "Check out our featured products",
                 products = await db.Products
                         .Where(x => x.Featured)
-                        .Select(z => new Prod
+                        .OrderBy(x => x.Name)
+                        .Select(z => new ProductData
                         {
                             id = z.ID,
                             name = z.Name,
-                            hopLink = z.HopLink + (customerId != null ? "?tid=" + customerId + z.ID: ""),
+                            hopLink = z.HopLink + (customerId != null ? "?tid=" + customerId + z.ID : ""),
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
@@ -75,7 +70,7 @@ namespace MarketingServer
             };
         }
 
-        private async Task<List<ProductGroup>> GetRecommendedProducts(string customerId, List<string> usedIds)
+        private async Task<List<ProductGroup>> GetRecommendedProducts(string customerId)
         {
             return await db.Subscriptions
                 .Where(x => x.CustomerID == customerId && x.Subscribed && !x.Suspended)
@@ -87,8 +82,9 @@ namespace MarketingServer
                             .Where(a => a.SubscriptionID == x.ID && a.ProductPurchased)
                             .Select(a => a.ProductID)
                             .ToList()
-                            .Contains(z.ID) && !usedIds.Contains(z.ID))
-                        .Select(z => new Prod
+                            .Contains(z.ID))
+                            .OrderBy(z => z.Name)
+                        .Select(z => new ProductData
                         {
                             id = z.ID,
                             name = z.Name,
@@ -106,35 +102,71 @@ namespace MarketingServer
                 .ToListAsync();
         }
 
-        private async Task<ProductGroup> GetRelatedProducts(string productIds, string customerId, List<string> usedIds)
+        private async Task<ProductGroup> GetBrowsedProducts(string productIds, string customerId, List<string> usedIds)
         {
-            string[] ids = productIds.Split('~');
+            int maxCount = 20;
 
-            var nicheIds = await db.Products.Where(x => ids.Contains(x.ID)).Select(x => x.NicheID).Distinct().ToListAsync();
+            // Put the product ids into a list
+            List<string> ids = productIds.Split('~').ToList();
+            
 
-            int count = 20 / nicheIds.Count;
+            // Expression for not suspended
+            Expression<Func<Product, bool>> notSuspended = x => !db.Products
+                .Where(z => db.Subscriptions
+                    .Where(a => a.CustomerID == customerId && a.Suspended)
+                    .Select(a => a.NicheID)
+                    .ToList()
+                    .Contains(z.NicheID))
+                .Select(z => z.ID)
+                .ToList()
+                .Contains(x.ID);
 
-            return new ProductGroup
-            {
-                caption = "Products you may like",
-                products = await db.Products
-                .Where(x => nicheIds.Contains(x.NicheID) && !usedIds.Contains(x.ID) && !x.CampaignRecords
-                            .Where(a => db.Subscriptions
-                                .Where(y => y.CustomerID == customerId)
-                                .Select(y => y.ID)
-                                .ToList()
-                                .Contains(a.SubscriptionID) && a.ProductPurchased)
-                            .Select(a => a.ProductID)
-                            .ToList()
-                            .Contains(x.ID))
-                .GroupBy(x => x.NicheID)
-                .Select(x => x.OrderBy(e => e.NicheID)
-                    .Take(count))
-                .SelectMany(e => e)
-                .Union(db.Products.Where(z => ids.Contains(z.ID)))
-                .OrderBy(x => x.Name) 
-                .Select(x => new Prod
+            // Expression for not purchased
+            Expression<Func<Product, bool>> notPurchased = x => !x.CampaignRecords
+                .Where(a => db.Subscriptions
+                    .Where(y => y.CustomerID == customerId)
+                    .Select(y => y.ID)
+                    .ToList()
+                    .Contains(a.SubscriptionID) && a.ProductPurchased)
+                .Select(a => a.ProductID)
+                .ToList()
+                .Contains(x.ID);
+
+            // Get the niche ids based on the product ids
+            var tempNicheIds = await db.Products
+                .Where(x => ids.Contains(x.ID))
+                .Where(x => !usedIds.Contains(x.ID))
+                .Where(notSuspended)
+                .Select(x => new
                 {
+                    productId = x.ID,
+                    nicheId = x.NicheID
+                })
+                .ToListAsync();
+
+            // Reorder the nicheids and calculate how many products to display per niche
+            List<int> nicheIds = tempNicheIds.OrderByDescending(x => ids.IndexOf(x.productId)).Select(x => x.nicheId).Take(4).Distinct().ToList();
+            int productCount = nicheIds.Count > 0 ? maxCount / nicheIds.Count : 0;
+
+            // Get the products based on the niche ids
+            var tempProducts = await db.Products
+                .Where(x => nicheIds.Contains(x.NicheID))
+                .Where(notPurchased)
+                .Where(x => !usedIds.Contains(x.ID))
+                .GroupBy(x => x.NicheID)
+                .Select(x => x.Take(productCount))
+                .SelectMany(e => e)
+                .Union(db.Products
+                    .Where(x => ids.Contains(x.ID) && nicheIds.Contains(x.NicheID))
+                    .Where(x => !usedIds.Contains(x.ID))
+                    .Where(notPurchased)
+                    .Where(notSuspended)
+                )
+                .OrderByDescending(x => ids.Contains(x.ID))
+                .Take(maxCount)
+                .Select(x => new
+                {
+                    nicheId = x.NicheID,
                     id = x.ID,
                     name = x.Name,
                     hopLink = x.HopLink + (customerId != null ? "?tid=" + customerId + x.ID : ""),
@@ -142,11 +174,31 @@ namespace MarketingServer
                     image = x.Image,
                     price = x.Price,
                     videos = x.ProductVideos
-                                .Where(y => y.ProductID == x.ID)
-                                .Select(y => y.Url)
-                                .ToList()
+                        .Where(y => y.ProductID == x.ID)
+                        .Select(y => y.Url)
+                        .ToList()
                 })
-                .ToListAsync()
+                .ToListAsync();
+
+            // Order the products
+            List<ProductData> products = tempProducts
+                .OrderBy(x => nicheIds.IndexOf(x.nicheId))
+                .ThenBy(x => x.name)
+                .Select(x => new ProductData
+                {
+                    id = x.id,
+                    name = x.name,
+                    hopLink = x.hopLink,
+                    description = x.description,
+                    image = x.image,
+                    price = x.price,
+                    videos = x.videos
+                }).ToList();
+
+            return new ProductGroup
+            {
+                caption = "Other products you may like based on your browsing",
+                products = products
             };
         }
 
@@ -157,12 +209,12 @@ namespace MarketingServer
             char separator = '^';
 
             //Search words
-            if(searchWords != string.Empty)
+            if (searchWords != string.Empty)
             {
                 string[] searchWordsArray = searchWords.Split(' ');
                 query = query.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
             }
-            
+
 
             //Category
             if (category > 0)
@@ -170,7 +222,7 @@ namespace MarketingServer
                 query = query.Where(x => x.Nich.CategoryID == category);
             }
 
-            
+
             //Niche
             if (nicheId > 0)
             {
@@ -184,7 +236,7 @@ namespace MarketingServer
                 Match result;
 
                 //Price Filter
-                if(filterExclude != "Price")
+                if (filterExclude != "Price")
                 {
                     result = Regex.Match(queryFilters, GetRegExPattern("Price"));
                     if (result.Length > 0)
@@ -198,7 +250,7 @@ namespace MarketingServer
                                 Max = x.Max
                             }).ToList();
 
-                        foreach(string price in priceRangeArray)
+                        foreach (string price in priceRangeArray)
                         {
                             result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
                             if (result.Length > 0)
@@ -223,7 +275,7 @@ namespace MarketingServer
                         query = query.Where(predicate);
                     }
                 }
-                
+
 
 
                 //Custom Filters
@@ -698,7 +750,7 @@ namespace MarketingServer
                 // Add product images to the list
                 if (product.Image != null) imagesToDelete.Add(product.Image);
                 product.ProductBanners.ToList().ForEach(y => imagesToDelete.Add(y.Name));
-                
+
                 // Delete the images
                 imagesToDelete.ForEach(x => ImageController.DeleteImageFile(x));
 
@@ -742,10 +794,10 @@ namespace MarketingServer
     public class ProductGroup
     {
         public string caption;
-        public List<Prod> products;
+        public List<ProductData> products;
     }
 
-    public class Prod
+    public class ProductData
     {
         public string id;
         public string name;
