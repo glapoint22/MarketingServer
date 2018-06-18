@@ -23,7 +23,9 @@ namespace MarketingServer
             List<ProductGroup> recommendedProducts = await GetRecommendedProducts(customerId);
 
             // Featured products
-            productGroups.Add(await GetFeaturedProducts(customerId));
+            ProductGroup featuredProducts = await GetFeaturedProducts(customerId);
+            if (featuredProducts.products.Count > 0) productGroups.Add(featuredProducts);
+
 
 
             // Recommended Products
@@ -108,7 +110,7 @@ namespace MarketingServer
 
             // Put the product ids into a list
             List<string> ids = productIds.Split('~').ToList();
-            
+
 
             // Expression for not suspended
             Expression<Func<Product, bool>> notSuspended = x => !db.Products
