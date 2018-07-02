@@ -23,6 +23,9 @@ namespace MarketingServer
                 case "price-desc":
                     sortResult = source.OrderByDescending(x => x.Price);
                     break;
+                default:
+                    sortResult = source.OrderBy(x => x.Price);
+                    break;
             }
 
             return sortResult;

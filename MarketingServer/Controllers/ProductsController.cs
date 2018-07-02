@@ -401,9 +401,11 @@ namespace MarketingServer
             return filters;
         }
 
-        public async Task<IHttpActionResult> GetProductsFromSearch(int category, string sort, int limit, string query = "", int nicheId = 0, int page = 1, string filter = "")
+        public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = 0, string query = "", int nicheId = 0, int page = 1, string filter = "")
         {
             int currentPage;
+
+            if (query == null) query = "";
 
             List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
             List<Filter> filterList = await db.Filters.ToListAsync();
