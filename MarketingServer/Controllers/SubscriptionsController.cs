@@ -152,7 +152,7 @@ namespace MarketingServer.Controllers
             {
                 await db.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
                 throw;
             }
@@ -241,7 +241,8 @@ namespace MarketingServer.Controllers
                     id = customer.ID,
                     email = customer.Email,
                     name = customer.Name,
-                    emailSendFrequency = customer.EmailSendFrequency
+                    emailSendFrequency = customer.EmailSendFrequency,
+                    emailSentDate = customer.EmailSentDate
                 },
                 subscriptions = await GetSubscriptions(customer.ID)
             };
