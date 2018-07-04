@@ -16,7 +16,9 @@ namespace MarketingServer.Controllers
 
             if (emailBody == null)
             {
-                return BadRequest();
+                emailBody = await db.LeadMagnetEmails.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
+
+                if(emailBody == null) return BadRequest();
             }
 
             Mail mail = new Mail(emailId, await db.Customers.Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", emailBody);
