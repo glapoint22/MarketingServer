@@ -41,7 +41,6 @@ namespace MarketingServer.Controllers
                                         .Where(a => a.ProductID == p.ID)
                                         .Select(a => new {
                                             id = a.ID,
-                                            day = a.Day,
                                             subject = a.Subject,
                                             body = a.Body
                                         })
