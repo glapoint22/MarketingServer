@@ -36,6 +36,7 @@ namespace MarketingServer.Controllers
                                 {
                                     id = p.ID,
                                     name = p.Name,
+                                    hoplink = p.HopLink,
                                     emails = p.EmailCampaigns
                                         .OrderBy(a => a.Day)
                                         .Where(a => a.ProductID == p.ID)
