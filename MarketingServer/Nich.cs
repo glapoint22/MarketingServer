@@ -27,6 +27,7 @@ namespace MarketingServer
         public string Name { get; set; }
         public int CategoryID { get; set; }
         public string Icon { get; set; }
+        public string LeadMagnet { get; set; }
     
         public virtual Category Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

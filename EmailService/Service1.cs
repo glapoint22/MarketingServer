@@ -75,12 +75,15 @@ namespace EmailService
                     {
                         Email email;
                         CampaignRecord newCampaignRecord;
+                        string productId;
 
                         //Get the current campaign record from this subscription
                         CampaignRecord currentCampaignRecord = await db.CampaignRecords
                             .OrderByDescending(x => x.Date)
                             .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
                             .FirstOrDefaultAsync();
+
+                        productId = currentCampaignRecord.ProductID;
 
                         if (currentCampaignRecord == null)
                         {
@@ -123,6 +126,7 @@ namespace EmailService
                                 Day = 1,
                             };
 
+                            productId = newCampaignRecord.ProductID;
 
                             //Get the first email from this campaign
                             email = await GetEmail(newCampaignRecord.ProductID, newCampaignRecord.Day);
@@ -145,7 +149,7 @@ namespace EmailService
                             };
                         }
 
-                        Mail mail = new Mail(email.id, customer, email.subject, email.body);
+                        Mail mail = new Mail(email.id, customer, productId, email.subject, email.body);
                         await mail.Send();
                         customer.EmailSentDate = DateTime.Today;
 

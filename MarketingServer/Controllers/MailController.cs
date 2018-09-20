@@ -23,6 +23,7 @@ namespace MarketingServer.Controllers
                         {
                             id = z.ID,
                             name = z.Name,
+                            leadMagnet = z.LeadMagnet,
                             emails = z.LeadMagnetEmails
                                 .Where(a => a.NicheID == z.ID)
                                 .Select(a => new {

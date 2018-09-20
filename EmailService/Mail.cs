@@ -12,7 +12,7 @@ namespace EmailService
         public string subject;
         public string body;
         
-        public Mail(string emailId, Customer customer, string subject, string body)
+        public Mail(string emailId, Customer customer, string productId, string subject, string body)
         {
             smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtpClient.Host = "smtp.gmail.com";
@@ -22,7 +22,7 @@ namespace EmailService
             smtpClient.EnableSsl = true;
 
             this.subject = subject;
-            this.body = string.Format(body, customer.Name, emailId, customer.ID);
+            this.body = string.Format(body, customer.Name, emailId, customer.ID, productId);
 
             to = customer.Email;
             from = "glapoint22@gmail.com";

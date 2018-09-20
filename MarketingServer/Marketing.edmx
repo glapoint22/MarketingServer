@@ -105,6 +105,7 @@
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="CategoryID" Type="int" Nullable="false" />
           <Property Name="Icon" Type="varchar" MaxLength="255" />
+          <Property Name="LeadMagnet" Type="varchar" MaxLength="255" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -577,6 +578,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Niches" ToRole="Categories" />
           <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__5F9E293D" FromRole="Niches" ToRole="LeadMagnetEmails" />
           <NavigationProperty Name="Leads" Relationship="Self.FK__Leads__NicheID__5EAA0504" FromRole="Niches" ToRole="Leads" />
@@ -1054,6 +1056,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Icon" ColumnName="Icon" />
+                <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
