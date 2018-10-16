@@ -113,7 +113,7 @@ namespace MarketingServer.Controllers
                     {
                         EmailCampaign dbEmailCampaign = dbEmailCampaigns.FirstOrDefault(x => x.ID == emailCampaign.ID);
                         db.Entry(dbEmailCampaign).State = EntityState.Detached;
-                        if (dbEmailCampaign.Subject != emailCampaign.Subject || dbEmailCampaign.Body != emailCampaign.Body)
+                        if (dbEmailCampaign.Subject != emailCampaign.Subject || dbEmailCampaign.Body != emailCampaign.Body || dbEmailCampaign.Day != emailCampaign.Day)
                         {
                             db.Entry(emailCampaign).State = EntityState.Modified;
                         }
