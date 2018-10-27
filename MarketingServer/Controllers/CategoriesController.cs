@@ -94,7 +94,10 @@ namespace MarketingServer.Controllers
                                         .ToList(),
                                     filters = p.ProductFilters
                                         .Where(q => q.ProductID == p.ID)
-                                        .Select(q => q.FilterLabelID)
+                                        .Select(q => new {
+                                            id = q.ID,
+                                            filterOption = q.FilterLabelID
+                                        })
                                         .ToList()
                                 })
                                 .ToList()
@@ -131,13 +134,14 @@ namespace MarketingServer.Controllers
             foreach (Category category in categories)
             {
                 // Get a list of category images for this category that is stored in the database
-                List<CategoryImage> dbCategoryImages = await db.CategoryImages.Where(x => x.CategoryID == category.ID).ToListAsync();
+                List<CategoryImage> dbCategoryImages = await db.CategoryImages.AsNoTracking().Where(x => x.CategoryID == category.ID).ToListAsync();
                 
                 // Check to see if any category images have been deleted
                 foreach (CategoryImage dbCategoryImage in dbCategoryImages)
                 {
                     if(!category.CategoryImages.Select(x => x.Name).ToList().Contains(dbCategoryImage.Name))
                     {
+                        db.CategoryImages.Attach(dbCategoryImage);
                         db.CategoryImages.Remove(dbCategoryImage);
                         ImageController.DeleteImageFile(dbCategoryImage.Name);
                     }
@@ -153,7 +157,6 @@ namespace MarketingServer.Controllers
                     else
                     {
                         CategoryImage dbCategoryImage = dbCategoryImages.FirstOrDefault(x => x.Name == categoryImage.Name);
-                        db.Entry(dbCategoryImage).State = EntityState.Detached;
                         if (dbCategoryImage.Selected != categoryImage.Selected)
                         {
                             db.Entry(categoryImage).State = EntityState.Modified;
@@ -162,8 +165,7 @@ namespace MarketingServer.Controllers
                 }
 
                 // Check to see if this category has been modified
-                Category dbCategory = db.Categories.FirstOrDefault(x => x.ID == category.ID);
-                db.Entry(dbCategory).State = EntityState.Detached;
+                Category dbCategory = db.Categories.AsNoTracking().FirstOrDefault(x => x.ID == category.ID);
 
                 if (dbCategory.Name != category.Name || dbCategory.Icon != category.Icon || dbCategory.Featured != category.Featured)
                 {

@@ -47,7 +47,52 @@ namespace MarketingServer.Controllers
 
             foreach (Nich niche in niches)
             {
-                db.Entry(niche).State = EntityState.Modified;
+                if (niche.Name == null)
+                {
+                    List<LeadMagnetEmail> dbLeadMagnetEmails = await db.LeadMagnetEmails.AsNoTracking().Where(x => x.NicheID == niche.ID).ToListAsync();
+
+                    // Check to see if any emails have been deleted
+                    foreach (LeadMagnetEmail dbLeadMagnetEmail in dbLeadMagnetEmails)
+                    {
+                        if (!niche.LeadMagnetEmails.Select(x => x.ID).ToList().Contains(dbLeadMagnetEmail.ID))
+                        {
+                            db.LeadMagnetEmails.Attach(dbLeadMagnetEmail);
+                            db.LeadMagnetEmails.Remove(dbLeadMagnetEmail);
+
+                        }
+                    }
+
+                    // Check to see if any lead magnet emails need to be added or have been modified
+                    foreach (LeadMagnetEmail leadMagnetEmail in niche.LeadMagnetEmails)
+                    {
+                        if (!(dbLeadMagnetEmails.Count(x => x.ID == leadMagnetEmail.ID) > 0))
+                        {
+                            db.Entry(leadMagnetEmail).State = EntityState.Added;
+                        }
+                        else
+                        {
+                            LeadMagnetEmail dbLeadMagnetEmail = dbLeadMagnetEmails.FirstOrDefault(x => x.ID == leadMagnetEmail.ID);
+                            if (dbLeadMagnetEmail.Subject != leadMagnetEmail.Subject || dbLeadMagnetEmail.Body != leadMagnetEmail.Body)
+                            {
+                                db.Entry(leadMagnetEmail).State = EntityState.Modified;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Check to see if this niche has been modified
+                    Nich dbNiche = db.Niches.AsNoTracking().FirstOrDefault(x => x.ID == niche.ID);
+                    if (dbNiche.Name != niche.Name || dbNiche.Icon != niche.Icon)
+                    {
+                        db.Entry(niche).State = EntityState.Modified;
+                    }
+                }
+
+
+
+
+
             }
 
             await db.SaveChangesAsync();
@@ -63,7 +108,7 @@ namespace MarketingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            foreach(Nich niche in niches)
+            foreach (Nich niche in niches)
             {
                 db.Niches.Add(niche);
             }

@@ -479,83 +479,124 @@ namespace MarketingServer
 
             foreach (Product product in products)
             {
-                // Get a list of product banners, product videos, and product filters for this product
-                List<ProductBanner> dbProductBanners = await db.ProductBanners.Where(x => x.ProductID == product.ID).ToListAsync();
-                List<ProductVideo> dbProductVideos = await db.ProductVideos.Where(x => x.ProductID == product.ID).ToListAsync();
-                List<ProductFilter> dbProductFilters = await db.ProductFilters.Where(x => x.ProductID == product.ID).ToListAsync();
-
-                // Check to see if any product banners have been deleted
-                foreach (ProductBanner dbProductBanner in dbProductBanners)
+                if (product.Name != null)
                 {
-                    if (!product.ProductBanners.Select(x => x.Name).ToList().Contains(dbProductBanner.Name))
-                    {
-                        db.ProductBanners.Remove(dbProductBanner);
-                        ImageController.DeleteImageFile(dbProductBanner.Name);
-                    }
-                }
+                    // Get a list of product banners, product videos, and product filters for this product
+                    List<ProductBanner> dbProductBanners = await db.ProductBanners.AsNoTracking().Where(x => x.ProductID == product.ID).ToListAsync();
+                    List<ProductVideo> dbProductVideos = await db.ProductVideos.AsNoTracking().Where(x => x.ProductID == product.ID).ToListAsync();
+                    List<ProductFilter> dbProductFilters = await db.ProductFilters.AsNoTracking().Where(x => x.ProductID == product.ID).ToListAsync();
 
-                // Check to see if any product videos have been deleted
-                foreach (ProductVideo dbProductVideo in dbProductVideos)
-                {
-                    if (!product.ProductVideos.Select(x => x.Url).ToList().Contains(dbProductVideo.Url))
-                    {
-                        db.ProductVideos.Remove(dbProductVideo);
-                    }
-                }
 
-                // Check to see if any product filters have been deleted
-                foreach (ProductFilter dbProductFilter in dbProductFilters)
-                {
-                    if (!product.ProductFilters.Select(x => x.ID).ToList().Contains(dbProductFilter.ID))
+                    // Check to see if any product banners have been deleted
+                    foreach (ProductBanner dbProductBanner in dbProductBanners)
                     {
-                        db.ProductFilters.Remove(dbProductFilter);
-                    }
-                }
-
-                // Check to see if any product banners need to be added or have been modified
-                foreach (ProductBanner productBanner in product.ProductBanners)
-                {
-                    if (!(dbProductBanners.Count(x => x.Name == productBanner.Name) > 0))
-                    {
-                        db.Entry(productBanner).State = EntityState.Added;
-                    }
-                    else
-                    {
-                        ProductBanner dbProductBanner = dbProductBanners.FirstOrDefault(x => x.Name == productBanner.Name);
-                        db.Entry(dbProductBanner).State = EntityState.Detached;
-                        if (dbProductBanner.Selected != productBanner.Selected)
+                        if (!product.ProductBanners.Select(x => x.Name).ToList().Contains(dbProductBanner.Name))
                         {
-                            db.Entry(productBanner).State = EntityState.Modified;
+                            db.ProductBanners.Attach(dbProductBanner);
+                            db.ProductBanners.Remove(dbProductBanner);
+                            ImageController.DeleteImageFile(dbProductBanner.Name);
+                        }
+                    }
+
+                    // Check to see if any product videos have been deleted
+                    foreach (ProductVideo dbProductVideo in dbProductVideos)
+                    {
+                        if (!product.ProductVideos.Select(x => x.Url).ToList().Contains(dbProductVideo.Url))
+                        {
+                            db.ProductVideos.Attach(dbProductVideo);
+                            db.ProductVideos.Remove(dbProductVideo);
+                        }
+                    }
+
+                    // Check to see if any product filters have been deleted
+                    foreach (ProductFilter dbProductFilter in dbProductFilters)
+                    {
+                        if (!product.ProductFilters.Select(x => x.ID).ToList().Contains(dbProductFilter.ID))
+                        {
+                            db.ProductFilters.Attach(dbProductFilter);
+                            db.ProductFilters.Remove(dbProductFilter);
+                        }
+                    }
+
+
+                    // Check to see if any product banners need to be added or have been modified
+                    foreach (ProductBanner productBanner in product.ProductBanners)
+                    {
+                        if (!(dbProductBanners.Count(x => x.Name == productBanner.Name) > 0))
+                        {
+                            db.Entry(productBanner).State = EntityState.Added;
+                        }
+                        else
+                        {
+                            ProductBanner dbProductBanner = dbProductBanners.FirstOrDefault(x => x.Name == productBanner.Name);
+                            if (dbProductBanner.Selected != productBanner.Selected)
+                            {
+                                db.Entry(productBanner).State = EntityState.Modified;
+                            }
+                        }
+                    }
+
+                    // Check to see if any product videos need to be added
+                    foreach (ProductVideo productVideo in product.ProductVideos)
+                    {
+                        if (!(dbProductVideos.Count(x => x.Url == productVideo.Url) > 0))
+                        {
+                            db.Entry(productVideo).State = EntityState.Added;
+                        }
+                    }
+
+                    // Check to see if any product filters need to be added
+                    foreach (ProductFilter productFilter in product.ProductFilters)
+                    {
+                        if (!(dbProductFilters.Count(x => x.ID == productFilter.ID) > 0))
+                        {   
+                            db.Entry(productFilter).State = EntityState.Added;
+                        }
+                    }
+
+
+                    // Check to see if this product has been modified
+                    Product dbProduct = db.Products.AsNoTracking().FirstOrDefault(x => x.ID == product.ID);
+
+
+                    if (dbProduct.Name != product.Name || dbProduct.HopLink != product.HopLink || dbProduct.Description != product.Description || dbProduct.Image != product.Image || dbProduct.Price != product.Price || dbProduct.Featured != product.Featured)
+                    {
+                        db.Entry(product).State = EntityState.Modified;
+                    }
+                }
+                else
+                {
+                    List<EmailCampaign> dbEmailCampaigns = await db.EmailCampaigns.AsNoTracking().Where(x => x.ProductID == product.ID).ToListAsync();
+
+                    // Check to see if any emails have been deleted
+                    foreach (EmailCampaign dbEmailCampaign in dbEmailCampaigns)
+                    {
+                        if (!product.EmailCampaigns.Select(x => x.ID).ToList().Contains(dbEmailCampaign.ID))
+                        {
+                            db.EmailCampaigns.Attach(dbEmailCampaign);
+                            db.EmailCampaigns.Remove(dbEmailCampaign);
+
+                        }
+                    }
+
+                    // Check to see if any email campaigns need to be added or have been modified
+                    foreach (EmailCampaign emailCampaign in product.EmailCampaigns)
+                    {
+                        if (!(dbEmailCampaigns.Count(x => x.ID == emailCampaign.ID) > 0))
+                        {
+                            db.Entry(emailCampaign).State = EntityState.Added;
+                        }
+                        else
+                        {
+                            EmailCampaign dbEmailCampaign = dbEmailCampaigns.FirstOrDefault(x => x.ID == emailCampaign.ID);
+                            if (dbEmailCampaign.Subject != emailCampaign.Subject || dbEmailCampaign.Body != emailCampaign.Body || dbEmailCampaign.Day != emailCampaign.Day)
+                            {
+                                db.Entry(emailCampaign).State = EntityState.Modified;
+                            }
                         }
                     }
                 }
 
-                // Check to see if any product videos need to be added
-                foreach (ProductVideo productVideo in product.ProductVideos)
-                {
-                    if (!(dbProductVideos.Count(x => x.Url == productVideo.Url) > 0))
-                    {
-                        db.Entry(productVideo).State = EntityState.Added;
-                    }
-                }
-
-                // Check to see if any product filters need to be added
-                foreach (ProductFilter productFilter in product.ProductFilters)
-                {
-                    if (!(dbProductFilters.Count(x => x.ID == productFilter.ID) > 0))
-                    {
-                        db.Entry(productFilter).State = EntityState.Added;
-                    }
-                }
-
-                // Check to see if this product has been modified
-                Product dbProduct = db.Products.FirstOrDefault(x => x.ID == product.ID);
-                db.Entry(dbProduct).State = EntityState.Detached;
-
-                if (dbProduct.Name != product.Name || dbProduct.HopLink != product.HopLink || dbProduct.Description != product.Description || dbProduct.Image != product.Image || dbProduct.Price != product.Price || dbProduct.Featured != product.Featured)
-                {
-                    db.Entry(product).State = EntityState.Modified;
-                }
             }
 
             if (db.ChangeTracker.HasChanges())
