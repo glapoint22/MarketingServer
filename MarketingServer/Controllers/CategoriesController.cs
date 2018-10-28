@@ -21,6 +21,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetCategories()
         {
             var categories = await db.Categories
+                .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .Select(x => new {
                     id = x.ID,
@@ -50,6 +51,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetCategories(bool isManager)
         {
             var categories = await db.Categories
+                .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .Select(x => new
                 {

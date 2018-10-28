@@ -15,6 +15,7 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetMail()
         {
             var categories = await db.Categories
+                .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .Select(x => new
                 {

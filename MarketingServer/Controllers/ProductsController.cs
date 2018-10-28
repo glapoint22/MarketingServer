@@ -53,6 +53,7 @@ namespace MarketingServer
             {
                 caption = "Check out our featured products",
                 products = await db.Products
+                        .AsNoTracking()
                         .Where(x => x.Featured)
                         .OrderBy(x => x.Name)
                         .Select(z => new ProductData
@@ -75,6 +76,7 @@ namespace MarketingServer
         private async Task<List<ProductGroup>> GetRecommendedProducts(string customerId)
         {
             return await db.Subscriptions
+                .AsNoTracking()
                 .Where(x => x.CustomerID == customerId && x.Subscribed && !x.Suspended)
                 .Select(x => new ProductGroup
                 {
@@ -136,6 +138,7 @@ namespace MarketingServer
 
             // Get the niche ids based on the product ids
             var tempNicheIds = await db.Products
+                .AsNoTracking()
                 .Where(x => ids.Contains(x.ID))
                 .Where(x => !usedIds.Contains(x.ID))
                 .Where(notSuspended)
@@ -152,6 +155,7 @@ namespace MarketingServer
 
             // Get the products based on the niche ids
             var tempProducts = await db.Products
+                .AsNoTracking()
                 .Where(x => nicheIds.Contains(x.NicheID))
                 .Where(notPurchased)
                 .Where(x => !usedIds.Contains(x.ID))
@@ -417,6 +421,7 @@ namespace MarketingServer
                 totalProducts = products.Count(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
                 products = await productsQuery
+                    .AsNoTracking()
                     .OrderBy(sort, query)
                     .Select(x => new
                     {
@@ -435,6 +440,7 @@ namespace MarketingServer
                     .Take(limit)
                     .ToListAsync(),
                 categories = await db.Categories
+                    .AsNoTracking()
                     .Where(x => x.Niches
                         .Where(z => products
                             .Contains(z.ID)
