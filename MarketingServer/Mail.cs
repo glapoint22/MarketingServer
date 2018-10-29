@@ -4,6 +4,7 @@ using System.Web.Configuration;
 using System.Net.Configuration;
 using System.Net.Mail;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace MarketingServer
 {
@@ -17,12 +18,22 @@ namespace MarketingServer
         
         public Mail(string emailId, Customer customer, string subject, string body)
         {
+            // Get the mail settings from web.config
             Configuration configurationFile = WebConfigurationManager.OpenWebConfiguration(HttpRuntime.AppDomainAppVirtualPath);
             MailSettingsSectionGroup mailSettings = configurationFile.GetSectionGroup("system.net/mailSettings") as MailSettingsSectionGroup;
 
-            this.subject = subject;
-            this.body = string.Format(body, customer.Name, emailId, customer.ID);
+            // Get the domain name
+            string domain = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority;
 
+            // Remove summary from the body
+            body = Regex.Replace(body, @"summary=""[a-zA-Z0-9-.]+""", "");
+
+            // Replace localhost with the domain name
+            body = Regex.Replace(body, @"http://localhost(?::[0-9]+)?", domain);
+
+            // Set the email properties
+            this.subject = subject;
+            this.body = string.Format(body, customer.Name, emailId, customer.ID, domain);
             to = customer.Email;
             from = mailSettings.Smtp.Network.UserName;
         }
