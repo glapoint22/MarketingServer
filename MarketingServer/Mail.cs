@@ -29,6 +29,9 @@ namespace MarketingServer
             // Remove summary from the body
             body = Regex.Replace(body, @"summary=""[a-zA-Z0-9-.]+""", "");
 
+            // Remove title from the body
+            body = Regex.Replace(body, @"title=""[(http(s)?):\/\/(www\.)?a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)""", "");
+
             // Replace localhost with the domain name
             body = Regex.Replace(body, @"http://localhost(?::[0-9]+)?", domain);
 
