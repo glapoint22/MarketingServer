@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MarketingServer;
+using System.Web;
 
 namespace MarketingServer.Controllers
 {
@@ -108,6 +109,9 @@ namespace MarketingServer.Controllers
             )
             .ToListAsync();
 
+            // Remove any unused images in the images directory
+            ImageController.DeleteUnusedImages(await ImageController.GetDBImages());
+            
             return Ok(categories);
         }
 

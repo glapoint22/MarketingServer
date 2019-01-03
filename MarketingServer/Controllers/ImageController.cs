@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
@@ -42,6 +44,51 @@ namespace MarketingServer
         public void DeleteImage(string itemIds)
         {
             DeleteImageFile(itemIds);
+        }
+
+        public static async Task<List<string>> GetDBImages()
+        {
+            MarketingEntities db = new MarketingEntities();
+            List<string> images = new List<string>();
+
+            // Get a list of images in the database
+            images.AddRange(await db.Categories.Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
+            images.AddRange(await db.Niches.Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
+            images.AddRange(await db.Products.Where(x => x.Image != null).Select(x => x.Image).ToListAsync());
+            images.AddRange(await db.CategoryImages.Select(x => x.Name).ToListAsync());
+            images.AddRange(await db.ProductBanners.Select(x => x.Name).ToListAsync());
+
+            // Get the images from emails and leads
+            List<string> bodies = await db.LeadMagnetEmails.Select(x => x.Body).ToListAsync();
+            bodies.AddRange(await db.EmailCampaigns.Select(x => x.Body).ToListAsync());
+            //TODO Add leads images
+            foreach (string body in bodies)
+            {
+                MatchCollection matchList = Regex.Matches(body, @"(?:\/Images\/)([a-z0-9]+\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg))");
+                if (matchList.Count > 0)
+                {
+                    images.AddRange(matchList.Cast<Match>().Select(match => match.Groups[1].Value).ToList());
+                }
+            }
+
+            return images;
+        }
+
+        public static void DeleteUnusedImages(List<string> dbImages)
+        {   
+            // Get all images in the images directory
+            string dir = HttpContext.Current.Server.MapPath("~/Images/");
+            string[] files = Directory.GetFiles(dir);
+
+            // Delete any image that is not in the database
+            foreach (string file in files)
+            {
+                string image = Path.GetFileName(file);
+                if (dbImages.FindIndex(x => x == image) == -1)
+                {
+                    File.Delete(file);
+                }
+            }
         }
     }
 }
