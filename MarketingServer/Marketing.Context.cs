@@ -33,7 +33,6 @@ namespace MarketingServer
         public virtual DbSet<FilterLabel> FilterLabels { get; set; }
         public virtual DbSet<Filter> Filters { get; set; }
         public virtual DbSet<LeadMagnetEmail> LeadMagnetEmails { get; set; }
-        public virtual DbSet<Lead> Leads { get; set; }
         public virtual DbSet<Nich> Niches { get; set; }
         public virtual DbSet<ProductBanner> ProductBanners { get; set; }
         public virtual DbSet<ProductFilter> ProductFilters { get; set; }

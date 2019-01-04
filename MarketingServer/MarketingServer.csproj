@@ -131,7 +131,6 @@
       <LastGenOutput>Marketing.cs</LastGenOutput>
     </Content>
     <Content Include="SQL\Marketing.sql" />
-    <Content Include="UltimateBodyTransformationEmail.html" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -174,9 +173,6 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="Lead.cs">
-      <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
     <Compile Include="LeadMagnetEmail.cs">
       <DependentUpon>Marketing.tt</DependentUpon>

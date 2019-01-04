@@ -18,7 +18,6 @@ namespace MarketingServer
         public Nich()
         {
             this.LeadMagnetEmails = new HashSet<LeadMagnetEmail>();
-            this.Leads = new HashSet<Lead>();
             this.Products = new HashSet<Product>();
             this.Subscriptions = new HashSet<Subscription>();
         }
@@ -28,12 +27,13 @@ namespace MarketingServer
         public int CategoryID { get; set; }
         public string Icon { get; set; }
         public string LeadMagnet { get; set; }
+        public string LeadPage { get; set; }
+        public string LeadMagnetCaption { get; set; }
+        public string LeadPageBody { get; set; }
     
         public virtual Category Category { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<LeadMagnetEmail> LeadMagnetEmails { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Lead> Leads { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Product> Products { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

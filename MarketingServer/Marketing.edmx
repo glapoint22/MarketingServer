@@ -79,24 +79,6 @@
           <Property Name="Body" Type="varchar(max)" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="Leads">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="LeadPage" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="LeadMagnet" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="MainStyle" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="Image" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="Text" Type="varchar(max)" Nullable="false" />
-          <Property Name="TextStyle" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="BarStyle" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="BarText" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="ButtonStyle" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="ButtonText" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="FormButtonText" Type="varchar" MaxLength="100" Nullable="false" />
-          <Property Name="NicheID" Type="int" Nullable="false" />
-        </EntityType>
         <EntityType Name="Niches">
           <Key>
             <PropertyRef Name="ID" />
@@ -106,6 +88,9 @@
           <Property Name="CategoryID" Type="int" Nullable="false" />
           <Property Name="Icon" Type="varchar" MaxLength="255" />
           <Property Name="LeadMagnet" Type="varchar" MaxLength="255" />
+          <Property Name="LeadPage" Type="varchar" MaxLength="255" />
+          <Property Name="LeadMagnetCaption" Type="varchar" MaxLength="255" />
+          <Property Name="LeadPageBody" Type="varchar" MaxLength="255" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -251,20 +236,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Leads__NicheID__5EAA0504">
-          <End Role="Niches" Type="Self.Niches" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="Leads" Type="Self.Leads" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Niches">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Leads">
-              <PropertyRef Name="NicheID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Niches__Category__40257DE4">
           <End Role="Categories" Type="Self.Categories" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -386,7 +357,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabels" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Filters" EntityType="Self.Filters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmails" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Leads" EntityType="Self.Leads" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanners" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilters" Schema="dbo" store:Type="Tables" />
@@ -423,10 +393,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__LeadMagne__Niche__5F9E293D" Association="Self.FK__LeadMagne__Niche__5F9E293D">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Leads__NicheID__5EAA0504" Association="Self.FK__Leads__NicheID__5EAA0504">
-            <End Role="Niches" EntitySet="Niches" />
-            <End Role="Leads" EntitySet="Leads" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__40257DE4" Association="Self.FK__Niches__Category__40257DE4">
             <End Role="Categories" EntitySet="Categories" />
@@ -551,25 +517,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__LeadMagne__Niche__5F9E293D" FromRole="LeadMagnetEmails" ToRole="Niches" />
         </EntityType>
-        <EntityType Name="Lead">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="MainStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Image" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Text" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="TextStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="BarStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="BarText" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ButtonStyle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="FormButtonText" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="NicheID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Nich" Relationship="Self.FK__Leads__NicheID__5EAA0504" FromRole="Leads" ToRole="Niches" />
-        </EntityType>
         <EntityType Name="Nich">
           <Key>
             <PropertyRef Name="ID" />
@@ -579,9 +526,11 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="LeadMagnetCaption" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="LeadPageBody" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Niches" ToRole="Categories" />
           <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__5F9E293D" FromRole="Niches" ToRole="LeadMagnetEmails" />
-          <NavigationProperty Name="Leads" Relationship="Self.FK__Leads__NicheID__5EAA0504" FromRole="Niches" ToRole="Leads" />
           <NavigationProperty Name="Products" Relationship="Self.FK__Products__NicheI__5DB5E0CB" FromRole="Niches" ToRole="Products" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__5CC1BC92" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
@@ -782,20 +731,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__Leads__NicheID__5EAA0504">
-          <End Role="Niches" Type="Self.Nich" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="Leads" Type="Self.Lead" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Niches">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="Leads">
-              <PropertyRef Name="NicheID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Products__NicheI__5DB5E0CB">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -875,7 +810,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabel" />
           <EntitySet Name="Filters" EntityType="Self.Filter" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmail" />
-          <EntitySet Name="Leads" EntityType="Self.Lead" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanner" />
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilter" />
@@ -918,10 +852,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__LeadMagne__Niche__5F9E293D" Association="Self.FK__LeadMagne__Niche__5F9E293D">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
-          </AssociationSet>
-          <AssociationSet Name="FK__Leads__NicheID__5EAA0504" Association="Self.FK__Leads__NicheID__5EAA0504">
-            <End Role="Niches" EntitySet="Niches" />
-            <End Role="Leads" EntitySet="Leads" />
           </AssociationSet>
           <AssociationSet Name="FK__Products__NicheI__5DB5E0CB" Association="Self.FK__Products__NicheI__5DB5E0CB">
             <End Role="Niches" EntitySet="Niches" />
@@ -1030,25 +960,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Leads">
-            <EntityTypeMapping TypeName="MarketingModel.Lead">
-              <MappingFragment StoreEntitySet="Leads">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
-                <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
-                <ScalarProperty Name="MainStyle" ColumnName="MainStyle" />
-                <ScalarProperty Name="Image" ColumnName="Image" />
-                <ScalarProperty Name="Text" ColumnName="Text" />
-                <ScalarProperty Name="TextStyle" ColumnName="TextStyle" />
-                <ScalarProperty Name="BarStyle" ColumnName="BarStyle" />
-                <ScalarProperty Name="BarText" ColumnName="BarText" />
-                <ScalarProperty Name="ButtonStyle" ColumnName="ButtonStyle" />
-                <ScalarProperty Name="ButtonText" ColumnName="ButtonText" />
-                <ScalarProperty Name="FormButtonText" ColumnName="FormButtonText" />
-                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Niches">
             <EntityTypeMapping TypeName="MarketingModel.Nich">
               <MappingFragment StoreEntitySet="Niches">
@@ -1057,6 +968,9 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Icon" ColumnName="Icon" />
                 <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
+                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
+                <ScalarProperty Name="LeadMagnetCaption" ColumnName="LeadMagnetCaption" />
+                <ScalarProperty Name="LeadPageBody" ColumnName="LeadPageBody" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
