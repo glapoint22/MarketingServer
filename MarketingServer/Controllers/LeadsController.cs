@@ -33,9 +33,18 @@ namespace MarketingServer.Controllers
                         id = z.ID,
                         name = z.Name,
                         leadMagnet = z.LeadMagnet,
-                        leadPage = z.LeadPage,
-                        leadMagnetCaption = z.LeadMagnetCaption,
-                        leadPageBody = z.LeadPageBody
+                        leadPages = z.LeadPages
+                                .Where(a => a.NicheID == z.ID)
+                                .Select(a => new {
+                                    id = a.ID,
+                                    title = a.Title,
+                                    body = a.Body,
+                                    pageTitle = a.PageTitle,
+                                })
+                                .ToList()
+                        //leadPage = z.LeadPage,
+                        //leadMagnetCaption = z.LeadMagnetCaption,
+                        //leadPageBody = z.LeadPageBody
                     }).ToList()
                 }
             )
@@ -46,23 +55,23 @@ namespace MarketingServer.Controllers
 
         // GET: api/Leads/5
         //[ResponseType(typeof(Lead))]
-        public async Task<IHttpActionResult> GetLead(string leadPage)
-        {
-            var lead = await db.Niches.Where(x => x.LeadPage == leadPage).Select(x => new
-            {
-                leadMagnetCaption = x.LeadMagnetCaption,
-                leadPageBody = x.LeadPageBody,
-                nicheId = x.ID
-            }).SingleOrDefaultAsync();
+        //public async Task<IHttpActionResult> GetLead(string leadPage)
+        //{
+        //    var lead = await db.Niches.Where(x => x.LeadPage == leadPage).Select(x => new
+        //    {
+        //        leadMagnetCaption = x.LeadMagnetCaption,
+        //        leadPageBody = x.LeadPageBody,
+        //        nicheId = x.ID
+        //    }).SingleOrDefaultAsync();
 
 
-            if (lead == null)
-            {
-                return NotFound();
-            }
+        //    if (lead == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(lead);
-        }
+        //    return Ok(lead);
+        //}
 
         // PUT: api/Leads/5
         //[ResponseType(typeof(void))]

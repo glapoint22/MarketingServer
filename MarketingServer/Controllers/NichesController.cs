@@ -49,6 +49,8 @@ namespace MarketingServer.Controllers
             {
                 if (niche.Name == null)
                 {
+
+                    // ****************************Lead Magent Emails********************************************
                     List<LeadMagnetEmail> dbLeadMagnetEmails = await db.LeadMagnetEmails.AsNoTracking().Where(x => x.NicheID == niche.ID).ToListAsync();
 
                     // Check to see if any emails have been deleted
@@ -78,6 +80,40 @@ namespace MarketingServer.Controllers
                             }
                         }
                     }
+
+
+
+                    // ****************************Lead Pages********************************************
+                    List<LeadPage> dbLeadPages = await db.LeadPages.AsNoTracking().Where(x => x.NicheID == niche.ID).ToListAsync();
+
+                    // Check to see if any lead pages have been deleted
+                    foreach (LeadPage dbLeadPage in dbLeadPages)
+                    {
+                        if (!niche.LeadPages.Select(x => x.ID).ToList().Contains(dbLeadPage.ID))
+                        {
+                            db.LeadPages.Attach(dbLeadPage);
+                            db.LeadPages.Remove(dbLeadPage);
+
+                        }
+                    }
+
+                    // Check to see if any lead pages need to be added or have been modified
+                    foreach (LeadPage leadPage in niche.LeadPages)
+                    {
+                        if (!(dbLeadPages.Count(x => x.ID == leadPage.ID) > 0))
+                        {
+                            db.Entry(leadPage).State = EntityState.Added;
+                        }
+                        else
+                        {
+                            LeadPage dbLeadPage = dbLeadPages.FirstOrDefault(x => x.ID == leadPage.ID);
+                            if (dbLeadPage.Title != leadPage.Title || dbLeadPage.Body != leadPage.Body || dbLeadPage.PageTitle != leadPage.PageTitle)
+                            {
+                                db.Entry(leadPage).State = EntityState.Modified;
+                            }
+                        }
+                    }
+
                 }
                 else
                 {
@@ -88,11 +124,6 @@ namespace MarketingServer.Controllers
                         db.Entry(niche).State = EntityState.Modified;
                     }
                 }
-
-
-
-
-
             }
 
             await db.SaveChangesAsync();

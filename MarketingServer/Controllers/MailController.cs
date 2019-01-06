@@ -31,7 +31,7 @@ namespace MarketingServer.Controllers
                                 .Where(a => a.NicheID == z.ID)
                                 .Select(a => new {
                                     id = a.ID,
-                                    subject = a.Subject,
+                                    title = a.Subject,
                                     body = a.Body
                                 })
                                 .ToList(),
@@ -46,7 +46,7 @@ namespace MarketingServer.Controllers
                                         .Where(a => a.ProductID == p.ID)
                                         .Select(a => new {
                                             id = a.ID,
-                                            subject = a.Subject,
+                                            title = a.Subject,
                                             body = a.Body,
                                             day = a.Day
                                         })

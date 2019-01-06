@@ -102,7 +102,7 @@ select * from customers
 select * from Subscriptions
 select * from CampaignRecords order by subscriptionid, date desc
 select * from Products order by nicheid
-select * from leads
+select * from LeadPages
 select * from LeadMagnetEmails
 select * from ProductVideos
 select * from CategoryImages
@@ -112,7 +112,7 @@ select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
 
-alter table products drop column sku
+alter table niches drop column leadpagebody
 drop table vendors
 
 
@@ -186,12 +186,15 @@ alter table campaignrecords alter column subscriptionID varchar(10) not null
 alter table campaignrecords add foreign key(subscriptionid) references subscriptions(ID) on delete cascade
 
 
-create table LeadMagnetEmails(
+drop table leadpages
+
+create table LeadPages(
 	ID varchar(10) NOT NULL PRIMARY KEY,
-	Subject varchar(255) not null,
+	Title varchar(255) not null,
 	Body varchar(max) not null,
+	PageTitle varchar(255) not null,
 	NicheID int not null,
-	foreign key (nicheid) references niches(id)
+	foreign key (nicheid) references niches(id) on delete cascade
 );
 
 

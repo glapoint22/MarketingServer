@@ -79,6 +79,16 @@
           <Property Name="Body" Type="varchar(max)" Nullable="false" />
           <Property Name="NicheID" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="LeadPages">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Title" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Body" Type="varchar(max)" Nullable="false" />
+          <Property Name="PageTitle" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="NicheID" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="Niches">
           <Key>
             <PropertyRef Name="ID" />
@@ -88,9 +98,6 @@
           <Property Name="CategoryID" Type="int" Nullable="false" />
           <Property Name="Icon" Type="varchar" MaxLength="255" />
           <Property Name="LeadMagnet" Type="varchar" MaxLength="255" />
-          <Property Name="LeadPage" Type="varchar" MaxLength="255" />
-          <Property Name="LeadMagnetCaption" Type="varchar" MaxLength="255" />
-          <Property Name="LeadPageBody" Type="varchar" MaxLength="255" />
         </EntityType>
         <!--Errors Found During Generation:
 warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
@@ -236,6 +243,20 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__LeadPages__Niche__7B4643B2">
+          <End Role="Niches" Type="Self.Niches" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LeadPages" Type="Self.LeadPages" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="LeadPages">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Niches__Category__40257DE4">
           <End Role="Categories" Type="Self.Categories" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -357,6 +378,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabels" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Filters" EntityType="Self.Filters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmails" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LeadPages" EntityType="Self.LeadPages" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Niches" EntityType="Self.Niches" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanners" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilters" Schema="dbo" store:Type="Tables" />
@@ -393,6 +415,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__LeadMagne__Niche__5F9E293D" Association="Self.FK__LeadMagne__Niche__5F9E293D">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LeadPages__Niche__7B4643B2" Association="Self.FK__LeadPages__Niche__7B4643B2">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="LeadPages" EntitySet="LeadPages" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__40257DE4" Association="Self.FK__Niches__Category__40257DE4">
             <End Role="Categories" EntitySet="Categories" />
@@ -517,6 +543,17 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="NicheID" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__LeadMagne__Niche__5F9E293D" FromRole="LeadMagnetEmails" ToRole="Niches" />
         </EntityType>
+        <EntityType Name="LeadPage">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Title" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Body" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PageTitle" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="NicheID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Nich" Relationship="Self.FK__LeadPages__Niche__7B4643B2" FromRole="LeadPages" ToRole="Niches" />
+        </EntityType>
         <EntityType Name="Nich">
           <Key>
             <PropertyRef Name="ID" />
@@ -526,11 +563,9 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="CategoryID" Type="Int32" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="LeadMagnet" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="LeadPage" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="LeadMagnetCaption" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="LeadPageBody" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="Category" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Niches" ToRole="Categories" />
           <NavigationProperty Name="LeadMagnetEmails" Relationship="Self.FK__LeadMagne__Niche__5F9E293D" FromRole="Niches" ToRole="LeadMagnetEmails" />
+          <NavigationProperty Name="LeadPages" Relationship="Self.FK__LeadPages__Niche__7B4643B2" FromRole="Niches" ToRole="LeadPages" />
           <NavigationProperty Name="Products" Relationship="Self.FK__Products__NicheI__5DB5E0CB" FromRole="Niches" ToRole="Products" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Niche__5CC1BC92" FromRole="Niches" ToRole="Subscriptions" />
         </EntityType>
@@ -731,6 +766,20 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK__LeadPages__Niche__7B4643B2">
+          <End Role="Niches" Type="Self.Nich" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="LeadPages" Type="Self.LeadPage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Niches">
+              <PropertyRef Name="ID" />
+            </Principal>
+            <Dependent Role="LeadPages">
+              <PropertyRef Name="NicheID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK__Products__NicheI__5DB5E0CB">
           <End Role="Niches" Type="Self.Nich" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -810,6 +859,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabel" />
           <EntitySet Name="Filters" EntityType="Self.Filter" />
           <EntitySet Name="LeadMagnetEmails" EntityType="Self.LeadMagnetEmail" />
+          <EntitySet Name="LeadPages" EntityType="Self.LeadPage" />
           <EntitySet Name="Niches" EntityType="Self.Nich" />
           <EntitySet Name="ProductBanners" EntityType="Self.ProductBanner" />
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilter" />
@@ -852,6 +902,10 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__LeadMagne__Niche__5F9E293D" Association="Self.FK__LeadMagne__Niche__5F9E293D">
             <End Role="Niches" EntitySet="Niches" />
             <End Role="LeadMagnetEmails" EntitySet="LeadMagnetEmails" />
+          </AssociationSet>
+          <AssociationSet Name="FK__LeadPages__Niche__7B4643B2" Association="Self.FK__LeadPages__Niche__7B4643B2">
+            <End Role="Niches" EntitySet="Niches" />
+            <End Role="LeadPages" EntitySet="LeadPages" />
           </AssociationSet>
           <AssociationSet Name="FK__Products__NicheI__5DB5E0CB" Association="Self.FK__Products__NicheI__5DB5E0CB">
             <End Role="Niches" EntitySet="Niches" />
@@ -960,6 +1014,17 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="LeadPages">
+            <EntityTypeMapping TypeName="MarketingModel.LeadPage">
+              <MappingFragment StoreEntitySet="LeadPages">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Body" ColumnName="Body" />
+                <ScalarProperty Name="PageTitle" ColumnName="PageTitle" />
+                <ScalarProperty Name="NicheID" ColumnName="NicheID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Niches">
             <EntityTypeMapping TypeName="MarketingModel.Nich">
               <MappingFragment StoreEntitySet="Niches">
@@ -968,9 +1033,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Icon" ColumnName="Icon" />
                 <ScalarProperty Name="LeadMagnet" ColumnName="LeadMagnet" />
-                <ScalarProperty Name="LeadPage" ColumnName="LeadPage" />
-                <ScalarProperty Name="LeadMagnetCaption" ColumnName="LeadMagnetCaption" />
-                <ScalarProperty Name="LeadPageBody" ColumnName="LeadPageBody" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
