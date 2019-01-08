@@ -61,7 +61,7 @@ namespace MarketingServer
             // Get the images from emails and leads
             List<string> bodies = await db.LeadMagnetEmails.Select(x => x.Body).ToListAsync();
             bodies.AddRange(await db.EmailCampaigns.Select(x => x.Body).ToListAsync());
-            //TODO Add leads images
+            bodies.AddRange(await db.LeadPages.Select(x => x.Body).ToListAsync());
             foreach (string body in bodies)
             {
                 MatchCollection matchList = Regex.Matches(body, @"(?:\/Images\/)([a-z0-9]+\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg))");
