@@ -26,10 +26,11 @@ namespace MarketingServer.Controllers
                         {
                             id = z.ID,
                             name = z.Name,
-                            leadMagnet = z.LeadMagnet,
+                            leadMagnet = z.LeadPages.Where(y => y.NicheID == z.ID).Select(y => y.LeadMagnet).FirstOrDefault(),
                             emails = z.LeadMagnetEmails
                                 .Where(a => a.NicheID == z.ID)
-                                .Select(a => new {
+                                .Select(a => new
+                                {
                                     id = a.ID,
                                     title = a.Subject,
                                     body = a.Body
@@ -44,7 +45,8 @@ namespace MarketingServer.Controllers
                                     emails = p.EmailCampaigns
                                         .OrderBy(a => a.Day)
                                         .Where(a => a.ProductID == p.ID)
-                                        .Select(a => new {
+                                        .Select(a => new
+                                        {
                                             id = a.ID,
                                             title = a.Subject,
                                             body = a.Body,

@@ -151,7 +151,7 @@
     <Compile Include="Controllers\FilterLabelsController.cs" />
     <Compile Include="Controllers\FiltersController.cs" />
     <Compile Include="Controllers\ImageController.cs" />
-    <Compile Include="Controllers\LeadsController.cs" />
+    <Compile Include="Controllers\LeadPagesController.cs" />
     <Compile Include="Controllers\MailController.cs" />
     <Compile Include="Controllers\NichesController.cs" />
     <Compile Include="Controllers\NotificationsController.cs" />

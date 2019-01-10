@@ -18,6 +18,7 @@ namespace MarketingServer
         public string Title { get; set; }
         public string Body { get; set; }
         public string PageTitle { get; set; }
+        public string LeadMagnet { get; set; }
         public int NicheID { get; set; }
     
         public virtual Nich Nich { get; set; }
