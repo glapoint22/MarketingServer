@@ -107,7 +107,7 @@ namespace MarketingServer.Controllers
                         else
                         {
                             LeadPage dbLeadPage = dbLeadPages.FirstOrDefault(x => x.ID == leadPage.ID);
-                            if (dbLeadPage.Title != leadPage.Title || dbLeadPage.Body != leadPage.Body || dbLeadPage.PageTitle != leadPage.PageTitle)
+                            if (dbLeadPage.Title != leadPage.Title || dbLeadPage.Body != leadPage.Body || dbLeadPage.PageTitle != leadPage.PageTitle || dbLeadPage.LeadMagnet != leadPage.LeadMagnet)
                             {
                                 db.Entry(leadPage).State = EntityState.Modified;
                             }

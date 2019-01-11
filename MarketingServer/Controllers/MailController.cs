@@ -26,7 +26,17 @@ namespace MarketingServer.Controllers
                         {
                             id = z.ID,
                             name = z.Name,
-                            leadMagnet = z.LeadPages.Where(y => y.NicheID == z.ID).Select(y => y.LeadMagnet).FirstOrDefault(),
+                            leadPages = z.LeadPages
+                                .Where(a => a.NicheID == z.ID)
+                                .Select(a => new {
+                                    id = a.ID,
+                                    title = a.Title,
+                                    body = a.Body,
+                                    pageTitle = a.PageTitle,
+                                    leadMagnet = a.LeadMagnet,
+                                    nicheId = z.ID
+                                })
+                                .ToList(),
                             emails = z.LeadMagnetEmails
                                 .Where(a => a.NicheID == z.ID)
                                 .Select(a => new

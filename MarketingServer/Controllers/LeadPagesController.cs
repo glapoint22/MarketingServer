@@ -33,6 +33,16 @@ namespace MarketingServer.Controllers
                     {
                         id = z.ID,
                         name = z.Name,
+                        leadMagnetEmails = z.LeadMagnetEmails
+                                .Where(a => a.NicheID == z.ID)
+                                .Select(a => new
+                                {
+                                    id = a.ID,
+                                    subject = a.Subject,
+                                    body = a.Body,
+                                    nicheId = z.ID
+                                })
+                                .ToList(),
                         leadPages = z.LeadPages
                                 .Where(a => a.NicheID == z.ID)
                                 .Select(a => new {
@@ -52,10 +62,19 @@ namespace MarketingServer.Controllers
         }
 
         // GET: api/LeadPages/5
-        [ResponseType(typeof(LeadPage))]
+        //[ResponseType(typeof(LeadPage))]
         public async Task<IHttpActionResult> GetLeadPage(string pageTitle)
         {
-            LeadPage leadPage = await db.LeadPages.FindAsync(pageTitle);
+            var leadPage = await db.LeadPages.Where(x => x.PageTitle == pageTitle).Select(x => new
+            {
+                title = x.Title,
+                body = x.Body,
+                pageTitle = x.PageTitle,
+                leadMagnet = x.LeadMagnet,
+                nicheId = x.NicheID
+            })
+            .SingleOrDefaultAsync();
+
             if (leadPage == null)
             {
                 return NotFound();
@@ -105,50 +124,11 @@ namespace MarketingServer.Controllers
         {
             HttpPostedFile postedFile = HttpContext.Current.Request.Files["file"];
             string filePath = HttpContext.Current.Server.MapPath("~/Downloads/" + postedFile.FileName);
-
-            //int imageIndex = filePath.LastIndexOf("\\") + 1;
-            //string imageName = filePath.Substring(imageIndex);
-            //int imageExt = imageName.IndexOf(".");
-
-            //string newImageName = Guid.NewGuid().ToString("N") + imageName.Substring(imageExt);
-
-            //filePath = filePath.Substring(0, imageIndex) + newImageName;
-
-
             postedFile.SaveAs(filePath);
-
 
             return Request.CreateResponse(HttpStatusCode.OK, postedFile.FileName);
         }
-        //[ResponseType(typeof(LeadPage))]
-        //public async Task<IHttpActionResult> PostLeadPage(LeadPage leadPage)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    db.LeadPages.Add(leadPage);
-
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (LeadPageExists(leadPage.ID))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return CreatedAtRoute("DefaultApi", new { id = leadPage.ID }, leadPage);
-        //}
-
+        
         // DELETE: api/LeadPages/5
         [ResponseType(typeof(LeadPage))]
         public async Task<IHttpActionResult> DeleteLeadPage(string id)
