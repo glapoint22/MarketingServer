@@ -73,22 +73,5 @@ namespace MarketingServer
 
             return images;
         }
-
-        public static void DeleteUnusedImages(List<string> dbImages)
-        {   
-            // Get all images in the images directory
-            string dir = HttpContext.Current.Server.MapPath("~/Images/");
-            string[] files = Directory.GetFiles(dir);
-
-            // Delete any image that is not in the database
-            foreach (string file in files)
-            {
-                string image = Path.GetFileName(file);
-                if (dbImages.FindIndex(x => x == image) == -1)
-                {
-                    File.Delete(file);
-                }
-            }
-        }
     }
 }

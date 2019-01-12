@@ -11,6 +11,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using MarketingServer;
 using System.Web;
+using System.IO;
 
 namespace MarketingServer.Controllers
 {
@@ -110,8 +111,13 @@ namespace MarketingServer.Controllers
             .ToListAsync();
 
             // Remove any unused images in the images directory
-            ImageController.DeleteUnusedImages(await ImageController.GetDBImages());
-            
+            DeleteUnusedFiles(await ImageController.GetDBImages(), "~/Images/");
+
+
+            // Remove any unused files in the downloads directory
+            DeleteUnusedFiles(await db.LeadPages.Select(x => x.LeadMagnet).ToListAsync(), "~/Downloads/");
+
+
             return Ok(categories);
         }
 
@@ -262,6 +268,23 @@ namespace MarketingServer.Controllers
         private bool CategoryExists(int id)
         {
             return db.Categories.Count(e => e.ID == id) > 0;
+        }
+
+        public static void DeleteUnusedFiles(List<string> dbFiles, string directory)
+        {
+            // Get all files in the directory
+            string dir = HttpContext.Current.Server.MapPath(directory);
+            string[] files = Directory.GetFiles(dir);
+
+            // Delete any file that is not in the database
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileName(file);
+                if (dbFiles.FindIndex(x => x == fileName) == -1)
+                {
+                    File.Delete(file);
+                }
+            }
         }
     }
 }
