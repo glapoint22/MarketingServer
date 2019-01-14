@@ -1,0 +1,177 @@
+<tr>
+    <td height="10"></td>
+</tr>
+<tr>
+    <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+        <!--[if (gte mso 9)|(IE)]><table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#858585"><tr><td><![endif]-->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#858585" style="max-width: 600px;">
+            <tr>
+                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                    <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="255"style="text-align:center"><![endif]-->
+                    <div style="width: 100%; max-width: 255px; display: inline-block; vertical-align: top;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td height="10"></td>
+                            </tr>
+                            <tr>
+                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                    <!--[if (gte mso 9)|(IE)]><table width="175" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 175px;">
+                                        <tr>
+											<td>
+												<a href="{3}" target="_blank"><img src="{3}/Assets/logo.png" width="175" style="width: 100%; display: block;"></a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(IE)]></td><td valign="top" width="345"style="text-align:center"><![endif]-->
+                    <div style="width: 100%; max-width: 345px; display: inline-block; vertical-align: top;">
+                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                            <tr>
+                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                    <!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50"style="text-align:center"><![endif]-->
+                                    <div style="width: 100%; max-width: 50px; display: inline-block; vertical-align: top;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                                    <!--[if (gte mso 9)|(IE)]><table width="33" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/twitter.png" width="33" style="width: 100%; display: block;"></a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!--[if (gte mso 9)|(IE)]></td><td valign="top" width="50"style="text-align:center"><![endif]-->
+                                    <div style="width: 100%; max-width: 50px; display: inline-block; vertical-align: top;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                                    <!--[if (gte mso 9)|(IE)]><table width="33" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/instagram.png" width="33" style="width: 100%; display: block;"></a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!--[if (gte mso 9)|(IE)]></td><td valign="top" width="50"style="text-align:center"><![endif]-->
+                                    <div style="width: 100%; max-width: 50px; display: inline-block; vertical-align: top;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                                    <!--[if (gte mso 9)|(IE)]><table width="33" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/facebook.png" width="33" style="width: 100%; display: block;"></a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height=10"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!--[if (gte mso 9)|(IE)]></td><td valign="top" width="50"style="text-align:center"><![endif]-->
+                                    <div style="width: 100%; max-width: 50px; display: inline-block; vertical-align: top;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                            <tr>
+                                                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                                                    <!--[if (gte mso 9)|(IE)]><table width="33" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                                                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/pinterest.png" width="33" style="width: 100%; display: block;"></a>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td height="10"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                </td>
+            </tr>
+            <tr>
+                <td height="15"></td>
+            </tr>
+            <tr>
+                <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
+                    <!--[if (gte mso 9)|(IE)]><table width="295" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 295px;">
+                        <tr>
+                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Niche Shack</span></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">575 Moon Hill Rd, Lake George, NY 12845</span></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;"><span style="color: rgb(240, 240, 240); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;"><br></span></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="{3}/mail?eid={1}&amp;cid={2}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;"><a href="{3}/preferences?cid={2}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
+                        </tr>
+                    </table>
+                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+                </td>
+            </tr>
+            <tr>
+                <td height="7"></td>
+            </tr>
+        </table>
+        <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+    </td>
+</tr>
+</table>
+<!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
+</td>
+</tr>
+</table>

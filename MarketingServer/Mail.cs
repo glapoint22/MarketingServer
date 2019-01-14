@@ -5,6 +5,7 @@ using System.Net.Configuration;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace MarketingServer
 {
@@ -34,6 +35,24 @@ namespace MarketingServer
 
             // Replace localhost with the domain name
             body = Regex.Replace(body, @"http://localhost(?::[0-9]+)?", domain);
+
+            // Get the email footer
+            string filePath = HttpContext.Current.Server.MapPath("~/EmailFooter.txt");
+            StreamReader file = new StreamReader(filePath);
+
+            // Get the footer from the file
+            string footer = "";
+            string line;
+
+            while((line = file.ReadLine()) != null)
+            {
+                footer += line;
+            }
+
+            file.Close();
+
+            // Add the footer to the body
+            body = Regex.Replace(body, @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$", footer);
 
             // Set the email properties
             this.subject = subject;
