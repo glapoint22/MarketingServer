@@ -10,7 +10,7 @@ namespace MarketingServer.Controllers
 {
     public class MailController : ApiController
     {
-        private MarketingEntities db = new MarketingEntities();
+        private static MarketingEntities db = new MarketingEntities();
 
         public async Task<IHttpActionResult> GetMail()
         {
@@ -76,17 +76,41 @@ namespace MarketingServer.Controllers
 
         public async Task<IHttpActionResult> GetMail(string emailId, string customerId)
         {
-            string emailBody = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
+            var email = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => new {
+                nicheId = e.Product.NicheID,
+                body = e.Body,
+                productId = e.ProductID
+            })
+            .FirstOrDefaultAsync();
 
-            if (emailBody == null)
+            
+
+            if (email == null)
             {
-                emailBody = await db.LeadMagnetEmails.Where(e => e.ID == emailId).Select(e => e.Body).FirstOrDefaultAsync();
+                email = await db.LeadMagnetEmails.Where(e => e.ID == emailId).Select(e => new
+                {
+                    nicheId = e.NicheID,
+                    body = e.Body,
+                    productId = string.Empty
+                })
+                .FirstOrDefaultAsync();
 
-                if(emailBody == null) return BadRequest();
+                if (email == null) return BadRequest();
             }
 
-            Mail mail = new Mail(emailId, await db.Customers.Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", emailBody);
+            Mail mail = new Mail(emailId, await db.Customers.Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
             return Ok(mail.body);
+        }
+
+        public static async Task<List<Product>> GetRelatedProducts(int nicheId, string emailId, string customerId, string productId)
+        {
+            return await db.Products.Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
+                            .Where(a => a.SubscriptionID == db.Subscriptions.Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended).Select(x => x.ID).FirstOrDefault() && a.ProductPurchased)
+                            .Select(a => a.ProductID)
+                            .ToList()
+                            .Contains(z.ID))
+                            .OrderBy(z => z.Name)
+                            .ToListAsync();
         }
     }
 }

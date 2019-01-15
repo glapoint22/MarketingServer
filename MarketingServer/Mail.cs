@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Collections.Generic;
 
 namespace MarketingServer
 {
@@ -17,7 +18,7 @@ namespace MarketingServer
         public string subject;
         public string body;
         
-        public Mail(string emailId, Customer customer, string subject, string body)
+        public Mail(string emailId, Customer customer, string subject, string body, List<Product> products)
         {
             // Get the mail settings from web.config
             Configuration configurationFile = WebConfigurationManager.OpenWebConfiguration(HttpRuntime.AppDomainAppVirtualPath);
@@ -51,6 +52,8 @@ namespace MarketingServer
 
             file.Close();
 
+            body = Regex.Replace(body, @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$", AddProducts(products));
+
             // Add the footer to the body
             body = Regex.Replace(body, @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$", footer);
 
@@ -66,6 +69,12 @@ namespace MarketingServer
             MailMessage mailMessage = new MailMessage(from, to, subject, body);
             mailMessage.IsBodyHtml = true;
             await smtpClient.SendMailAsync(mailMessage);
+        }
+
+        public string AddProducts(List<Product> products)
+        {
+            string caption = "<tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999828338623\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#858585\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#858585\"  style=\"max-width: 600px;\"><tr><td height=\"8\"></td></tr><tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999732971519\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"  style=\"max-width: 600px;\"><tr><td style=\"text-align: center;\"><span style=\"color: rgb(214, 214, 214); font-size: 30px; font-family: &quot;Times New Roman&quot;, Times, serif; font-weight: bold; font-style: italic;\">Check out these similar products</span></td></tr></table><!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]--></td></tr><tr><td height=\"8\"></td></tr></table><!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]--></td></tr><tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999999994179\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ededed\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ededed\"  style=\"max-width: 600px;\"><tr><td height=\"10\"></td></tr>";
+            return caption;
         }
     }
 }

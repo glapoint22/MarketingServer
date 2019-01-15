@@ -71,7 +71,7 @@ namespace MarketingServer.Controllers
                 }
                 ).SingleAsync();
 
-                Mail mail = new Mail(email.id, customer, email.subject, email.body);
+                Mail mail = new Mail(email.id, customer, email.subject, email.body, await MailController.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
                 await mail.Send();
 
                 response = new
