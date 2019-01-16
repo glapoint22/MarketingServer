@@ -41,6 +41,13 @@ namespace MarketingServer
             string filePath = HttpContext.Current.Server.MapPath("~/EmailFooter.txt");
             StreamReader file = new StreamReader(filePath);
 
+            string emailEndPattern = @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$";
+
+
+
+            body = Regex.Replace(body, emailEndPattern, AddProducts(products));
+
+
             // Get the footer from the file
             string footer = "";
             string line;
@@ -52,10 +59,9 @@ namespace MarketingServer
 
             file.Close();
 
-            body = Regex.Replace(body, @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$", AddProducts(products));
 
             // Add the footer to the body
-            body = Regex.Replace(body, @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$", footer);
+            body = Regex.Replace(body, emailEndPattern, footer);
 
             // Set the email properties
             this.subject = subject;
@@ -73,8 +79,102 @@ namespace MarketingServer
 
         public string AddProducts(List<Product> products)
         {
-            string caption = "<tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999828338623\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#858585\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#858585\"  style=\"max-width: 600px;\"><tr><td height=\"8\"></td></tr><tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999732971519\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\"  style=\"max-width: 600px;\"><tr><td style=\"text-align: center;\"><span style=\"color: rgb(214, 214, 214); font-size: 30px; font-family: &quot;Times New Roman&quot;, Times, serif; font-weight: bold; font-style: italic;\">Check out these similar products</span></td></tr></table><!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]--></td></tr><tr><td height=\"8\"></td></tr></table><!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]--></td></tr><tr><td align=\"center\" valign=\"top\" style=\"padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;\"><!--[if (gte mso 9)|(IE)]><table width=\"599.9999999994179\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ededed\"><tr><td><![endif]--><table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" bgcolor=\"#ededed\"  style=\"max-width: 600px;\"><tr><td height=\"10\"></td></tr>";
-            return caption;
+            // Get the email footer
+            string filePath = HttpContext.Current.Server.MapPath("~/Products.txt");
+            StreamReader file = new StreamReader(filePath);
+
+            string line;
+            string caption = string.Empty;
+            string productsRow = string.Empty;
+            //string productContainer = string.Empty;
+            string singleProduct = string.Empty;
+            string multipleProducts = string.Empty;
+            string product = string.Empty;
+            //string imageContainer = string.Empty;
+            //string imageContainerEnd = string.Empty;
+            string productEnd = string.Empty;
+            string productsRowEnd = string.Empty;
+            string documentEnd = string.Empty;
+            string productsText = string.Empty;
+
+            while ((line = file.ReadLine()) != "<!--Product Row-->")
+            {
+                caption += line.Trim();
+            }
+
+            while ((line = file.ReadLine()).Trim() != "<!--Single Product-->")
+            {
+                productsRow += line.Trim();
+            }
+
+            while ((line = file.ReadLine()).Trim() != "<!--Multiple Products-->")
+            {
+                singleProduct += line.Trim();
+            }
+
+            while ((line = file.ReadLine()).Trim() != "<!--Product-->")
+            {
+                multipleProducts += line.Trim();
+            }
+
+            while ((line = file.ReadLine()).Trim() != "<!--Product End-->")
+            {
+                product += line.Trim();
+            }
+
+            //while ((line = file.ReadLine()).Trim() != "<!--Image Container End-->")
+            //{
+            //    imageContainer += line.Trim();
+            //}
+
+            //while ((line = file.ReadLine()).Trim() != "<!--Product End-->")
+            //{
+            //    imageContainerEnd += line.Trim();
+            //}
+
+            while ((line = file.ReadLine()).Trim() != "<!--Product Row End-->")
+            {
+                productEnd += line.Trim();
+            }
+
+            while ((line = file.ReadLine()).Trim() != "<!--Document End-->")
+            {
+                productsRowEnd += line.Trim();
+            }
+
+            while ((line = file.ReadLine()) != null)
+            {
+                documentEnd += line.Trim();
+            }
+
+            file.Close();
+
+            
+
+            for(int i = 0; i < products.Count; i++)
+            {
+                if(i % 2 == 0)
+                {
+                    productsText += productsRow + (i == products.Count - 1 ? singleProduct : multipleProducts);
+                }else
+                {
+                    productsText += multipleProducts;
+                }
+
+
+
+                productsText += product;
+
+                productsText += productEnd +  (i != products.Count - 1 ? "</div>" : "");
+
+                if (i % 2 == 1)
+                {
+                    productsText += productsRowEnd;
+                }
+
+            }
+
+            return caption + productsText + documentEnd;
         }
     }
 }

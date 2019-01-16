@@ -28,7 +28,8 @@ namespace MarketingServer.Controllers
                             name = z.Name,
                             leadPages = z.LeadPages
                                 .Where(a => a.NicheID == z.ID)
-                                .Select(a => new {
+                                .Select(a => new
+                                {
                                     id = a.ID,
                                     title = a.Title,
                                     body = a.Body,
@@ -76,14 +77,15 @@ namespace MarketingServer.Controllers
 
         public async Task<IHttpActionResult> GetMail(string emailId, string customerId)
         {
-            var email = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => new {
+            var email = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => new
+            {
                 nicheId = e.Product.NicheID,
                 body = e.Body,
                 productId = e.ProductID
             })
             .FirstOrDefaultAsync();
 
-            
+
 
             if (email == null)
             {
@@ -104,13 +106,18 @@ namespace MarketingServer.Controllers
 
         public static async Task<List<Product>> GetRelatedProducts(int nicheId, string emailId, string customerId, string productId)
         {
-            return await db.Products.Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
-                            .Where(a => a.SubscriptionID == db.Subscriptions.Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended).Select(x => x.ID).FirstOrDefault() && a.ProductPurchased)
-                            .Select(a => a.ProductID)
-                            .ToList()
-                            .Contains(z.ID))
-                            .OrderBy(z => z.Name)
-                            .ToListAsync();
+            return await db.Products
+                .Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
+                    .Where(a => a.SubscriptionID == db.Subscriptions
+                            .Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended)
+                            .Select(x => x.ID)
+                            .FirstOrDefault()
+                        && a.ProductPurchased)
+                    .Select(a => a.ProductID)
+                    .ToList()
+                    .Contains(z.ID))
+                .OrderBy(z => z.Name)
+                .ToListAsync();
         }
     }
 }

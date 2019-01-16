@@ -131,6 +131,7 @@
       <DependentUpon>Marketing.edmx</DependentUpon>
       <LastGenOutput>Marketing.cs</LastGenOutput>
     </Content>
+    <Content Include="Products.txt" />
     <Content Include="SQL\Marketing.sql" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
