@@ -1,4 +1,10 @@
-﻿<tr>
+﻿<!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="300"style="text-align:center"><![endif]-->
+<!--Outlook Product Continue-->
+<!--[if (gte mso 9)|(IE)]></td><td valign="top" width="300"style="text - align:center"><![endif]-->
+<!--Outlook Product End-->
+<!--[if (gte mso 9)| (IE)]></td></tr></table><![endif]-->
+<!--Caption-->
+<tr>
     <td align="center" valign="top" style="padding-left: 0px; padding-right: 0px; padding-bottom: 0px; font-size: 0px;">
         <!--[if (gte mso 9)|(IE)]><table width="600" cellpadding="0" cellspacing="0" border="0" bgcolor="#ededed"><tr><td><![endif]-->
         <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ededed" style="max-width: 600px;">
@@ -34,7 +40,6 @@
 					<!--[if (gte mso 9)|(IE)]><table width="300" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
 					<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 300px;">
 					<!--Multiple Products-->
-					<!--[if (gte mso 9)|(IE)]><table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="300"style="text-align:center"><![endif]-->
 					<div style="width: 100%; max-width: 300px; display: inline-block; vertical-align: top;">
 					<table width="100%" cellpadding="0" cellspacing="0" border="0">
 						<!--Product-->
@@ -44,8 +49,8 @@
                                 <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 290px;">
                                     <tr>
                                         <td>
-                                            <a href="http://56e2c0n4zhqi1se007udp9fq1122.hop.clickbank.net/?tid={2}BD620F2E3F" target="_blank">
-												<img src="{3}/Images/ProductExample.png" width="290" style="width: 100%; display: block;">
+                                            <a href="{0}" target="_blank">
+												<img src="{2}/Images/{1}" width="290" style="width: 100%; display: block;">
 											</a>
 										<!--Product End-->
                                         </td>
@@ -58,7 +63,6 @@
                             <td height="20"></td>
                         </tr>
                     </table>
-                    <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
 					<!--Product Row End-->
 				</td>
             </tr>

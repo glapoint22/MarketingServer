@@ -77,36 +77,46 @@ namespace MarketingServer.Controllers
 
         public async Task<IHttpActionResult> GetMail(string emailId, string customerId)
         {
-            var email = await db.EmailCampaigns.Where(e => e.ID == emailId).Select(e => new
-            {
-                nicheId = e.Product.NicheID,
-                body = e.Body,
-                productId = e.ProductID
-            })
-            .FirstOrDefaultAsync();
-
-
-
-            if (email == null)
-            {
-                email = await db.LeadMagnetEmails.Where(e => e.ID == emailId).Select(e => new
+            // Search email campaigns for this email id
+            var email = await db.EmailCampaigns
+                .AsNoTracking()
+                .Where(e => e.ID == emailId)
+                .Select(e => new
                 {
-                    nicheId = e.NicheID,
+                    nicheId = e.Product.NicheID,
                     body = e.Body,
-                    productId = string.Empty
+                    productId = e.ProductID
                 })
                 .FirstOrDefaultAsync();
 
+
+            // If email was not in email campaigns, search in leadmagnet emails
+            if (email == null)
+            {
+                email = await db.LeadMagnetEmails
+                    .AsNoTracking()
+                    .Where(e => e.ID == emailId)
+                    .Select(e => new
+                    {
+                        nicheId = e.NicheID,
+                        body = e.Body,
+                        productId = string.Empty
+                    })
+                .FirstOrDefaultAsync();
+
+                // If not found, return bad request
                 if (email == null) return BadRequest();
             }
 
-            Mail mail = new Mail(emailId, await db.Customers.Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
+            // Make a new mail instance
+            Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
             return Ok(mail.body);
         }
 
         public static async Task<List<Product>> GetRelatedProducts(int nicheId, string emailId, string customerId, string productId)
         {
             return await db.Products
+                .AsNoTracking()
                 .Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
                     .Where(a => a.SubscriptionID == db.Subscriptions
                             .Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended)

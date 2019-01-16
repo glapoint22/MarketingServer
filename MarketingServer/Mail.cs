@@ -17,7 +17,7 @@ namespace MarketingServer
         public string to;
         public string subject;
         public string body;
-        
+
         public Mail(string emailId, Customer customer, string subject, string body, List<Product> products)
         {
             // Get the mail settings from web.config
@@ -37,31 +37,15 @@ namespace MarketingServer
             // Replace localhost with the domain name
             body = Regex.Replace(body, @"http://localhost(?::[0-9]+)?", domain);
 
-            // Get the email footer
-            string filePath = HttpContext.Current.Server.MapPath("~/EmailFooter.txt");
-            StreamReader file = new StreamReader(filePath);
 
+            // Get the end of the email
             string emailEndPattern = @"<\/table><!--\[if \(gte mso 9\)\|\(IE\)\]><\/td><\/tr><\/table><!\[endif\]--><\/td><\/tr><\/table>$";
 
+            // Add products
+            if(products.Count > 0) body = Regex.Replace(body, emailEndPattern, AddProducts(products, domain));
 
-
-            body = Regex.Replace(body, emailEndPattern, AddProducts(products));
-
-
-            // Get the footer from the file
-            string footer = "";
-            string line;
-
-            while((line = file.ReadLine()) != null)
-            {
-                footer += line;
-            }
-
-            file.Close();
-
-
-            // Add the footer to the body
-            body = Regex.Replace(body, emailEndPattern, footer);
+            // Add the footer
+            body = Regex.Replace(body, emailEndPattern, AddFooter());
 
             // Set the email properties
             this.subject = subject;
@@ -77,25 +61,62 @@ namespace MarketingServer
             await smtpClient.SendMailAsync(mailMessage);
         }
 
-        public string AddProducts(List<Product> products)
+        public string AddFooter()
         {
             // Get the email footer
+            string filePath = HttpContext.Current.Server.MapPath("~/EmailFooter.txt");
+            StreamReader file = new StreamReader(filePath);
+
+            // Read the text from the file
+            string footer = "";
+            string line;
+
+            while ((line = file.ReadLine()) != null)
+            {
+                footer += line.Trim();
+            }
+
+            file.Close();
+
+            return footer;
+        }
+
+        public string AddProducts(List<Product> products, string domain)
+        {
+            // Read the products text
             string filePath = HttpContext.Current.Server.MapPath("~/Products.txt");
             StreamReader file = new StreamReader(filePath);
 
             string line;
             string caption = string.Empty;
             string productsRow = string.Empty;
-            //string productContainer = string.Empty;
             string singleProduct = string.Empty;
             string multipleProducts = string.Empty;
             string product = string.Empty;
-            //string imageContainer = string.Empty;
-            //string imageContainerEnd = string.Empty;
             string productEnd = string.Empty;
             string productsRowEnd = string.Empty;
             string documentEnd = string.Empty;
             string productsText = string.Empty;
+            string outlookProductStart = string.Empty;
+            string outlookProductContinue = string.Empty;
+            string outlookProductEnd = string.Empty;
+
+
+            // Read the sections of the file
+            while ((line = file.ReadLine()) != "<!--Outlook Product Continue-->")
+            {
+                outlookProductStart += line.Trim();
+            }
+
+            while ((line = file.ReadLine()) != "<!--Outlook Product End-->")
+            {
+                outlookProductContinue += line.Trim();
+            }
+
+            while ((line = file.ReadLine()) != "<!--Caption-->")
+            {
+                outlookProductEnd += line.Trim();
+            }
 
             while ((line = file.ReadLine()) != "<!--Product Row-->")
             {
@@ -122,16 +143,6 @@ namespace MarketingServer
                 product += line.Trim();
             }
 
-            //while ((line = file.ReadLine()).Trim() != "<!--Image Container End-->")
-            //{
-            //    imageContainer += line.Trim();
-            //}
-
-            //while ((line = file.ReadLine()).Trim() != "<!--Product End-->")
-            //{
-            //    imageContainerEnd += line.Trim();
-            //}
-
             while ((line = file.ReadLine()).Trim() != "<!--Product Row End-->")
             {
                 productEnd += line.Trim();
@@ -149,29 +160,33 @@ namespace MarketingServer
 
             file.Close();
 
-            
 
-            for(int i = 0; i < products.Count; i++)
-            {
-                if(i % 2 == 0)
+            // Loop through all the products
+            for (int i = 0; i < products.Count; i++)
+            {   
+                // First product in the row
+                if (i % 2 == 0)
                 {
-                    productsText += productsRow + (i == products.Count - 1 ? singleProduct : multipleProducts);
-                }else
+                    productsText += productsRow + (i == products.Count - 1 ? singleProduct : outlookProductStart + multipleProducts);
+                }
+                // Last product in the row
+                else
                 {
-                    productsText += multipleProducts;
+                    productsText += outlookProductContinue + multipleProducts;
                 }
 
 
+                // Get product info
+                productsText += string.Format(product, products[i].HopLink, products[i].Image, domain);
 
-                productsText += product;
+                // End of product
+                productsText += productEnd + (i != products.Count - 1 ? "</div>" : "");
 
-                productsText += productEnd +  (i != products.Count - 1 ? "</div>" : "");
-
-                if (i % 2 == 1)
+                // End of row
+                if (i % 2 == 1 || i == products.Count - 1)
                 {
-                    productsText += productsRowEnd;
+                    productsText += outlookProductEnd + productsRowEnd;
                 }
-
             }
 
             return caption + productsText + documentEnd;

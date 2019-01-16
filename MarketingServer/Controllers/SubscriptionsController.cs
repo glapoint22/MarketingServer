@@ -31,7 +31,7 @@ namespace MarketingServer.Controllers
             bool isExistingCustomer = false;
 
             //See if we have an existing customer
-            string id = await db.Customers.Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
+            string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
             if (id != null) isExistingCustomer = true;
 
              //Set the customer
@@ -40,7 +40,7 @@ namespace MarketingServer.Controllers
             if(subscriptionInfo.leadMagnet != null)
             {
                 //Check to see if this customer is subscribed to this niche
-                Subscription subscription = await db.Subscriptions.Where(x => x.CustomerID == customer.ID && x.NicheID == subscriptionInfo.nicheId).FirstOrDefaultAsync();
+                Subscription subscription = await db.Subscriptions.AsNoTracking().Where(x => x.CustomerID == customer.ID && x.NicheID == subscriptionInfo.nicheId).FirstOrDefaultAsync();
                 if (subscription == null)
                 {
                     //Get a new subscription
@@ -63,7 +63,7 @@ namespace MarketingServer.Controllers
 
 
                 //Get the email and send
-                var email = await db.LeadMagnetEmails.Where(x => x.NicheID == subscriptionInfo.nicheId).Select(x => new
+                var email = await db.LeadMagnetEmails.AsNoTracking().Where(x => x.NicheID == subscriptionInfo.nicheId).Select(x => new
                 {
                     id = x.ID,
                     subject = x.Subject,
