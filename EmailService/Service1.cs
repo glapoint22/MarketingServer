@@ -4,9 +4,12 @@ using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.SqlServer;
 using System.Linq;
+using System.Net.Http;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+
 
 namespace EmailService
 {
@@ -36,6 +39,38 @@ namespace EmailService
             _cancellationTokenSource.Cancel();
         }
 
+        public async Task<List<T>> GetListAsync<T>(string uri)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = await client.GetAsync(uri))
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        string contentString = await content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<List<T>>(contentString);
+
+                    }
+                }
+            }
+        }
+
+        public async Task<T> GetAsync<T>(string uri, params string[][] args)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = await client.GetAsync(uri + "?subscriptionID=foo"))
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        string contentString = await content.ReadAsStringAsync();
+                        return JsonConvert.DeserializeObject<T>(contentString);
+
+                    }
+                }
+            }
+        }
+
         public async Task SendEmails(CancellationToken token)
         {
             while (true)
@@ -52,14 +87,12 @@ namespace EmailService
                     minutes = date1.Subtract(date2).TotalMinutes;
                 }
 
-                await Task.Delay(TimeSpan.FromMinutes(minutes), token);
+                //await Task.Delay(TimeSpan.FromMinutes(minutes), token);
+
 
 
                 //Get a list of customers that we will be sending emails to
-                List<Customer> customers = await db.Customers
-                    .Where(c => SqlFunctions.DateDiff("day", c.EmailSentDate, DateTime.Today) >= c.EmailSendFrequency && c.Subscriptions
-                        .Where(x => x.Subscribed && !x.Suspended).Count() != 0)
-                    .ToListAsync();
+                List<Customer> customers = await GetListAsync<Customer>("http://localhost:49699/api/Customers");
 
                 //Iterate through each customer
                 foreach (Customer customer in customers)
@@ -67,7 +100,6 @@ namespace EmailService
                     //Get a list of subscriptions this customer is subscribed to
                     List<Subscription> subscriptions = customer.Subscriptions
                         .Where(c => c.Subscribed && !c.Suspended)
-                        .Select(c => c)
                         .ToList();
 
                     //Iterate through each subscription
@@ -78,18 +110,19 @@ namespace EmailService
                         string productId;
 
                         //Get the current campaign record from this subscription
-                        CampaignRecord currentCampaignRecord = await db.CampaignRecords
-                            .OrderByDescending(x => x.Date)
-                            .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
-                            .FirstOrDefaultAsync();
-
-                        productId = currentCampaignRecord.ProductID;
+                        //CampaignRecord currentCampaignRecord = await db.CampaignRecords
+                        //    .OrderByDescending(x => x.Date)
+                        //    .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
+                        //    .FirstOrDefaultAsync();
+                        CampaignRecord currentCampaignRecord = await GetAsync<CampaignRecord>("http://localhost:49699/api/CampaignRecords",  new[] { "subscriptionID", subscription.ID });
 
                         if (currentCampaignRecord == null)
                         {
                             //Error!
                             continue;
                         }
+
+                        productId = currentCampaignRecord.ProductID;
 
                         //Get the next email from this campaign
                         email = await GetEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1);
