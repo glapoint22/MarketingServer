@@ -7,6 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
+using System.Web.Http.Description;
 
 namespace MarketingServer.Controllers
 {
@@ -155,6 +156,28 @@ namespace MarketingServer.Controllers
             catch (Exception e)
             {
                 throw;
+            }
+
+            return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        [Route("api/Subscriptions/V2")]
+        public async Task<IHttpActionResult> PutSubscriptions(Subscription subscription)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            db.Entry(subscription).State = EntityState.Modified;
+
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(HttpStatusCode.InternalServerError);
             }
 
             return StatusCode(HttpStatusCode.NoContent);
