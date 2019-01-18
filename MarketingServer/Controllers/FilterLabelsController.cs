@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Data.Entity;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using MarketingServer;
 
 namespace MarketingServer.Controllers
 {
@@ -18,23 +10,23 @@ namespace MarketingServer.Controllers
         private MarketingEntities db = new MarketingEntities();
 
         // GET: api/FilterLabels
-        public IQueryable<FilterLabel> GetFilterLabels()
-        {
-            return db.FilterLabels;
-        }
+        //public IQueryable<FilterLabel> GetFilterLabels()
+        //{
+        //    return db.FilterLabels;
+        //}
 
         // GET: api/FilterLabels/5
-        [ResponseType(typeof(FilterLabel))]
-        public async Task<IHttpActionResult> GetFilterLabel(int id)
-        {
-            FilterLabel filterLabel = await db.FilterLabels.FindAsync(id);
-            if (filterLabel == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(FilterLabel))]
+        //public async Task<IHttpActionResult> GetFilterLabel(int id)
+        //{
+        //    FilterLabel filterLabel = await db.FilterLabels.FindAsync(id);
+        //    if (filterLabel == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(filterLabel);
-        }
+        //    return Ok(filterLabel);
+        //}
 
         // PUT: api/FilterLabels/5
         [ResponseType(typeof(void))]
@@ -93,18 +85,18 @@ namespace MarketingServer.Controllers
             return Ok();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool FilterLabelExists(int id)
-        {
-            return db.FilterLabels.Count(e => e.ID == id) > 0;
-        }
+        //private bool FilterLabelExists(int id)
+        //{
+        //    return db.FilterLabels.Count(e => e.ID == id) > 0;
+        //}
     }
 }

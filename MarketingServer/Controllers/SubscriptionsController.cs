@@ -7,7 +7,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
-using System.Web.Http.Description;
 
 namespace MarketingServer.Controllers
 {
@@ -228,6 +227,7 @@ namespace MarketingServer.Controllers
         private async Task<object> GetSubscriptions(string customerId)
         {
             return await db.Categories
+                .AsNoTracking()
                 .Where(n => db.Niches
                     .Where(s => db.Subscriptions
                         .Where(a => a.CustomerID == customerId)

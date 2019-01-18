@@ -55,6 +55,7 @@ namespace MarketingServer.Controllers
 
                         //Check to see if this campaign record exists based on the product id and the customer id
                         CampaignRecord campaignRecord = await db.CampaignRecords
+                            .AsNoTracking()
                             .Where(x => db.Subscriptions
                                 .Where(y => y.CustomerID == customerId)
                                 .Select(y => y.ID)
@@ -80,7 +81,7 @@ namespace MarketingServer.Controllers
                             else
                             {
                                 //There are no more products available. Test to see if we can suspend the subscription
-                                bool isRecords = await db.CampaignRecords.AnyAsync(x => x.SubscriptionID == campaignRecord.SubscriptionID && x.ProductID != productId && !x.ProductPurchased);
+                                bool isRecords = await db.CampaignRecords.AsNoTracking().AnyAsync(x => x.SubscriptionID == campaignRecord.SubscriptionID && x.ProductID != productId && !x.ProductPurchased);
                                 if (!isRecords)
                                 {
                                     campaignRecord.Subscription.Suspended = true;
@@ -90,9 +91,8 @@ namespace MarketingServer.Controllers
                         //This campaign record does not exist in the database
                         else
                         {
-
-                            int nicheId = await db.Products.Where(x => x.ID == productId).Select(x => x.NicheID).SingleAsync();
-                            string subscriptionId = await db.Subscriptions.Where(x => x.CustomerID == customerId && x.NicheID == nicheId).Select(x => x.ID).SingleOrDefaultAsync();
+                            int nicheId = await db.Products.AsNoTracking().Where(x => x.ID == productId).Select(x => x.NicheID).SingleAsync();
+                            string subscriptionId = await db.Subscriptions.AsNoTracking().Where(x => x.CustomerID == customerId && x.NicheID == nicheId).Select(x => x.ID).SingleOrDefaultAsync();
 
                             //If this product is part of a new subscription, create a new subscription
                             if (subscriptionId == null)

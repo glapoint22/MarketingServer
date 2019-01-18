@@ -52,16 +52,16 @@ namespace MarketingServer
             List<string> images = new List<string>();
 
             // Get a list of images in the database
-            images.AddRange(await db.Categories.Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
-            images.AddRange(await db.Niches.Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
-            images.AddRange(await db.Products.Where(x => x.Image != null).Select(x => x.Image).ToListAsync());
-            images.AddRange(await db.CategoryImages.Select(x => x.Name).ToListAsync());
-            images.AddRange(await db.ProductBanners.Select(x => x.Name).ToListAsync());
+            images.AddRange(await db.Categories.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
+            images.AddRange(await db.Niches.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
+            images.AddRange(await db.Products.AsNoTracking().Where(x => x.Image != null).Select(x => x.Image).ToListAsync());
+            images.AddRange(await db.CategoryImages.AsNoTracking().Select(x => x.Name).ToListAsync());
+            images.AddRange(await db.ProductBanners.AsNoTracking().Select(x => x.Name).ToListAsync());
 
             // Get the images from emails and leads
-            List<string> bodies = await db.LeadMagnetEmails.Select(x => x.Body).ToListAsync();
-            bodies.AddRange(await db.EmailCampaigns.Select(x => x.Body).ToListAsync());
-            bodies.AddRange(await db.LeadPages.Select(x => x.Body).ToListAsync());
+            List<string> bodies = await db.LeadMagnetEmails.AsNoTracking().Select(x => x.Body).ToListAsync();
+            bodies.AddRange(await db.EmailCampaigns.AsNoTracking().Select(x => x.Body).ToListAsync());
+            bodies.AddRange(await db.LeadPages.AsNoTracking().Select(x => x.Body).ToListAsync());
             foreach (string body in bodies)
             {
                 MatchCollection matchList = Regex.Matches(body, @"(?:\/Images\/)([a-z0-9]+\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg))");

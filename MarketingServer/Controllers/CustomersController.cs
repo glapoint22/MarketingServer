@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using MarketingServer;
 using System.Data.Entity.SqlServer;
 
 namespace MarketingServer.Controllers
@@ -50,111 +45,111 @@ namespace MarketingServer.Controllers
         }
 
         // GET: api/Customers/5
-        [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> GetCustomer(string id)
-        {
-            Customer customer = await db.Customers.FindAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(Customer))]
+        //public async Task<IHttpActionResult> GetCustomer(string id)
+        //{
+        //    Customer customer = await db.Customers.FindAsync(id);
+        //    if (customer == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(customer);
-        }
+        //    return Ok(customer);
+        //}
 
         // PUT: api/Customers/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutCustomer(string id, Customer customer)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[ResponseType(typeof(void))]
+        //public async Task<IHttpActionResult> PutCustomer(string id, Customer customer)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (id != customer.ID)
-            {
-                return BadRequest();
-            }
+        //    if (id != customer.ID)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            db.Entry(customer).State = EntityState.Modified;
+        //    db.Entry(customer).State = EntityState.Modified;
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!CustomerExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return StatusCode(HttpStatusCode.NoContent);
-        }
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
 
         // POST: api/Customers
-        [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> PostCustomer(Customer customer)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[ResponseType(typeof(Customer))]
+        //public async Task<IHttpActionResult> PostCustomer(Customer customer)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            db.Customers.Add(customer);
+        //    db.Customers.Add(customer);
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CustomerExists(customer.ID))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        if (CustomerExists(customer.ID))
+        //        {
+        //            return Conflict();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return CreatedAtRoute("DefaultApi", new { id = customer.ID }, customer);
-        }
+        //    return CreatedAtRoute("DefaultApi", new { id = customer.ID }, customer);
+        //}
 
-        // DELETE: api/Customers/5
-        [ResponseType(typeof(Customer))]
-        public async Task<IHttpActionResult> DeleteCustomer(string id)
-        {
-            Customer customer = await db.Customers.FindAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+        //// DELETE: api/Customers/5
+        //[ResponseType(typeof(Customer))]
+        //public async Task<IHttpActionResult> DeleteCustomer(string id)
+        //{
+        //    Customer customer = await db.Customers.FindAsync(id);
+        //    if (customer == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            db.Customers.Remove(customer);
-            await db.SaveChangesAsync();
+        //    db.Customers.Remove(customer);
+        //    await db.SaveChangesAsync();
 
-            return Ok(customer);
-        }
+        //    return Ok(customer);
+        //}
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool CustomerExists(string id)
-        {
-            return db.Customers.Count(e => e.ID == id) > 0;
-        }
+        //private bool CustomerExists(string id)
+        //{
+        //    return db.Customers.Count(e => e.ID == id) > 0;
+        //}
     }
 }

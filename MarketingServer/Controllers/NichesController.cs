@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using MarketingServer;
 
 namespace MarketingServer.Controllers
 {
@@ -18,23 +13,23 @@ namespace MarketingServer.Controllers
         private MarketingEntities db = new MarketingEntities();
 
         // GET: api/Niches
-        public IQueryable<Nich> GetNiches()
-        {
-            return db.Niches;
-        }
+        //public IQueryable<Nich> GetNiches()
+        //{
+        //    return db.Niches;
+        //}
 
         // GET: api/Niches/5
-        [ResponseType(typeof(Nich))]
-        public async Task<IHttpActionResult> GetNich(int id)
-        {
-            Nich nich = await db.Niches.FindAsync(id);
-            if (nich == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(Nich))]
+        //public async Task<IHttpActionResult> GetNich(int id)
+        //{
+        //    Nich nich = await db.Niches.FindAsync(id);
+        //    if (nich == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(nich);
-        }
+        //    return Ok(nich);
+        //}
 
         // PUT: api/Niches/5
         [ResponseType(typeof(void))]
@@ -186,18 +181,18 @@ namespace MarketingServer.Controllers
             return Ok();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool NichExists(int id)
-        {
-            return db.Niches.Count(e => e.ID == id) > 0;
-        }
+        //private bool NichExists(int id)
+        //{
+        //    return db.Niches.Count(e => e.ID == id) > 0;
+        //}
     }
 }

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
-using MarketingServer;
 
 namespace MarketingServer.Controllers
 {
@@ -37,17 +31,17 @@ namespace MarketingServer.Controllers
         }
 
         // GET: api/Filters/5
-        [ResponseType(typeof(Filter))]
-        public async Task<IHttpActionResult> GetFilter(int id)
-        {
-            Filter filter = await db.Filters.FindAsync(id);
-            if (filter == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(Filter))]
+        //public async Task<IHttpActionResult> GetFilter(int id)
+        //{
+        //    Filter filter = await db.Filters.FindAsync(id);
+        //    if (filter == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(filter);
-        }
+        //    return Ok(filter);
+        //}
 
         // PUT: api/Filters/5
         [ResponseType(typeof(void))]
@@ -106,18 +100,18 @@ namespace MarketingServer.Controllers
             return Ok();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool FilterExists(int id)
-        {
-            return db.Filters.Count(e => e.ID == id) > 0;
-        }
+        //private bool FilterExists(int id)
+        //{
+        //    return db.Filters.Count(e => e.ID == id) > 0;
+        //}
     }
 }

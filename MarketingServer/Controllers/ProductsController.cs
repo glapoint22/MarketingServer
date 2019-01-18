@@ -50,6 +50,7 @@ namespace MarketingServer
         public async Task<IHttpActionResult> GetProduct(int nicheId, string subscriptionId)
         {
             string productId = await db.Products
+                .AsNoTracking()
                 .Where(x => x.NicheID == nicheId
                         && !x.CampaignRecords
                             .Where(z => z.SubscriptionID == subscriptionId)
@@ -828,19 +829,19 @@ namespace MarketingServer
             return Ok();
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool ProductExists(string id)
-        {
-            return db.Products.Count(e => e.ID == id) > 0;
-        }
+        //private bool ProductExists(string id)
+        //{
+        //    return db.Products.Count(e => e.ID == id) > 0;
+        //}
     }
 
 

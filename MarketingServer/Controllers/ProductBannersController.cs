@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Description;
 
 namespace MarketingServer
 {
@@ -20,6 +14,7 @@ namespace MarketingServer
         public async Task<IHttpActionResult> GetProductBanners()
         {
             var productBanners = await db.ProductBanners
+                .AsNoTracking()
                 .Where(x => x.Selected)
                 .Select(x => new
                 {
@@ -37,111 +32,111 @@ namespace MarketingServer
         }
 
         // GET: api/ProductBanners/5
-        [ResponseType(typeof(ProductBanner))]
-        public async Task<IHttpActionResult> GetProductBanner(string id)
-        {
-            ProductBanner productBanner = await db.ProductBanners.FindAsync(id);
-            if (productBanner == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(ProductBanner))]
+        //public async Task<IHttpActionResult> GetProductBanner(string id)
+        //{
+        //    ProductBanner productBanner = await db.ProductBanners.FindAsync(id);
+        //    if (productBanner == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return Ok(productBanner);
-        }
+        //    return Ok(productBanner);
+        //}
 
         // PUT: api/ProductBanners/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutProductBanner(string id, ProductBanner productBanner)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[ResponseType(typeof(void))]
+        //public async Task<IHttpActionResult> PutProductBanner(string id, ProductBanner productBanner)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (id != productBanner.ProductID)
-            {
-                return BadRequest();
-            }
+        //    if (id != productBanner.ProductID)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            db.Entry(productBanner).State = EntityState.Modified;
+        //    db.Entry(productBanner).State = EntityState.Modified;
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProductBannerExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!ProductBannerExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return StatusCode(HttpStatusCode.NoContent);
-        }
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
 
         // POST: api/ProductBanners
-        [ResponseType(typeof(ProductBanner))]
-        public async Task<IHttpActionResult> PostProductBanner(ProductBanner productBanner)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[ResponseType(typeof(ProductBanner))]
+        //public async Task<IHttpActionResult> PostProductBanner(ProductBanner productBanner)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            db.ProductBanners.Add(productBanner);
+        //    db.ProductBanners.Add(productBanner);
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ProductBannerExists(productBanner.ProductID))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateException)
+        //    {
+        //        if (ProductBannerExists(productBanner.ProductID))
+        //        {
+        //            return Conflict();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return CreatedAtRoute("DefaultApi", new { id = productBanner.ProductID }, productBanner);
-        }
+        //    return CreatedAtRoute("DefaultApi", new { id = productBanner.ProductID }, productBanner);
+        //}
 
         // DELETE: api/ProductBanners/5
-        [ResponseType(typeof(ProductBanner))]
-        public async Task<IHttpActionResult> DeleteProductBanner(string id)
-        {
-            ProductBanner productBanner = await db.ProductBanners.FindAsync(id);
-            if (productBanner == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(ProductBanner))]
+        //public async Task<IHttpActionResult> DeleteProductBanner(string id)
+        //{
+        //    ProductBanner productBanner = await db.ProductBanners.FindAsync(id);
+        //    if (productBanner == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            db.ProductBanners.Remove(productBanner);
-            await db.SaveChangesAsync();
+        //    db.ProductBanners.Remove(productBanner);
+        //    await db.SaveChangesAsync();
 
-            return Ok(productBanner);
-        }
+        //    return Ok(productBanner);
+        //}
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool ProductBannerExists(string id)
-        {
-            return db.ProductBanners.Count(e => e.ProductID == id) > 0;
-        }
+        //private bool ProductBannerExists(string id)
+        //{
+        //    return db.ProductBanners.Count(e => e.ProductID == id) > 0;
+        //}
     }
 }

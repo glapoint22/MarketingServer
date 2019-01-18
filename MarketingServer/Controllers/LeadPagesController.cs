@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Description;
 using MarketingServer;
 using System.Web;
 
@@ -65,7 +61,7 @@ namespace MarketingServer.Controllers
         //[ResponseType(typeof(LeadPage))]
         public async Task<IHttpActionResult> GetLeadPage(string pageTitle)
         {
-            var leadPage = await db.LeadPages.Where(x => x.PageTitle == pageTitle).Select(x => new
+            var leadPage = await db.LeadPages.AsNoTracking().Where(x => x.PageTitle == pageTitle).Select(x => new
             {
                 title = x.Title,
                 body = x.Body,
@@ -84,43 +80,43 @@ namespace MarketingServer.Controllers
         }
 
         // PUT: api/LeadPages/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutLeadPage(string id, LeadPage leadPage)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+        //[ResponseType(typeof(void))]
+        //public async Task<IHttpActionResult> PutLeadPage(string id, LeadPage leadPage)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
 
-            if (id != leadPage.ID)
-            {
-                return BadRequest();
-            }
+        //    if (id != leadPage.ID)
+        //    {
+        //        return BadRequest();
+        //    }
 
-            db.Entry(leadPage).State = EntityState.Modified;
+        //    db.Entry(leadPage).State = EntityState.Modified;
 
-            try
-            {
-                await db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LeadPageExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+        //    try
+        //    {
+        //        await db.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!LeadPageExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
 
-            return StatusCode(HttpStatusCode.NoContent);
-        }
+        //    return StatusCode(HttpStatusCode.NoContent);
+        //}
 
         // POST: api/LeadPages
         [HttpPost]
-        public HttpResponseMessage PostImage()
+        public HttpResponseMessage PostLead()
         {
             HttpPostedFile postedFile = HttpContext.Current.Request.Files["file"];
             string filePath = HttpContext.Current.Server.MapPath("~/Downloads/" + postedFile.FileName);
@@ -130,33 +126,33 @@ namespace MarketingServer.Controllers
         }
         
         // DELETE: api/LeadPages/5
-        [ResponseType(typeof(LeadPage))]
-        public async Task<IHttpActionResult> DeleteLeadPage(string id)
-        {
-            LeadPage leadPage = await db.LeadPages.FindAsync(id);
-            if (leadPage == null)
-            {
-                return NotFound();
-            }
+        //[ResponseType(typeof(LeadPage))]
+        //public async Task<IHttpActionResult> DeleteLeadPage(string id)
+        //{
+        //    LeadPage leadPage = await db.LeadPages.FindAsync(id);
+        //    if (leadPage == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            db.LeadPages.Remove(leadPage);
-            await db.SaveChangesAsync();
+        //    db.LeadPages.Remove(leadPage);
+        //    await db.SaveChangesAsync();
 
-            return Ok(leadPage);
-        }
+        //    return Ok(leadPage);
+        //}
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
 
-        private bool LeadPageExists(string id)
-        {
-            return db.LeadPages.Count(e => e.ID == id) > 0;
-        }
+        //private bool LeadPageExists(string id)
+        //{
+        //    return db.LeadPages.Count(e => e.ID == id) > 0;
+        //}
     }
 }
