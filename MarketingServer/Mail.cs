@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
+using System.Data.Entity;
 
 namespace MarketingServer
 {
@@ -190,6 +192,25 @@ namespace MarketingServer
             }
 
             return caption + productsText + documentEnd;
+        }
+
+        public static async Task<List<Product>> GetRelatedProducts(int nicheId, string emailId, string customerId, string productId)
+        {
+            MarketingEntities db = new MarketingEntities();
+
+            return await db.Products
+                .AsNoTracking()
+                .Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
+                    .Where(a => a.SubscriptionID == db.Subscriptions
+                            .Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended)
+                            .Select(x => x.ID)
+                            .FirstOrDefault()
+                        && a.ProductPurchased)
+                    .Select(a => a.ProductID)
+                    .ToList()
+                    .Contains(z.ID))
+                .OrderBy(z => z.Name)
+                .ToListAsync();
         }
     }
 }

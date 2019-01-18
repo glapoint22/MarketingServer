@@ -52,16 +52,11 @@ namespace MarketingServer.Controllers
 
         // PUT: api/CampaignRecords/5
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutCampaignRecord(string id, CampaignRecord campaignRecord)
+        public async Task<IHttpActionResult> PutCampaignRecord(CampaignRecord campaignRecord)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
-            }
-
-            if (id != campaignRecord.SubscriptionID)
-            {
-                return BadRequest();
             }
 
             db.Entry(campaignRecord).State = EntityState.Modified;
@@ -72,14 +67,7 @@ namespace MarketingServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CampaignRecordExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(HttpStatusCode.InternalServerError);
             }
 
             return StatusCode(HttpStatusCode.NoContent);

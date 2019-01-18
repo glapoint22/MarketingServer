@@ -47,6 +47,21 @@ namespace MarketingServer
             return Ok(productGroups);
         }
 
+        public async Task<IHttpActionResult> GetProduct(int nicheId, string subscriptionId)
+        {
+            string productId = await db.Products
+                .Where(x => x.NicheID == nicheId
+                        && !x.CampaignRecords
+                            .Where(z => z.SubscriptionID == subscriptionId)
+                            .Select(z => z.ProductID)
+                            .ToList()
+                            .Contains(x.ID))
+                .Select(x => x.ID)
+                .FirstOrDefaultAsync();
+
+            return Ok(productId);
+        }
+
         private async Task<ProductGroup> GetFeaturedProducts(string customerId)
         {
             return new ProductGroup

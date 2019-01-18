@@ -140,6 +140,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Campaign.cs" />
+    <Compile Include="CampaignEmail.cs" />
     <Compile Include="CampaignRecord.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

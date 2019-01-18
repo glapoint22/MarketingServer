@@ -9,14 +9,17 @@ using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
+using MarketingServer;
+using System.Text;
+using System.Net;
 
 namespace EmailService
 {
     public partial class Service1 : ServiceBase
     {
         private CancellationTokenSource _cancellationTokenSource;
-        private MarketingEntities db = new MarketingEntities();
+        //private MarketingEntities db = new MarketingEntities();
+        private string apiUrl = "http://localhost:49699/api/";
 
         public Service1()
         {
@@ -43,7 +46,7 @@ namespace EmailService
         {
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage response = await client.GetAsync(uri))
+                using (HttpResponseMessage response = await client.GetAsync(apiUrl + uri))
                 {
                     using (HttpContent content = response.Content)
                     {
@@ -57,9 +60,18 @@ namespace EmailService
 
         public async Task<T> GetAsync<T>(string uri, params string[][] args)
         {
+            string parameters = string.Empty;
+
+            for(int i = 0; i < args.Length; i++)
+            {
+                parameters += (i == 0) ? "?" : "&";
+                parameters += args[i][0] + "=" + args[i][1];
+            }
+
+
             using (HttpClient client = new HttpClient())
             {
-                using (HttpResponseMessage response = await client.GetAsync(uri + "?subscriptionID=foo"))
+                using (HttpResponseMessage response = await client.GetAsync(apiUrl + uri + parameters))
                 {
                     using (HttpContent content = response.Content)
                     {
@@ -70,6 +82,52 @@ namespace EmailService
                 }
             }
         }
+
+        //public async Task<HttpStatusCode> PostMailAsync(CampaignEmail campaignEmail)
+        //{
+        //    using (HttpClient client = new HttpClient())
+        //    {
+
+        //        StringContent content = new StringContent(JsonConvert.SerializeObject(campaignEmail), Encoding.UTF8, "application/json");
+
+        //        using (HttpResponseMessage response = await client.PostAsync(apiUrl + "Mail", content))
+        //        {
+        //            return response.StatusCode;
+                    
+        //        }
+        //    }
+        //}
+
+
+        public async Task<HttpStatusCode> PostAsync(string uri, object obj)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
+
+                using (HttpResponseMessage response = await client.PostAsync(apiUrl + uri, content))
+                {
+                    return response.StatusCode;
+                }
+            }
+        }
+
+
+        public async Task<HttpStatusCode> PutAsync(string uri, object obj)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                StringContent content = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
+
+                using (HttpResponseMessage response = await client.PutAsync(apiUrl + uri, content))
+                {
+                    return response.StatusCode;
+                }
+            }
+        }
+
+
+
 
         public async Task SendEmails(CancellationToken token)
         {
@@ -92,7 +150,7 @@ namespace EmailService
 
 
                 //Get a list of customers that we will be sending emails to
-                List<Customer> customers = await GetListAsync<Customer>("http://localhost:49699/api/Customers");
+                List<Customer> customers = await GetListAsync<Customer>("Customers");
 
                 //Iterate through each customer
                 foreach (Customer customer in customers)
@@ -105,16 +163,10 @@ namespace EmailService
                     //Iterate through each subscription
                     foreach (Subscription subscription in subscriptions)
                     {
-                        Email email;
                         CampaignRecord newCampaignRecord;
-                        string productId;
 
                         //Get the current campaign record from this subscription
-                        //CampaignRecord currentCampaignRecord = await db.CampaignRecords
-                        //    .OrderByDescending(x => x.Date)
-                        //    .Where(x => x.SubscriptionID == subscription.ID && !x.ProductPurchased && !x.Ended)
-                        //    .FirstOrDefaultAsync();
-                        CampaignRecord currentCampaignRecord = await GetAsync<CampaignRecord>("http://localhost:49699/api/CampaignRecords",  new[] { "subscriptionID", subscription.ID });
+                        CampaignRecord currentCampaignRecord = await GetAsync<CampaignRecord>("CampaignRecords",  new[] { "subscriptionID", subscription.ID });
 
                         if (currentCampaignRecord == null)
                         {
@@ -122,31 +174,41 @@ namespace EmailService
                             continue;
                         }
 
-                        productId = currentCampaignRecord.ProductID;
-
-                        //Get the next email from this campaign
-                        email = await GetEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1);
+                        // Send out the email
+                        HttpStatusCode status = await PostAsync("Mail", new CampaignEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1, customer));
 
                         /*
-                        If the email is null, this means we are at the end of the 
+                        If the email is not found, this means we are at the end of the 
                         email campaign and must start a new campaign with a new product
                         */
-                        if (email == null)
+                        if (status == HttpStatusCode.NotFound)
                         {
                             //Mark the current campaign record that this campaign has ended
                             currentCampaignRecord.Ended = true;
 
-                            //Get a new product
-                            string newProduct = await GetProduct(subscription);
+                            if(await PutAsync("CampaignRecords", currentCampaignRecord) == HttpStatusCode.InternalServerError)
+                            {
+                                // Error!
+                                continue;
+                            }
+
+                            //Get a new product id
+                            string newProductId = await GetAsync<string>("Products", new[] { "nicheId", subscription.NicheID.ToString() }, new[] { "subscriptionId", subscription.ID });
 
                             /*
-                            If the product is null, this means there are no more products in this 
+                            If the product id is null, this means there are no more products in this 
                             subscription and we must suspend this subscription until more products are added
                             */
-                            if (newProduct == null)
+                            if (newProductId == null)
                             {
                                 //Suspending subscription
                                 subscription.Suspended = true;
+
+                                if (await PutAsync("Subscriptions", subscription) == HttpStatusCode.InternalServerError)
+                                {
+                                    // Error!
+                                }
+
                                 continue;
                             }
 
@@ -155,16 +217,16 @@ namespace EmailService
                             {
                                 SubscriptionID = subscription.ID,
                                 Date = DateTime.Now,
-                                ProductID = newProduct,
+                                ProductID = newProductId,
                                 Day = 1,
                             };
 
-                            productId = newCampaignRecord.ProductID;
 
-                            //Get the first email from this campaign
-                            email = await GetEmail(newCampaignRecord.ProductID, newCampaignRecord.Day);
+                            //Send out the first email from this campaign
+                            status = await PostAsync("Mail",  new CampaignEmail(newCampaignRecord.ProductID, newCampaignRecord.Day, customer));
 
-                            if (email == null)
+
+                            if (status == HttpStatusCode.NotFound)
                             {
                                 //Error!
                                 continue;
@@ -182,62 +244,66 @@ namespace EmailService
                             };
                         }
 
-                        Mail mail = new Mail(email.id, customer, productId, email.subject, email.body);
-                        await mail.Send();
-                        customer.EmailSentDate = DateTime.Today;
+                        
+
+                        //Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscription.NicheID, email.id, customer.ID, productId));
+                        //await mail.Send();
+                        //customer.EmailSentDate = DateTime.Today;
+
+
 
                         //Add the new record
-                        db.CampaignRecords.Add(newCampaignRecord);
+                        //db.CampaignRecords.Add(newCampaignRecord);
                     }
                 }
 
                 //Update the database
-                if (db.ChangeTracker.HasChanges())
-                {
-                    try
-                    {
-                        await db.SaveChangesAsync();
-                    }
-                    catch
-                    {
-                        throw;
-                    }
-                }
+                //if (db.ChangeTracker.HasChanges())
+                //{
+                //    try
+                //    {
+                //        await db.SaveChangesAsync();
+                //    }
+                //    catch
+                //    {
+                //        throw;
+                //    }
+                //}
             }
         }
 
-        private async Task<Email> GetEmail(string productId, int day)
-        {
-            return await db.EmailCampaigns
-                .Where(x => x.ProductID == productId && x.Day == day)
-                .Select(x => new Email
-                {
-                    id = x.ID,
-                    subject = x.Subject,
-                    body = x.Body
-                })
-                .FirstOrDefaultAsync();
-        }
+        //private async Task<Email> GetEmail(string productId, int day)
+        //{
+        //    return await db.EmailCampaigns
+        //        .Where(x => x.ProductID == productId && x.Day == day)
+        //        .Select(x => new Email
+        //        {
+        //            id = x.ID,
+        //            subject = x.Subject,
+        //            body = x.Body
+        //        })
+        //        .FirstOrDefaultAsync();
+        //}
 
-        public async Task<string> GetProduct(Subscription subscription)
-        {
-            return await db.Products
-                .OrderBy(x => x.Order)
-                .Where(x => x.NicheID == subscription.NicheID
-                        && !x.CampaignRecords
-                            .Where(z => z.SubscriptionID == subscription.ID)
-                            .Select(z => z.ProductID)
-                            .ToList()
-                            .Contains(x.ID))
-                .Select(x => x.ID)
-                .FirstOrDefaultAsync();
-        }
+        //public async Task<string> GetProduct(Subscription subscription)
+        //{
+        //    return await db.Products
+        //        .OrderBy(x => x.Order)
+        //        .Where(x => x.NicheID == subscription.NicheID
+        //                && !x.CampaignRecords
+        //                    .Where(z => z.SubscriptionID == subscription.ID)
+        //                    .Select(z => z.ProductID)
+        //                    .ToList()
+        //                    .Contains(x.ID))
+        //        .Select(x => x.ID)
+        //        .FirstOrDefaultAsync();
+        //}
     }
 }
 
-public class Email
-{
-    public string id;
-    public string subject;
-    public string body;
-}
+//public class foo
+//{
+//    public string id;
+//    public string subject;
+//    public string body;
+//}

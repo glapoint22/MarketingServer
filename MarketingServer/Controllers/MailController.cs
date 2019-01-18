@@ -109,25 +109,30 @@ namespace MarketingServer.Controllers
             }
 
             // Make a new mail instance
-            Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
+            Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
             return Ok(mail.body);
         }
 
-        public static async Task<List<Product>> GetRelatedProducts(int nicheId, string emailId, string customerId, string productId)
+        [HttpPost]
+        public async Task<IHttpActionResult> PostMail(CampaignEmail campaignEmail)
         {
-            return await db.Products
+            var email = await db.EmailCampaigns
                 .AsNoTracking()
-                .Where(z => z.NicheID == nicheId && z.ID != productId && !z.CampaignRecords
-                    .Where(a => a.SubscriptionID == db.Subscriptions
-                            .Where(x => x.CustomerID == customerId && x.Subscribed && x.NicheID == nicheId && !x.Suspended)
-                            .Select(x => x.ID)
-                            .FirstOrDefault()
-                        && a.ProductPurchased)
-                    .Select(a => a.ProductID)
-                    .ToList()
-                    .Contains(z.ID))
-                .OrderBy(z => z.Name)
-                .ToListAsync();
+                .Where(x => x.ProductID == campaignEmail.productId && x.Day == campaignEmail.day)
+                .Select(x => new
+                {
+                    id = x.ID,
+                    subject = x.Subject,
+                    body = x.Body,
+                    nicheId = x.Product.NicheID
+                })
+                .FirstOrDefaultAsync();
+
+            if (email == null) return NotFound();
+
+            Mail mail = new Mail(email.id, campaignEmail.customer, email.subject, email.body, await Mail.GetRelatedProducts(email.nicheId, email.id, campaignEmail.customer.ID, campaignEmail.productId));
+            //await mail.Send();
+            return Ok();
         }
     }
 }
