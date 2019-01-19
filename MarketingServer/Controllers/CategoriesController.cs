@@ -46,7 +46,8 @@ namespace MarketingServer.Controllers
             return Ok(categories);
         }
 
-        public async Task<IHttpActionResult> GetCategories(bool isManager)
+        [Route("api/Categories/Manager")]
+        public async Task<IHttpActionResult> GetManagerCategories()
         {
             var categories = await db.Categories
                 .AsNoTracking()
