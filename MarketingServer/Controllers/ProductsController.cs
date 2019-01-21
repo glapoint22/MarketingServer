@@ -17,6 +17,7 @@ namespace MarketingServer
 
         // GET: api/Products
         [ResponseType(typeof(Product))]
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetProducts(string customerId, string productIds)
         {
             List<ProductGroup> productGroups = new List<ProductGroup>();
@@ -421,6 +422,7 @@ namespace MarketingServer
             return filters;
         }
 
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = 0, string query = "", int nicheId = 0, int page = 1, string filter = "")
         {
             int currentPage;

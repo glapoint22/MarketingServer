@@ -11,6 +11,7 @@ namespace MarketingServer
         private MarketingEntities db = new MarketingEntities();
 
         // GET: api/ProductBanners
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetProductBanners()
         {
             var productBanners = await db.ProductBanners

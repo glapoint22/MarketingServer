@@ -16,6 +16,7 @@ namespace MarketingServer.Controllers
         private MarketingEntities db = new MarketingEntities();
 
         // GET: api/Categories
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetCategories()
         {
             var categories = await db.Categories

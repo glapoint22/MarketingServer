@@ -14,6 +14,7 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
+        [AllowAnonymous]
         public async Task<IHttpActionResult> Get(string customerId)
         {
             Customer customer = await db.Customers.FindAsync(customerId);
@@ -115,7 +116,7 @@ namespace MarketingServer.Controllers
             return Ok(response);
         }
 
-
+        [AllowAnonymous]
         public async Task<IHttpActionResult> Put(Preferences preferences)
         {
             //Assign the customer
