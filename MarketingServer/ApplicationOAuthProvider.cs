@@ -27,6 +27,8 @@ namespace MarketingServer
         {
             var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 
+            
+
             ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
 
             if (user == null)
@@ -39,6 +41,12 @@ namespace MarketingServer
                OAuthDefaults.AuthenticationType);
             ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,
                 CookieAuthenticationDefaults.AuthenticationType);
+
+            context.OwinContext.Authentication.SignIn(new AuthenticationProperties { IsPersistent = true }, oAuthIdentity);
+
+
+            //SignIn(new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30) }, oAuthIdentity);
+
 
             AuthenticationProperties properties = CreateProperties(user.UserName);
             AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);

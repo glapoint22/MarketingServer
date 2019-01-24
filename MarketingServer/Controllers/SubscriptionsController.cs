@@ -26,6 +26,7 @@ namespace MarketingServer.Controllers
             return Ok(await GetPreferences(customer));
         }
 
+        [AllowAnonymous]
         public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
         {
             var response = new object();
