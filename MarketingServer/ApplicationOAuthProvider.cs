@@ -42,7 +42,7 @@ namespace MarketingServer
             ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,
                 CookieAuthenticationDefaults.AuthenticationType);
 
-            context.OwinContext.Authentication.SignIn(new AuthenticationProperties { IsPersistent = true }, oAuthIdentity);
+            //context.OwinContext.Authentication.SignIn(new AuthenticationProperties { IsPersistent = true }, oAuthIdentity);
 
 
             //SignIn(new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30) }, oAuthIdentity);
