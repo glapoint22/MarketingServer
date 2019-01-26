@@ -28,7 +28,7 @@ namespace MarketingServer
                 AccessTokenExpireTimeSpan = TimeSpan.FromHours(8),
                 RefreshTokenProvider = new ApplicationRefreshTokenProvider(),
                 // In production mode set AllowInsecureHttp = false
-                AllowInsecureHttp = false
+                AllowInsecureHttp = true
             };
 
             // Enable the application to use bearer tokens to authenticate users
@@ -40,7 +40,7 @@ namespace MarketingServer
     {
         public override void Create(AuthenticationTokenCreateContext context)
         {
-            context.Ticket.Properties.ExpiresUtc = new DateTimeOffset(DateTime.Now.AddDays(14));
+            context.Ticket.Properties.ExpiresUtc = new DateTimeOffset(DateTime.Now.AddDays(2));
             context.SetToken(context.SerializeTicket());
         }
 

@@ -40,6 +40,7 @@ namespace MarketingServer
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductVideo> ProductVideos { get; set; }
         public virtual DbSet<Subscription> Subscriptions { get; set; }
+        public virtual DbSet<Token> Tokens { get; set; }
         public virtual DbSet<PriceRange> PriceRanges { get; set; }
     }
 }

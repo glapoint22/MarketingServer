@@ -161,6 +161,16 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
           <Property Name="DateUnsubscribed" Type="datetime" />
         </EntityType>
+        <EntityType Name="Tokens">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AccessToken" Type="varchar(max)" Nullable="false" />
+          <Property Name="AccessTokenExpires" Type="datetime" Nullable="false" />
+          <Property Name="RefreshToken" Type="varchar(max)" Nullable="false" />
+          <Property Name="RefreshTokenExpires" Type="datetime" Nullable="false" />
+        </EntityType>
         <Association Name="FK__CampaignR__Produ__5708E33C">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
           <End Role="CampaignRecords" Type="Self.CampaignRecords" Multiplicity="*" />
@@ -385,6 +395,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Tokens" EntityType="Self.Tokens" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PriceRange" EntityType="Self.PriceRange" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [PriceRange].[Label] AS [Label], 
@@ -632,6 +643,16 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__5CC1BC92" FromRole="Subscriptions" ToRole="Niches" />
         </EntityType>
+        <EntityType Name="Token">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AccessToken" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AccessTokenExpires" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="RefreshToken" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="RefreshTokenExpires" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
         <EntityType Name="PriceRange">
           <Key>
             <PropertyRef Name="Label" />
@@ -866,6 +887,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
+          <EntitySet Name="Tokens" EntityType="Self.Token" />
           <EntitySet Name="PriceRanges" EntityType="Self.PriceRange" />
           <AssociationSet Name="FK__CampaignR__Produ__5708E33C" Association="Self.FK__CampaignR__Produ__5708E33C">
             <End Role="Products" EntitySet="Products" />
@@ -1086,6 +1108,17 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
                 <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Tokens">
+            <EntityTypeMapping TypeName="MarketingModel.Token">
+              <MappingFragment StoreEntitySet="Tokens">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="AccessToken" ColumnName="AccessToken" />
+                <ScalarProperty Name="AccessTokenExpires" ColumnName="AccessTokenExpires" />
+                <ScalarProperty Name="RefreshToken" ColumnName="RefreshToken" />
+                <ScalarProperty Name="RefreshTokenExpires" ColumnName="RefreshTokenExpires" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

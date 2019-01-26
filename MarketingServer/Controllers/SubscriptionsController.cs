@@ -154,7 +154,7 @@ namespace MarketingServer.Controllers
             {
                 await db.SaveChangesAsync();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw;
             }
