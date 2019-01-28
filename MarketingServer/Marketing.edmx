@@ -35,6 +35,14 @@
           <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="Selected" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="Clients">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Secret" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="SecurityStamp" Type="nvarchar(max)" Nullable="false" />
+        </EntityType>
         <EntityType Name="Customers">
           <Key>
             <PropertyRef Name="ID" />
@@ -149,6 +157,15 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="ProductID" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Url" Type="varchar" MaxLength="255" Nullable="false" />
         </EntityType>
+        <EntityType Name="RefreshTokens">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="ClientID" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="Ticket" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="Expires" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="Subscriptions">
           <Key>
             <PropertyRef Name="ID" />
@@ -160,16 +177,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Suspended" Type="bit" Nullable="false" />
           <Property Name="DateSubscribed" Type="datetime" Nullable="false" />
           <Property Name="DateUnsubscribed" Type="datetime" />
-        </EntityType>
-        <EntityType Name="Tokens">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="AccessToken" Type="varchar(max)" Nullable="false" />
-          <Property Name="AccessTokenExpires" Type="datetime" Nullable="false" />
-          <Property Name="RefreshToken" Type="varchar(max)" Nullable="false" />
-          <Property Name="RefreshTokenExpires" Type="datetime" Nullable="false" />
         </EntityType>
         <Association Name="FK__CampaignR__Produ__5708E33C">
           <End Role="Products" Type="Self.Products" Multiplicity="1" />
@@ -383,6 +390,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecords" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CategoryImages" EntityType="Self.CategoryImages" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Clients" EntityType="Self.Clients" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabels" Schema="dbo" store:Type="Tables" />
@@ -394,8 +402,8 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilters" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Products" EntityType="Self.Products" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideos" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="RefreshTokens" EntityType="Self.RefreshTokens" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscriptions" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="Tokens" EntityType="Self.Tokens" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="PriceRange" EntityType="Self.PriceRange" store:Type="Tables" store:Schema="dbo">
             <DefiningQuery>SELECT 
     [PriceRange].[Label] AS [Label], 
@@ -503,6 +511,14 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Selected" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__4119A21D" FromRole="CategoryImages" ToRole="Categories" />
+        </EntityType>
+        <EntityType Name="Client">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Secret" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="SecurityStamp" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
         </EntityType>
         <EntityType Name="Customer">
           <Key>
@@ -628,6 +644,15 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Url" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Product" Relationship="Self.FK__ProductVi__Produ__505BE5AD" FromRole="ProductVideos" ToRole="Products" />
         </EntityType>
+        <EntityType Name="RefreshToken">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Name="ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ClientID" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Ticket" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Expires" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
         <EntityType Name="Subscription">
           <Key>
             <PropertyRef Name="ID" />
@@ -642,16 +667,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <NavigationProperty Name="CampaignRecords" Relationship="Self.FK__CampaignR__Subsc__703EA55A" FromRole="Subscriptions" ToRole="CampaignRecords" />
           <NavigationProperty Name="Customer" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Subscriptions" ToRole="Customers" />
           <NavigationProperty Name="Nich" Relationship="Self.FK__Subscript__Niche__5CC1BC92" FromRole="Subscriptions" ToRole="Niches" />
-        </EntityType>
-        <EntityType Name="Token">
-          <Key>
-            <PropertyRef Name="ID" />
-          </Key>
-          <Property Name="ID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="AccessToken" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="AccessTokenExpires" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="RefreshToken" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="RefreshTokenExpires" Type="DateTime" Nullable="false" Precision="3" />
         </EntityType>
         <EntityType Name="PriceRange">
           <Key>
@@ -875,6 +890,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
           <EntitySet Name="CategoryImages" EntityType="Self.CategoryImage" />
+          <EntitySet Name="Clients" EntityType="Self.Client" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
           <EntitySet Name="FilterLabels" EntityType="Self.FilterLabel" />
@@ -886,8 +902,8 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <EntitySet Name="ProductFilters" EntityType="Self.ProductFilter" />
           <EntitySet Name="Products" EntityType="Self.Product" />
           <EntitySet Name="ProductVideos" EntityType="Self.ProductVideo" />
+          <EntitySet Name="RefreshTokens" EntityType="Self.RefreshToken" />
           <EntitySet Name="Subscriptions" EntityType="Self.Subscription" />
-          <EntitySet Name="Tokens" EntityType="Self.Token" />
           <EntitySet Name="PriceRanges" EntityType="Self.PriceRange" />
           <AssociationSet Name="FK__CampaignR__Produ__5708E33C" Association="Self.FK__CampaignR__Produ__5708E33C">
             <End Role="Products" EntitySet="Products" />
@@ -984,6 +1000,15 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Selected" ColumnName="Selected" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Clients">
+            <EntityTypeMapping TypeName="MarketingModel.Client">
+              <MappingFragment StoreEntitySet="Clients">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="Secret" ColumnName="Secret" />
+                <ScalarProperty Name="SecurityStamp" ColumnName="SecurityStamp" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -1098,6 +1123,16 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="RefreshTokens">
+            <EntityTypeMapping TypeName="MarketingModel.RefreshToken">
+              <MappingFragment StoreEntitySet="RefreshTokens">
+                <ScalarProperty Name="ID" ColumnName="ID" />
+                <ScalarProperty Name="ClientID" ColumnName="ClientID" />
+                <ScalarProperty Name="Ticket" ColumnName="Ticket" />
+                <ScalarProperty Name="Expires" ColumnName="Expires" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Subscriptions">
             <EntityTypeMapping TypeName="MarketingModel.Subscription">
               <MappingFragment StoreEntitySet="Subscriptions">
@@ -1108,17 +1143,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Suspended" ColumnName="Suspended" />
                 <ScalarProperty Name="DateSubscribed" ColumnName="DateSubscribed" />
                 <ScalarProperty Name="DateUnsubscribed" ColumnName="DateUnsubscribed" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Tokens">
-            <EntityTypeMapping TypeName="MarketingModel.Token">
-              <MappingFragment StoreEntitySet="Tokens">
-                <ScalarProperty Name="ID" ColumnName="ID" />
-                <ScalarProperty Name="AccessToken" ColumnName="AccessToken" />
-                <ScalarProperty Name="AccessTokenExpires" ColumnName="AccessTokenExpires" />
-                <ScalarProperty Name="RefreshToken" ColumnName="RefreshToken" />
-                <ScalarProperty Name="RefreshTokenExpires" ColumnName="RefreshTokenExpires" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

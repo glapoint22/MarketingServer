@@ -92,7 +92,12 @@ alter table Categories alter column Icon varchar(255) not null
 
 
 
-
+CREATE TABLE RefreshTokens (
+	ID nvarchar(255) not null primary key,
+	ClientID varchar(255) not null,
+	Ticket nvarchar(max) not null,
+	Expires Datetime not null
+);
  
 
 select * from Categories
@@ -111,6 +116,10 @@ select * from Filters
 select * from FilterLabels
 select * from ProductFilters
 select * from priceRange
+select * from Clients
+select * from RefreshTokens
+
+
 
 alter table niches drop column leadpagebody
 drop table vendors

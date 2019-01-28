@@ -12,12 +12,11 @@ namespace MarketingServer
     using System;
     using System.Collections.Generic;
     
-    public partial class Token
+    public partial class RefreshToken
     {
-        public int ID { get; set; }
-        public string AccessToken { get; set; }
-        public System.DateTime AccessTokenExpires { get; set; }
-        public string RefreshToken { get; set; }
-        public System.DateTime RefreshTokenExpires { get; set; }
+        public string ID { get; set; }
+        public string ClientID { get; set; }
+        public string Ticket { get; set; }
+        public System.DateTime Expires { get; set; }
     }
 }

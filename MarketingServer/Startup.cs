@@ -1,6 +1,5 @@
 ﻿using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
-using Microsoft.Owin.Security.Infrastructure;
 using Microsoft.Owin.Security.OAuth;
 using Owin;
 using System;
@@ -25,7 +24,7 @@ namespace MarketingServer
                 TokenEndpointPath = new PathString("/api/Token"),
                 Provider = new ApplicationOAuthProvider("self"),
                 //AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
-                AccessTokenExpireTimeSpan = TimeSpan.FromHours(8),
+                AccessTokenExpireTimeSpan = TimeSpan.FromHours(1),
                 RefreshTokenProvider = new ApplicationRefreshTokenProvider(),
                 // In production mode set AllowInsecureHttp = false
                 AllowInsecureHttp = true
@@ -33,20 +32,6 @@ namespace MarketingServer
 
             // Enable the application to use bearer tokens to authenticate users
             app.UseOAuthBearerTokens(OAuthOptions);
-        }
-    }
-
-    public class ApplicationRefreshTokenProvider : AuthenticationTokenProvider
-    {
-        public override void Create(AuthenticationTokenCreateContext context)
-        {
-            context.Ticket.Properties.ExpiresUtc = new DateTimeOffset(DateTime.Now.AddDays(2));
-            context.SetToken(context.SerializeTicket());
-        }
-
-        public override void Receive(AuthenticationTokenReceiveContext context)
-        {
-            context.DeserializeTicket(context.Token);
         }
     }
 }
