@@ -4,11 +4,7 @@ using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Globalization;
-using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace MarketingServer
@@ -59,35 +55,7 @@ namespace MarketingServer
 
         public override Task TokenEndpointResponse(OAuthTokenEndpointResponseContext context)
         {
-            //MarketingEntities db = new MarketingEntities();
-            //Token token = db.Tokens.SingleOrDefault();
-            //bool tokenModified = true;
-
-            //if (token == null)
-            //{
-            //    token = new Token();
-            //    tokenModified = false;
-            //}
-
-            //token.AccessToken = context.AccessToken;
-            //token.AccessTokenExpires = DateTime.Parse((string)context.AdditionalResponseParameters[".expires"]);
-            //token.RefreshToken = context.TokenEndpointRequest.RefreshTokenGrant.RefreshToken;
-            //token.RefreshTokenExpires = context.Properties.ExpiresUtc.Value.DateTime;
-
-            //if (tokenModified)
-            //{
-            //    db.Entry(token).State = EntityState.Modified;
-            //}
-            //else
-            //{
-            //    db.Tokens.Add(token);
-            //}
-
-
-            //db.SaveChanges();
-
             context.AdditionalResponseParameters.Add("refreshTokenExpires", context.Properties.ExpiresUtc.Value.DateTime);
-
             return Task.FromResult<object>(null);
         }
 
