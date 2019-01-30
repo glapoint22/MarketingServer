@@ -10,8 +10,9 @@ using Newtonsoft.Json;
 using MarketingServer;
 using System.Text;
 using System.Net;
-using System.IO;
 using Newtonsoft.Json.Linq;
+using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
 
 namespace EmailService
 {
@@ -23,6 +24,9 @@ namespace EmailService
         private string password = "Z0r!0th22";
         private string clientId = "autoresponder";
         private string clientSecret = "As!rama1";
+        private Token accessToken;
+        private Token refreshToken;
+        private AuthenticationHeaderValue header;
 
         public Service1()
         {
@@ -48,15 +52,9 @@ namespace EmailService
 
         public async Task SendEmails(CancellationToken token)
         {
-            string response;
+            HttpStatusCode statusCode;
 
-            response = await PostAsync("Token", new StringContent("username=" +
-              userName + "&password=" +
-              password + "&grant_type=password&client_id=" +
-              clientId + "&client_secret=" +
-              clientSecret));
-
-            
+            SetTokens(await Login());
 
             while (true)
             {
@@ -101,13 +99,13 @@ namespace EmailService
                         }
 
                         // Send out the email
-                        response = await PostAsync("Mail", SerializeObject(new CampaignEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1, customer)));
+                        statusCode = await PostAsync("Mail", SerializeObject(new CampaignEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1, customer)));
 
                         /*
                         If the email is not found, this means we are at the end of the 
                         email campaign and must start a new campaign with a new product
                         */
-                        if (response == "Not Found")
+                        if (statusCode == HttpStatusCode.NotFound)
                         {
                             //Mark the current campaign record that this campaign has ended
                             currentCampaignRecord.Ended = true;
@@ -149,10 +147,10 @@ namespace EmailService
 
 
                             //Send out the first email from this campaign
-                            response = await PostAsync("Mail", SerializeObject(new CampaignEmail(newCampaignRecord.ProductID, newCampaignRecord.Day, customer)));
+                            statusCode = await PostAsync("Mail", SerializeObject(new CampaignEmail(newCampaignRecord.ProductID, newCampaignRecord.Day, customer)));
 
 
-                            if (response == "Not Found")
+                            if (statusCode == HttpStatusCode.NotFound)
                             {
                                 //Error!
                                 continue;
@@ -170,7 +168,7 @@ namespace EmailService
                             };
                         }
 
-                        response = await PostAsync("CampaignRecords", SerializeObject(newCampaignRecord));
+                        statusCode = await PostAsync("CampaignRecords", SerializeObject(newCampaignRecord));
                     }
                 }
             }
@@ -178,8 +176,10 @@ namespace EmailService
 
         public async Task<List<T>> GetListAsync<T>(string uri)
         {
+            await ValidateToken();
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = header;
                 using (HttpResponseMessage response = await client.GetAsync(apiUrl + uri))
                 {
                     using (HttpContent content = response.Content)
@@ -201,9 +201,10 @@ namespace EmailService
                 parameters += args[i][0] + "=" + args[i][1];
             }
 
-
+            await ValidateToken();
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = header;
                 using (HttpResponseMessage response = await client.GetAsync(apiUrl + uri + parameters))
                 {
                     using (HttpContent content = response.Content)
@@ -216,14 +217,15 @@ namespace EmailService
         }
 
 
-        public async Task<string> PostAsync(string uri, StringContent content)
+        public async Task<HttpStatusCode> PostAsync(string uri, StringContent content)
         {
+            await ValidateToken();
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = header;
                 using (HttpResponseMessage response = await client.PostAsync(apiUrl + uri, content))
                 {
-                    if (response.StatusCode == HttpStatusCode.NotFound) return "Not Found";
-                    return await response.Content.ReadAsStringAsync();
+                    return response.StatusCode;
                 }
             }
         }
@@ -231,8 +233,10 @@ namespace EmailService
 
         public async Task<HttpStatusCode> PutAsync(string uri, StringContent content)
         {
+            await ValidateToken();
             using (HttpClient client = new HttpClient())
             {
+                client.DefaultRequestHeaders.Authorization = header;
                 using (HttpResponseMessage response = await client.PutAsync(apiUrl + uri, content))
                 {
                     return response.StatusCode;
@@ -243,6 +247,66 @@ namespace EmailService
         private StringContent SerializeObject(object obj)
         {
             return new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
+        }
+
+        private void SetTokens(string response)
+        {
+            response = Regex.Replace(response, @"\.", "");
+
+            JObject jObject = JObject.Parse(response);
+
+            accessToken = new Token()
+            {
+                id = (string)jObject.SelectToken("access_token"),
+                expires = (DateTime)jObject.SelectToken("expires")
+            };
+
+            refreshToken = new Token()
+            {
+                id = (string)jObject.SelectToken("refresh_token"),
+                expires = (DateTime)jObject.SelectToken("refreshTokenExpires")
+            };
+
+            refreshToken.expires = refreshToken.expires.AddHours(-5);
+            header = new AuthenticationHeaderValue("Bearer", accessToken.id);
+        }
+
+        private async Task ValidateToken()
+        {
+            if (accessToken.expires.Subtract(DateTime.Now).TotalMilliseconds < 60000)
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    using (HttpResponseMessage response = await client.PostAsync(apiUrl + "Token", new StringContent("grant_type=refresh_token&refresh_token=" +
+                    refreshToken.id + "&client_id=" +
+                    clientId + "&client_secret=" +
+                    clientSecret)))
+                    {
+                        using (HttpContent httpContent = response.Content)
+                        {
+                            SetTokens(await httpContent.ReadAsStringAsync());
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task<string> Login()
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = await client.PostAsync(apiUrl + "Token", new StringContent("username=" +
+                    userName + "&password=" +
+                    password + "&grant_type=password&client_id=" +
+                    clientId + "&client_secret=" +
+                    clientSecret)))
+                {
+                    using (HttpContent httpContent = response.Content)
+                    {
+                        return await httpContent.ReadAsStringAsync();
+                    }
+                }
+            }
         }
     }
 }
