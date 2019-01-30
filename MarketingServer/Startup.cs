@@ -22,10 +22,10 @@ namespace MarketingServer
             OAuthAuthorizationServerOptions OAuthOptions = new OAuthAuthorizationServerOptions
             {
                 TokenEndpointPath = new PathString("/api/Token"),
-                Provider = new ApplicationOAuthProvider("self"),
-                //AuthorizeEndpointPath = new PathString("/api/Account/ExternalLogin"),
+                Provider = new ApplicationOAuthProvider(),
                 AccessTokenExpireTimeSpan = TimeSpan.FromHours(1),
                 RefreshTokenProvider = new ApplicationRefreshTokenProvider(),
+                
                 // In production mode set AllowInsecureHttp = false
                 AllowInsecureHttp = true
             };

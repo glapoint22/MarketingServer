@@ -2,8 +2,8 @@
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -11,24 +11,11 @@ namespace MarketingServer
 {
     public class ApplicationOAuthProvider : OAuthAuthorizationServerProvider
     {
-        private readonly string _publicClientId;
         private MarketingEntities db = new MarketingEntities();
-
-        public ApplicationOAuthProvider(string publicClientId)
-        {
-            if (publicClientId == null)
-            {
-                throw new ArgumentNullException("publicClientId");
-            }
-
-            _publicClientId = publicClientId;
-        }
 
         public override async Task GrantResourceOwnerCredentials(OAuthGrantResourceOwnerCredentialsContext context)
         {
-            var userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
-
-
+            ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
 
             ApplicationUser user = await userManager.FindAsync(context.UserName, context.Password);
 
@@ -38,11 +25,14 @@ namespace MarketingServer
                 return;
             }
 
+            // Remove all tokens from this client
+            db.RefreshTokens.RemoveRange(db.RefreshTokens.Where(x => x.ClientID == context.ClientId));
+            await db.SaveChangesAsync();
+
             ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager,
                OAuthDefaults.AuthenticationType);
             ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,
                 CookieAuthenticationDefaults.AuthenticationType);
-
 
             AuthenticationProperties properties = CreateProperties(user.UserName);
             properties.Dictionary.Add("ClientID", context.ClientId);
@@ -50,8 +40,6 @@ namespace MarketingServer
             context.Validated(ticket);
             context.Request.Context.Authentication.SignIn(cookiesIdentity);
         }
-
-
 
         public override Task TokenEndpointResponse(OAuthTokenEndpointResponseContext context)
         {
@@ -97,20 +85,6 @@ namespace MarketingServer
             return Task.FromResult<object>(null);
         }
 
-        public override Task ValidateClientRedirectUri(OAuthValidateClientRedirectUriContext context)
-        {
-            if (context.ClientId == _publicClientId)
-            {
-                Uri expectedRootUri = new Uri(context.Request.Uri, "/");
-
-                if (expectedRootUri.AbsoluteUri == context.RedirectUri)
-                {
-                    context.Validated();
-                }
-            }
-
-            return Task.FromResult<object>(null);
-        }
 
         public static AuthenticationProperties CreateProperties(string userName)
         {

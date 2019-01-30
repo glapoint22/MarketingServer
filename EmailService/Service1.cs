@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using MarketingServer;
 using System.Text;
 using System.Net;
+using System.IO;
+using Newtonsoft.Json.Linq;
 
 namespace EmailService
 {
@@ -17,6 +19,10 @@ namespace EmailService
     {
         private CancellationTokenSource _cancellationTokenSource;
         private string apiUrl = "http://localhost:49699/api/";
+        private string userName = "email";
+        private string password = "Z0r!0th22";
+        private string clientId = "autoresponder";
+        private string clientSecret = "As!rama1";
 
         public Service1()
         {
@@ -42,6 +48,16 @@ namespace EmailService
 
         public async Task SendEmails(CancellationToken token)
         {
+            string response;
+
+            response = await PostAsync("Token", new StringContent("username=" +
+              userName + "&password=" +
+              password + "&grant_type=password&client_id=" +
+              clientId + "&client_secret=" +
+              clientSecret));
+
+            
+
             while (true)
             {
                 //Calculate the minutes when we send emails
@@ -85,18 +101,18 @@ namespace EmailService
                         }
 
                         // Send out the email
-                        HttpStatusCode status = await PostAsync("Mail", new CampaignEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1, customer));
+                        response = await PostAsync("Mail", SerializeObject(new CampaignEmail(currentCampaignRecord.ProductID, currentCampaignRecord.Day + 1, customer)));
 
                         /*
                         If the email is not found, this means we are at the end of the 
                         email campaign and must start a new campaign with a new product
                         */
-                        if (status == HttpStatusCode.NotFound)
+                        if (response == "Not Found")
                         {
                             //Mark the current campaign record that this campaign has ended
                             currentCampaignRecord.Ended = true;
 
-                            if (await PutAsync("CampaignRecords", currentCampaignRecord) == HttpStatusCode.InternalServerError)
+                            if (await PutAsync("CampaignRecords", SerializeObject(currentCampaignRecord)) == HttpStatusCode.InternalServerError)
                             {
                                 // Error!
                                 continue;
@@ -114,7 +130,7 @@ namespace EmailService
                                 //Suspending subscription
                                 subscription.Suspended = true;
 
-                                if (await PutAsync("Subscriptions/V2", subscription) == HttpStatusCode.InternalServerError)
+                                if (await PutAsync("Subscriptions/V2", SerializeObject(subscription)) == HttpStatusCode.InternalServerError)
                                 {
                                     // Error!
                                 }
@@ -133,10 +149,10 @@ namespace EmailService
 
 
                             //Send out the first email from this campaign
-                            status = await PostAsync("Mail", new CampaignEmail(newCampaignRecord.ProductID, newCampaignRecord.Day, customer));
+                            response = await PostAsync("Mail", SerializeObject(new CampaignEmail(newCampaignRecord.ProductID, newCampaignRecord.Day, customer)));
 
 
-                            if (status == HttpStatusCode.NotFound)
+                            if (response == "Not Found")
                             {
                                 //Error!
                                 continue;
@@ -154,7 +170,7 @@ namespace EmailService
                             };
                         }
 
-                        status = await PostAsync("CampaignRecords", newCampaignRecord);
+                        response = await PostAsync("CampaignRecords", SerializeObject(newCampaignRecord));
                     }
                 }
             }
@@ -200,31 +216,33 @@ namespace EmailService
         }
 
 
-        public async Task<HttpStatusCode> PostAsync(string uri, object obj)
+        public async Task<string> PostAsync(string uri, StringContent content)
         {
             using (HttpClient client = new HttpClient())
             {
-                StringContent content = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
-
                 using (HttpResponseMessage response = await client.PostAsync(apiUrl + uri, content))
+                {
+                    if (response.StatusCode == HttpStatusCode.NotFound) return "Not Found";
+                    return await response.Content.ReadAsStringAsync();
+                }
+            }
+        }
+
+
+        public async Task<HttpStatusCode> PutAsync(string uri, StringContent content)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = await client.PutAsync(apiUrl + uri, content))
                 {
                     return response.StatusCode;
                 }
             }
         }
 
-
-        public async Task<HttpStatusCode> PutAsync(string uri, object obj)
+        private StringContent SerializeObject(object obj)
         {
-            using (HttpClient client = new HttpClient())
-            {
-                StringContent content = new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
-
-                using (HttpResponseMessage response = await client.PutAsync(apiUrl + uri, content))
-                {
-                    return response.StatusCode;
-                }
-            }
+            return new StringContent(JsonConvert.SerializeObject(obj), Encoding.UTF8, "application/json");
         }
     }
 }

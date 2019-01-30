@@ -10,12 +10,14 @@ namespace MarketingServer
 
         public override async Task CreateAsync(AuthenticationTokenCreateContext context)
         {
+            // Create a ID for the new token
             string refreshTokenId = Guid.NewGuid().ToString("n");
 
-
+            // Set the token properties
             context.Ticket.Properties.IssuedUtc = DateTime.UtcNow;
             context.Ticket.Properties.ExpiresUtc = DateTime.UtcNow.AddDays(14);
 
+            // Create the token object to store in the database
             RefreshToken token = new RefreshToken()
             {
                 ID = Hashing.GetHash(refreshTokenId),
@@ -25,13 +27,10 @@ namespace MarketingServer
             };
 
 
+            // Save the new token
             db.RefreshTokens.Add(token);
-
             await db.SaveChangesAsync();
-
             context.SetToken(refreshTokenId);
-
-
         }
 
         public override async Task ReceiveAsync(AuthenticationTokenReceiveContext context)
