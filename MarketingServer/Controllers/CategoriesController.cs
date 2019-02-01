@@ -8,6 +8,10 @@ using System.Web.Http.Description;
 using MarketingServer;
 using System.Web;
 using System.IO;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using System;
+using System.Net.Http.Formatting;
 
 namespace MarketingServer.Controllers
 {
@@ -17,8 +21,24 @@ namespace MarketingServer.Controllers
 
         // GET: api/Categories
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetCategories()
+        public async Task<HttpResponseMessage> GetCategories()
         {
+            HttpResponseMessage response = new HttpResponseMessage();
+            string sessionId  = Session.GetSessionID(Request);
+            
+            if(sessionId != null)
+            {
+                Customer customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+                if(customer != null)
+                {
+                    sessionId = Guid.NewGuid().ToString("N");
+                    Session.SetSessionID(sessionId, Request, ref response);
+                    customer.SessionID = Hashing.GetHash(sessionId);
+                    db.Entry(customer).State = EntityState.Modified;
+                    await db.SaveChangesAsync();
+                }
+            }
+
             var categories = await db.Categories
                 .AsNoTracking()
                 .OrderBy(x => x.Name)
@@ -44,7 +64,9 @@ namespace MarketingServer.Controllers
             )
             .ToListAsync();
 
-            return Ok(categories);
+            response.Content = new ObjectContent<object>(categories, new JsonMediaTypeFormatter());
+
+            return response;
         }
 
         [Route("api/Categories/Manager")]

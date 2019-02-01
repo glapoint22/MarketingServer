@@ -8,6 +8,8 @@ using System.Web.Http.Description;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq.Expressions;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace MarketingServer
 {
@@ -18,8 +20,14 @@ namespace MarketingServer
         // GET: api/Products
         [ResponseType(typeof(Product))]
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetProducts(string customerId, string productIds)
+        public async Task<IHttpActionResult> GetProducts(string productIds)
         {
+            string customerId = string.Empty;
+            string sessionId = Session.GetSessionID(Request);
+
+            if(sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+
+
             List<ProductGroup> productGroups = new List<ProductGroup>();
             List<ProductGroup> recommendedProducts = await GetRecommendedProducts(customerId);
 

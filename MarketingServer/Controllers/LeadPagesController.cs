@@ -59,6 +59,7 @@ namespace MarketingServer.Controllers
 
         // GET: api/LeadPages/5
         //[ResponseType(typeof(LeadPage))]
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetLeadPage(string pageTitle)
         {
             var leadPage = await db.LeadPages.AsNoTracking().Where(x => x.PageTitle == pageTitle).Select(x => new

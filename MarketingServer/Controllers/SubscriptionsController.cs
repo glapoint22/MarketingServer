@@ -7,12 +7,16 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Formatting;
 
 namespace MarketingServer.Controllers
 {
     public class SubscriptionsController : ApiController
     {
         private MarketingEntities db = new MarketingEntities();
+        private string sessionId;
 
         [AllowAnonymous]
         public async Task<IHttpActionResult> Get(string customerId)
@@ -27,9 +31,9 @@ namespace MarketingServer.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
+        public async Task<HttpResponseMessage> Post(SubscriptionInfo subscriptionInfo)
         {
-            var response = new object();
+            HttpResponseMessage response = new HttpResponseMessage();
             bool isExistingCustomer = false;
 
             //See if we have an existing customer
@@ -76,28 +80,50 @@ namespace MarketingServer.Controllers
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
                 await mail.Send();
 
-                response = new
+                //response = new
+                //{
+                //    leadMagnet = subscriptionInfo.leadMagnet,
+                //    customer = new
+                //    {
+                //        id = customer.ID,
+                //        email = customer.Email,
+                //        name = customer.Name,
+                //    },
+                // };
+
+                response.Content = new ObjectContent<object>(new
                 {
                     leadMagnet = subscriptionInfo.leadMagnet,
                     customer = new
                     {
-                        id = customer.ID,
+                        //id = customer.ID,
                         email = customer.Email,
                         name = customer.Name,
                     },
-                 };
+                }, new JsonMediaTypeFormatter());
             }
             else
             {
-                response = new
+                //response = new
+                //{
+                //    customer = new
+                //    {
+                //        id = customer.ID,
+                //        name = customer.Name,
+                //        isExistingCustomer = isExistingCustomer
+                //    }
+                //};
+
+                response.Content = new ObjectContent<object>(new
                 {
                     customer = new
                     {
-                        id = customer.ID,
+                        //id = customer.ID,
                         name = customer.Name,
                         isExistingCustomer = isExistingCustomer
                     }
-                };
+                }, new JsonMediaTypeFormatter());
+
             }
 
 
@@ -114,7 +140,18 @@ namespace MarketingServer.Controllers
                 }
             }
 
-            return Ok(response);
+            Session.SetSessionID(sessionId, Request, ref response);
+
+            //CookieHeaderValue cookie = new CookieHeaderValue("session", sessionId);
+            //cookie.Expires = DateTimeOffset.Now.AddYears(1);
+            //cookie.Domain = Request.RequestUri.Host;
+            //cookie.Path = "/";
+            //response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
+
+            
+
+            return response;
+
         }
 
         [AllowAnonymous]
@@ -201,6 +238,7 @@ namespace MarketingServer.Controllers
         private async Task<Customer> SetCustomer(string id, string name, string email)
         {
             Customer customer;
+            sessionId = Guid.NewGuid().ToString("N");
 
             //If the customer DOES NOT exist in the database
             if (id == null)
@@ -211,8 +249,8 @@ namespace MarketingServer.Controllers
                     Email = email,
                     Name = name,
                     EmailSendFrequency = 3,
-                    EmailSentDate = DateTime.Today
-
+                    EmailSentDate = DateTime.Today,
+                    SessionID = Hashing.GetHash(sessionId)
                 };
 
                 //Add the new customer to the database

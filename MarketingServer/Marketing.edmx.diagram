@@ -4,12 +4,12 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="9e27795e69944ea0a7dda98c97c4ce9b" Name="Diagram1">
+      <Diagram DiagramId="ee9ff78020c44f64b973cf2e03dc0157" Name="Diagram1">
         <EntityTypeShape EntityType="MarketingModel.CampaignRecord" Width="1.5" PointX="7.5" PointY="14.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Category" Width="1.5" PointX="0.75" PointY="13.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.CategoryImage" Width="1.5" PointX="3" PointY="7" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Client" Width="1.5" PointX="0.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="5.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="MarketingModel.Customer" Width="1.5" PointX="6" PointY="5.75" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.EmailCampaign" Width="1.5" PointX="7.5" PointY="18.625" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.FilterLabel" Width="1.5" PointX="8.25" PointY="29.875" IsExpanded="true" />
         <EntityTypeShape EntityType="MarketingModel.Filter" Width="1.5" PointX="6" PointY="30" IsExpanded="true" />

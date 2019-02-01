@@ -52,6 +52,7 @@
           <Property Name="Email" Type="varchar" MaxLength="255" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="int" Nullable="false" />
           <Property Name="EmailSentDate" Type="datetime" Nullable="false" />
+          <Property Name="SessionID" Type="nvarchar" MaxLength="255" />
         </EntityType>
         <EntityType Name="EmailCampaigns">
           <Key>
@@ -529,6 +530,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="EmailSendFrequency" Type="Int32" Nullable="false" />
           <Property Name="EmailSentDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="SessionID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="Subscriptions" Relationship="Self.FK__Subscript__Custo__6D6238AF" FromRole="Customers" ToRole="Subscriptions" />
         </EntityType>
         <EntityType Name="EmailCampaign">
@@ -1020,6 +1022,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailSendFrequency" ColumnName="EmailSendFrequency" />
                 <ScalarProperty Name="EmailSentDate" ColumnName="EmailSentDate" />
+                <ScalarProperty Name="SessionID" ColumnName="SessionID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

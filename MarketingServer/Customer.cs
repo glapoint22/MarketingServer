@@ -25,6 +25,7 @@ namespace MarketingServer
         public string Email { get; set; }
         public int EmailSendFrequency { get; set; }
         public System.DateTime EmailSentDate { get; set; }
+        public string SessionID { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Subscription> Subscriptions { get; set; }
