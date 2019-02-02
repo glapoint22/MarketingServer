@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Data.Entity.SqlServer;
+using System.Net.Http;
+using System.Net.Http.Formatting;
 
 namespace MarketingServer.Controllers
 {
@@ -44,17 +46,33 @@ namespace MarketingServer.Controllers
             return Ok(customers);
         }
 
-        // GET: api/Customers/5
+        //GET: api/Customers/5
         //[ResponseType(typeof(Customer))]
-        //public async Task<IHttpActionResult> GetCustomer(string id)
+        //[Route("api/Customers/Id")]
+        //[AllowAnonymous]
+        //public async Task<HttpResponseMessage> GetCustomerID()
         //{
-        //    Customer customer = await db.Customers.FindAsync(id);
-        //    if (customer == null)
+        //    HttpResponseMessage response = new HttpResponseMessage();
+        //    string sessionId = Session.GetSessionID(Request);
+        //    string customerId = string.Empty;
+
+        //    if (sessionId != null)
         //    {
-        //        return NotFound();
+        //        Customer customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+        //        if (customer != null)
+        //        {
+        //            customerId = customer.ID;
+        //            sessionId = Guid.NewGuid().ToString("N");
+        //            Session.SetSessionID(sessionId, Request, ref response);
+        //            customer.SessionID = Hashing.GetHash(sessionId);
+        //            db.Entry(customer).State = EntityState.Modified;
+        //            await db.SaveChangesAsync();
+        //        }
         //    }
 
-        //    return Ok(customer);
+        //    response.Content = new ObjectContent<object>(new { customerId = customerId}, new JsonMediaTypeFormatter());
+
+        //    return response;
         //}
 
         // PUT: api/Customers/5

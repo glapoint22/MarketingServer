@@ -18,9 +18,9 @@ namespace MarketingServer
             response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
         }
 
-        public static string GetSessionID(HttpRequestMessage request)
+        public static string GetSessionID(HttpRequestHeaders headers)
         {
-            CookieHeaderValue cookie = request.Headers.GetCookies("session").FirstOrDefault();
+            CookieHeaderValue cookie = headers.GetCookies("session").FirstOrDefault();
             if (cookie != null)
             {
                 return Hashing.GetHash(cookie["session"].Value);

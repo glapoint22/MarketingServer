@@ -74,43 +74,57 @@ namespace MarketingServer.Controllers
             return Ok(categories);
         }
 
-
-        public async Task<IHttpActionResult> GetMail(string emailId, string customerId)
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> GetMail(string emailId)
         {
-            // Search email campaigns for this email id
-            var email = await db.EmailCampaigns
-                .AsNoTracking()
-                .Where(e => e.ID == emailId)
-                .Select(e => new
-                {
-                    nicheId = e.Product.NicheID,
-                    body = e.Body,
-                    productId = e.ProductID
-                })
-                .FirstOrDefaultAsync();
+            string sessionId;
+            string customerId = null;
 
+            sessionId = Session.GetSessionID(Request.Headers);
 
-            // If email was not in email campaigns, search in leadmagnet emails
-            if (email == null)
+            if (sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+
+            if (customerId != null)
             {
-                email = await db.LeadMagnetEmails
+                // Search email campaigns for this email id
+                var email = await db.EmailCampaigns
                     .AsNoTracking()
                     .Where(e => e.ID == emailId)
                     .Select(e => new
                     {
-                        nicheId = e.NicheID,
+                        nicheId = e.Product.NicheID,
                         body = e.Body,
-                        productId = string.Empty
+                        productId = e.ProductID
                     })
-                .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync();
 
-                // If not found, return bad request
-                if (email == null) return BadRequest();
+
+                // If email was not in email campaigns, search in leadmagnet emails
+                if (email == null)
+                {
+                    email = await db.LeadMagnetEmails
+                        .AsNoTracking()
+                        .Where(e => e.ID == emailId)
+                        .Select(e => new
+                        {
+                            nicheId = e.NicheID,
+                            body = e.Body,
+                            productId = string.Empty
+                        })
+                    .FirstOrDefaultAsync();
+
+                    // If not found, return bad request
+                    if (email == null) return BadRequest();
+                }
+
+                // Make a new mail instance
+                Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
+                return Ok(mail.body);
             }
-
-            // Make a new mail instance
-            Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
-            return Ok(mail.body);
+            else
+            {
+                return Ok();
+            }
         }
 
         [HttpPost]

@@ -22,10 +22,12 @@ namespace MarketingServer
         [AllowAnonymous]
         public async Task<IHttpActionResult> GetProducts(string productIds)
         {
-            string customerId = string.Empty;
-            string sessionId = Session.GetSessionID(Request);
+            string sessionId;
+            string customerId = null;
 
-            if(sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+            sessionId = Session.GetSessionID(Request.Headers);
+
+            if (sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
 
             List<ProductGroup> productGroups = new List<ProductGroup>();

@@ -16,15 +16,21 @@ namespace MarketingServer.Controllers
     public class SubscriptionsController : ApiController
     {
         private MarketingEntities db = new MarketingEntities();
-        private string sessionId;
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> Get(string customerId)
+        public async Task<IHttpActionResult> Get()
         {
-            Customer customer = await db.Customers.FindAsync(customerId);
+            string sessionId;
+            Customer customer = null;
+
+            sessionId = Session.GetSessionID(Request.Headers);
+
+            if(sessionId != null) customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+
+
             if (customer == null)
             {
-                return NotFound();
+                return Ok();
             }
 
             return Ok(await GetPreferences(customer));
@@ -40,8 +46,10 @@ namespace MarketingServer.Controllers
             string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
             if (id != null) isExistingCustomer = true;
 
-             //Set the customer
-             Customer customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email);
+            string sessionId = Guid.NewGuid().ToString("N");
+
+            //Set the customer
+            Customer customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
 
             if(subscriptionInfo.leadMagnet != null)
             {
@@ -148,7 +156,7 @@ namespace MarketingServer.Controllers
             //cookie.Path = "/";
             //response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
 
-            
+
 
             return response;
 
@@ -235,10 +243,9 @@ namespace MarketingServer.Controllers
             return subscription;
         }
 
-        private async Task<Customer> SetCustomer(string id, string name, string email)
+        private async Task<Customer> SetCustomer(string id, string name, string email, string sessionId)
         {
             Customer customer;
-            sessionId = Guid.NewGuid().ToString("N");
 
             //If the customer DOES NOT exist in the database
             if (id == null)
@@ -259,6 +266,7 @@ namespace MarketingServer.Controllers
             else
             {
                 customer = await db.Customers.FindAsync(id);
+                customer.SessionID = Hashing.GetHash(sessionId);
             }
 
             return customer;
@@ -301,7 +309,7 @@ namespace MarketingServer.Controllers
             {
                 customer = new
                 {
-                    id = customer.ID,
+                    //id = customer.ID,
                     email = customer.Email,
                     name = customer.Name,
                     emailSendFrequency = customer.EmailSendFrequency,
