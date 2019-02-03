@@ -78,13 +78,13 @@ namespace MarketingServer.Controllers
         public async Task<IHttpActionResult> GetMail(string emailId)
         {
             string sessionId;
-            string customerId = null;
+            Customer customer = null;
 
             sessionId = Session.GetSessionID(Request.Headers);
 
-            if (sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+            if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
 
-            if (customerId != null)
+            if (customer != null)
             {
                 // Search email campaigns for this email id
                 var email = await db.EmailCampaigns
@@ -118,7 +118,7 @@ namespace MarketingServer.Controllers
                 }
 
                 // Make a new mail instance
-                Mail mail = new Mail(emailId, await db.Customers.AsNoTracking().Where(c => c.ID == customerId).Select(c => c).SingleAsync(), "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customerId, email.productId));
+                Mail mail = new Mail(emailId, customer, "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customer.ID, email.productId));
                 return Ok(mail.body);
             }
             else

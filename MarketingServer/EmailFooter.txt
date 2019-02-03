@@ -151,10 +151,10 @@
                             <td style="text-align: center;"><span style="color: rgb(240, 240, 240); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;"><br></span></td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="{3}/mail?eid={1}&amp;cid={2}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
+                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="{3}/mail?eid={1}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;"><a href="{3}/preferences?cid={2}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
+                            <td style="text-align: center;"><a href="{3}/preferences" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
                         </tr>
                     </table>
                     <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->

@@ -126,7 +126,7 @@ namespace MarketingServer.Controllers
                 {
                     customer = new
                     {
-                        //id = customer.ID,
+                        id = customer.ID,
                         name = customer.Name,
                         isExistingCustomer = isExistingCustomer
                     }
@@ -309,11 +309,12 @@ namespace MarketingServer.Controllers
             {
                 customer = new
                 {
-                    //id = customer.ID,
+                    id = customer.ID,
                     email = customer.Email,
                     name = customer.Name,
                     emailSendFrequency = customer.EmailSendFrequency,
-                    emailSentDate = customer.EmailSentDate
+                    emailSentDate = customer.EmailSentDate,
+                    sessionId = customer.SessionID
                 },
                 subscriptions = await GetSubscriptions(customer.ID)
             };

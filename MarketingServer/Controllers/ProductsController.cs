@@ -20,14 +20,21 @@ namespace MarketingServer
         // GET: api/Products
         [ResponseType(typeof(Product))]
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetProducts(string productIds)
+        public async Task<IHttpActionResult> GetProducts()
         {
             string sessionId;
             string customerId = null;
+            string productIds = null;
 
             sessionId = Session.GetSessionID(Request.Headers);
 
             if (sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+
+            CookieHeaderValue cookie = Request.Headers.GetCookies("Products").FirstOrDefault();
+            if (cookie != null)
+            {
+                productIds = cookie["Products"].Value;
+            }
 
 
             List<ProductGroup> productGroups = new List<ProductGroup>();
@@ -640,6 +647,32 @@ namespace MarketingServer
 
             return Ok();
         }
+
+        //[Route("api/Products/hoplink")]
+        //[AllowAnonymous]
+        //public async Task<IHttpActionResult> PostProduct(Product product)
+        //{
+        //    string sessionId;
+             
+
+        //    sessionId = Session.GetSessionID(Request.Headers);
+
+        //    if (sessionId != null)
+        //    {
+        //        string customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+        //        if(customerId != null)
+        //        {
+        //            return Ok(new {
+        //                hoplink = product.HopLink + "?tid=" + customerId + product.ID
+        //            });
+        //        }
+        //    }
+
+        //    return Ok(new
+        //    {
+        //        hoplink = product.HopLink
+        //    });
+        //}
 
         //POST: api/Products
         //[ResponseType(typeof(Product))]
