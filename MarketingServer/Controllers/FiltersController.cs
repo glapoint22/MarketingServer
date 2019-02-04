@@ -14,34 +14,25 @@ namespace MarketingServer.Controllers
         // GET: api/Filters
         public async Task<IHttpActionResult> GetFilters()
         {
-            var filters = await db.Filters.Select(x => new {
-                id = x.ID,
-                name = x.Name,
-                options = x.FilterLabels
+            var filters = await db.Filters
+                .AsNoTracking()
+                .Select(x => new
+                {
+                    id = x.ID,
+                    name = x.Name,
+                    options = x.FilterLabels
                     .Where(y => y.FilterID == x.ID)
-                    .Select(y => new {
+                    .Select(y => new
+                    {
                         id = y.ID,
                         name = y.Name
                     })
                     .ToList()
-            })
+                })
             .ToListAsync();
 
             return Ok(filters);
         }
-
-        // GET: api/Filters/5
-        //[ResponseType(typeof(Filter))]
-        //public async Task<IHttpActionResult> GetFilter(int id)
-        //{
-        //    Filter filter = await db.Filters.FindAsync(id);
-        //    if (filter == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(filter);
-        //}
 
         // PUT: api/Filters/5
         [ResponseType(typeof(void))]
@@ -52,7 +43,7 @@ namespace MarketingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            foreach(Filter filter in filters)
+            foreach (Filter filter in filters)
             {
                 db.Entry(filter).State = EntityState.Modified;
             }
@@ -70,11 +61,11 @@ namespace MarketingServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            foreach(Filter filter in filters)
+            foreach (Filter filter in filters)
             {
                 db.Filters.Add(filter);
             }
-            
+
             await db.SaveChangesAsync();
             return Ok();
         }
@@ -95,23 +86,9 @@ namespace MarketingServer.Controllers
 
                 db.Filters.Remove(filter);
             }
-            
+
             await db.SaveChangesAsync();
             return Ok();
         }
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool FilterExists(int id)
-        //{
-        //    return db.Filters.Count(e => e.ID == id) > 0;
-        //}
     }
 }

@@ -7,7 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using System.Data.Entity.SqlServer;
 using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Net;
 
 namespace MarketingServer.Controllers
 {
@@ -46,128 +46,42 @@ namespace MarketingServer.Controllers
             return Ok(customers);
         }
 
-        //GET: api/Customers/5
-        //[ResponseType(typeof(Customer))]
-        //[Route("api/Customers/Id")]
-        //[AllowAnonymous]
-        //public async Task<HttpResponseMessage> GetCustomerID()
-        //{
-        //    HttpResponseMessage response = new HttpResponseMessage();
-        //    string sessionId = Session.GetSessionID(Request);
-        //    string customerId = string.Empty;
+        [Route("api/Customers/Session")]
+        [AllowAnonymous]
+        public async Task<HttpResponseMessage> GetSession()
+        {
+            HttpResponseMessage response = new HttpResponseMessage();
 
-        //    if (sessionId != null)
-        //    {
-        //        Customer customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
-        //        if (customer != null)
-        //        {
-        //            customerId = customer.ID;
-        //            sessionId = Guid.NewGuid().ToString("N");
-        //            Session.SetSessionID(sessionId, Request, ref response);
-        //            customer.SessionID = Hashing.GetHash(sessionId);
-        //            db.Entry(customer).State = EntityState.Modified;
-        //            await db.SaveChangesAsync();
-        //        }
-        //    }
+            string sessionId;
+            Customer customer = null;
 
-        //    response.Content = new ObjectContent<object>(new { customerId = customerId}, new JsonMediaTypeFormatter());
+            sessionId = Session.GetSessionID(Request.Headers);
 
-        //    return response;
-        //}
+            if (sessionId != null) customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
 
-        // PUT: api/Customers/5
-        //[ResponseType(typeof(void))]
-        //public async Task<IHttpActionResult> PutCustomer(string id, Customer customer)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+            if(customer == null)
+            {
+                return response;
+            }
 
-        //    if (id != customer.ID)
-        //    {
-        //        return BadRequest();
-        //    }
+            sessionId = Guid.NewGuid().ToString("N");
 
-        //    db.Entry(customer).State = EntityState.Modified;
+            customer.SessionID = Hashing.GetHash(sessionId);
 
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CustomerExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
 
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
+            Session.SetSessionID(sessionId, Request, ref response);
 
-        // POST: api/Customers
-        //[ResponseType(typeof(Customer))]
-        //public async Task<IHttpActionResult> PostCustomer(Customer customer)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+            return response;
+        }
 
-        //    db.Customers.Add(customer);
 
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        if (CustomerExists(customer.ID))
-        //        {
-        //            return Conflict();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return CreatedAtRoute("DefaultApi", new { id = customer.ID }, customer);
-        //}
-
-        //// DELETE: api/Customers/5
-        //[ResponseType(typeof(Customer))]
-        //public async Task<IHttpActionResult> DeleteCustomer(string id)
-        //{
-        //    Customer customer = await db.Customers.FindAsync(id);
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    db.Customers.Remove(customer);
-        //    await db.SaveChangesAsync();
-
-        //    return Ok(customer);
-        //}
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool CustomerExists(string id)
-        //{
-        //    return db.Customers.Count(e => e.ID == id) > 0;
-        //}
     }
 }

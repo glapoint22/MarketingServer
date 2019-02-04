@@ -15,7 +15,7 @@ namespace MarketingServer
             MarketingEntities db = new MarketingEntities();
 
             return await db.Products
-                //.OrderBy(x => x.Order)
+                .AsNoTracking()
                 .Where(x => x.NicheID == subscription.NicheID
                         && !x.CampaignRecords
                             .Where(z => z.SubscriptionID == subscription.ID)

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using MarketingServer;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Formatting;
 
 namespace MarketingServer.Controllers
@@ -25,7 +24,7 @@ namespace MarketingServer.Controllers
 
             sessionId = Session.GetSessionID(Request.Headers);
 
-            if(sessionId != null) customer = await db.Customers.Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+            if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
 
 
             if (customer == null)
@@ -41,17 +40,42 @@ namespace MarketingServer.Controllers
         {
             HttpResponseMessage response = new HttpResponseMessage();
             bool isExistingCustomer = false;
+            Customer customer = null;
+            string sessionId;
 
-            //See if we have an existing customer
-            string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
-            if (id != null) isExistingCustomer = true;
+            if (subscriptionInfo.email == null)
+            {
+                sessionId = Session.GetSessionID(Request.Headers);
 
-            string sessionId = Guid.NewGuid().ToString("N");
+                if (sessionId == null)
+                {
+                    return response;
+                }
 
-            //Set the customer
-            Customer customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
 
-            if(subscriptionInfo.leadMagnet != null)
+                customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+
+
+                if (customer == null)
+                {
+                    return response;
+                }
+            }
+            else
+            {
+                //See if we have an existing customer
+                string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
+                if (id != null) isExistingCustomer = true;
+
+                sessionId = Guid.NewGuid().ToString("N");
+
+                //Set the customer
+                customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
+            }
+
+
+
+            if (subscriptionInfo.leadMagnet != null)
             {
                 //Check to see if this customer is subscribed to this niche
                 Subscription subscription = await db.Subscriptions.AsNoTracking().Where(x => x.CustomerID == customer.ID && x.NicheID == subscriptionInfo.nicheId).FirstOrDefaultAsync();
@@ -86,25 +110,13 @@ namespace MarketingServer.Controllers
                 ).SingleAsync();
 
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
-                await mail.Send();
-
-                //response = new
-                //{
-                //    leadMagnet = subscriptionInfo.leadMagnet,
-                //    customer = new
-                //    {
-                //        id = customer.ID,
-                //        email = customer.Email,
-                //        name = customer.Name,
-                //    },
-                // };
+                //await mail.Send();
 
                 response.Content = new ObjectContent<object>(new
                 {
                     leadMagnet = subscriptionInfo.leadMagnet,
                     customer = new
                     {
-                        //id = customer.ID,
                         email = customer.Email,
                         name = customer.Name,
                     },
@@ -112,16 +124,6 @@ namespace MarketingServer.Controllers
             }
             else
             {
-                //response = new
-                //{
-                //    customer = new
-                //    {
-                //        id = customer.ID,
-                //        name = customer.Name,
-                //        isExistingCustomer = isExistingCustomer
-                //    }
-                //};
-
                 response.Content = new ObjectContent<object>(new
                 {
                     customer = new
@@ -148,15 +150,8 @@ namespace MarketingServer.Controllers
                 }
             }
 
-            Session.SetSessionID(sessionId, Request, ref response);
 
-            //CookieHeaderValue cookie = new CookieHeaderValue("session", sessionId);
-            //cookie.Expires = DateTimeOffset.Now.AddYears(1);
-            //cookie.Domain = Request.RequestUri.Host;
-            //cookie.Path = "/";
-            //response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
-
-
+            if (subscriptionInfo.email != null) Session.SetSessionID(sessionId, Request, ref response);
 
             return response;
 
@@ -176,7 +171,8 @@ namespace MarketingServer.Controllers
                 //If unsubscribing to all subscriptions
                 if (customer.EmailSendFrequency == 0)
                 {
-                    await db.Subscriptions.Where(x => x.CustomerID == customer.ID).ForEachAsync(x => {
+                    await db.Subscriptions.AsNoTracking().Where(x => x.CustomerID == customer.ID).ForEachAsync(x =>
+                    {
                         x.Subscribed = false;
                         x.DateUnsubscribed = DateTime.Today;
                     });
@@ -285,7 +281,8 @@ namespace MarketingServer.Controllers
                     .Select(z => z.CategoryID)
                     .ToList()
                     .Contains(n.ID))
-                .Select(x => new {
+                .Select(x => new
+                {
                     name = x.Name,
                     niches = db.Niches
                         .Where(y => y.CategoryID == x.ID && db.Subscriptions
@@ -293,7 +290,8 @@ namespace MarketingServer.Controllers
                             .Select(a => a.NicheID)
                             .ToList()
                             .Contains(y.ID))
-                        .Select(n => new {
+                        .Select(n => new
+                        {
                             id = n.ID,
                             name = n.Name,
                             isSubscribed = n.Subscriptions.Any(a => a.CustomerID == customerId && a.Subscribed && a.NicheID == n.ID),

@@ -113,24 +113,11 @@ namespace MarketingServer.Controllers
 
 
             // Remove any unused files in the downloads directory
-            DeleteUnusedFiles(await db.LeadPages.Select(x => x.LeadMagnet).ToListAsync(), "~/Downloads/");
+            DeleteUnusedFiles(await db.LeadPages.AsNoTracking().Select(x => x.LeadMagnet).ToListAsync(), "~/Downloads/");
 
 
             return Ok(categories);
         }
-
-        //// GET: api/Categories/5
-        //[ResponseType(typeof(Category))]
-        //public async Task<IHttpActionResult> GetCategory(int id)
-        //{
-        //    Category category = await db.Categories.FindAsync(id);
-        //    if (category == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(category);
-        //}
 
         // PUT: api/Categories/5
         [ResponseType(typeof(void))]
@@ -254,19 +241,6 @@ namespace MarketingServer.Controllers
             return Ok();
         }
 
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool CategoryExists(int id)
-        //{
-        //    return db.Categories.Count(e => e.ID == id) > 0;
-        //}
 
         public static void DeleteUnusedFiles(List<string> dbFiles, string directory)
         {

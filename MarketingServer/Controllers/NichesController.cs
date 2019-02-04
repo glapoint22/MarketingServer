@@ -12,24 +12,6 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
-        // GET: api/Niches
-        //public IQueryable<Nich> GetNiches()
-        //{
-        //    return db.Niches;
-        //}
-
-        // GET: api/Niches/5
-        //[ResponseType(typeof(Nich))]
-        //public async Task<IHttpActionResult> GetNich(int id)
-        //{
-        //    Nich nich = await db.Niches.FindAsync(id);
-        //    if (nich == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(nich);
-        //}
 
         // PUT: api/Niches/5
         [ResponseType(typeof(void))]
@@ -180,19 +162,5 @@ namespace MarketingServer.Controllers
             await db.SaveChangesAsync();
             return Ok();
         }
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool NichExists(int id)
-        //{
-        //    return db.Niches.Count(e => e.ID == id) > 0;
-        //}
     }
 }

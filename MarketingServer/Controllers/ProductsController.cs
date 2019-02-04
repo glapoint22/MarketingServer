@@ -28,7 +28,7 @@ namespace MarketingServer
 
             sessionId = Session.GetSessionID(Request.Headers);
 
-            if (sessionId != null) customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+            if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
             CookieHeaderValue cookie = Request.Headers.GetCookies("Products").FirstOrDefault();
             if (cookie != null)
@@ -443,13 +443,19 @@ namespace MarketingServer
         public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = 0, string query = "", int nicheId = 0, int page = 1, string filter = "")
         {
             int currentPage;
+            string sessionId;
+            string customerId = null;
+
+            sessionId = Session.GetSessionID(Request.Headers);
+
+            if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
             if (query == null) query = "";
 
-            List<PriceRange> priceRanges = await db.PriceRanges.ToListAsync();
-            List<Filter> filterList = await db.Filters.ToListAsync();
+            List<PriceRange> priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
+            List<Filter> filterList = await db.Filters.AsNoTracking().ToListAsync();
             IQueryable<Product> productsQuery = BuildQuery(query, category, nicheId, filter, filterList, priceRanges);
-            List<int> products = await productsQuery.Select(a => a.NicheID).ToListAsync();
+            List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
 
             var data = new
             {
@@ -462,7 +468,7 @@ namespace MarketingServer
                     {
                         id = x.ID,
                         name = x.Name,
-                        hopLink = x.HopLink,
+                        hopLink = x.HopLink + (customerId != null ? "?tid=" + customerId + x.ID : ""),
                         description = x.Description,
                         image = x.Image,
                         price = x.Price,
@@ -648,182 +654,6 @@ namespace MarketingServer
             return Ok();
         }
 
-        //[Route("api/Products/hoplink")]
-        //[AllowAnonymous]
-        //public async Task<IHttpActionResult> PostProduct(Product product)
-        //{
-        //    string sessionId;
-             
-
-        //    sessionId = Session.GetSessionID(Request.Headers);
-
-        //    if (sessionId != null)
-        //    {
-        //        string customerId = await db.Customers.Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
-        //        if(customerId != null)
-        //        {
-        //            return Ok(new {
-        //                hoplink = product.HopLink + "?tid=" + customerId + product.ID
-        //            });
-        //        }
-        //    }
-
-        //    return Ok(new
-        //    {
-        //        hoplink = product.HopLink
-        //    });
-        //}
-
-        //POST: api/Products
-        //[ResponseType(typeof(Product))]
-        //public async Task<IHttpActionResult> PostProduct(Product product)
-        //{
-        //    string[] banners = new string[] {
-        //        "Fall.jpg",
-        //        "Costumes.png",
-        //        "2WeekDiet.png",
-        //        "Halloween.png",
-        //        "Delight.jpg"
-        //    };
-
-        //    string[] videos = new string[] {
-        //        "//player.vimeo.com/video/203810510?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/195471382?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/196271312?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/195492285?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/197072042?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/195506334?title=0&byline=0&portrait=0&color=ffffff",
-        //        "//player.vimeo.com/video/195494203?title=0&byline=0&portrait=0&color=ffffff"
-        //    };
-
-
-        //    int totalProducts = 0;
-
-        //    var categories = await db.Categories
-        //        .Select(x => new
-        //        {
-        //            id = x.ID,
-        //            name = x.Name
-        //        })
-        //        .ToListAsync();
-
-        //    foreach (var category in categories)
-        //    {
-        //        var niches = await db.Niches
-        //            .Where(x => x.CategoryID == category.id)
-        //            .Select(x => new
-        //            {
-        //                id = x.ID,
-        //                name = x.Name
-        //            })
-        //            .ToListAsync();
-
-        //        foreach (var niche in niches)
-        //        {
-        //            int order = 1;
-        //            Random rnd = new Random();
-        //            int count = rnd.Next(10, 25);
-
-        //            string[] images = new string[] { "2WeekDiet.gif", "ad2.jpg", "book.png", "box-medium.jpg", "diabetes-lie-3d.png", "EatStopEat.png", "hnm2.jpg", "leanbelly.png", "organifi.png", "Unlock-Your-Hip-Flexors.png", "WakeUpLean.png", "ynm3.jpg" };
-
-        //            for (int i = 0; i < count; i++)
-        //            {
-        //                Product p = new Product
-        //                {
-        //                    ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-        //                    Name = niche.name + " " + order,
-        //                    NicheID = niche.id,
-        //                    HopLink = "http://56e2c0n4zhqi1se007udp9fq11.hop.clickbank.net/",
-        //                    Order = order,
-        //                    Description = "A Foolproof, Science-Based System that's Guaranteed to Melt Away All Your Unwanted Stubborn Body Fat in Just 14 Days.",
-        //                    Image = images[rnd.Next(0, 12)],
-        //                    Active = true,
-        //                    VendorID = 1,
-        //                    Price = (decimal)(rnd.NextDouble() * (100.00 - 3.00) + 3.00),
-        //                };
-
-        //                if (rnd.Next(0, 2) == 1)
-        //                {
-        //                    for(int z = 0; z < videos.Length; z++)
-        //                    {
-        //                        if (rnd.Next(0, 2) == 1)
-        //                        {
-        //                            ProductVideo productVideo = new ProductVideo
-        //                            {
-        //                                ProductID = p.ID,
-        //                                Url = videos[z]
-        //                            };
-        //                            db.ProductVideos.Add(productVideo);
-        //                        }
-        //                    }
-
-        //                }
-
-        //                    for (int k = 17; k < 28; k++)
-        //                {
-        //                    if(rnd.Next(0, 2) == 1)
-        //                    {
-        //                        ProductFilterOption productFilterOption = new ProductFilterOption
-        //                        {
-        //                            ProductID = p.ID,
-        //                            FilterOptionID = k
-        //                        };
-        //                        db.ProductFilterOptions.Add(productFilterOption);
-        //                    }
-        //                }
-
-        //                int day = 1;
-        //                for (int j = 0; j < 4; j++)
-        //                {
-        //                    EmailCampaign e = new EmailCampaign
-        //                    {
-        //                        ID = Guid.NewGuid().ToString("N").Substring(0, 10).ToUpper(),
-        //                        ProductID = p.ID,
-        //                        Day = j + 1,
-        //                        Subject = p.Name + " Day " + day,
-        //                        Body = p.Name + " Day " + day
-        //                    };
-        //                    db.EmailCampaigns.Add(e);
-        //                    day++;
-        //                }
-
-        //                db.Products.Add(p);
-        //                order++;
-        //                totalProducts++;
-        //                if (totalProducts < 6)
-        //                {
-
-        //                    ProductBanner productBanner = new ProductBanner
-        //                    {
-        //                        ProductID = p.ID,
-        //                        Name = banners[totalProducts - 1],
-        //                        Selected = true
-        //                    };
-
-        //                    db.ProductBanners.Add(productBanner);
-
-        //                }
-        //            }
-        //        }
-        //    }
-
-
-
-
-
-
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateException)
-        //    {
-        //        throw;
-        //    }
-
-        //    return CreatedAtRoute("DefaultApi", new { id = product.ID }, product);
-        //}
-
         //POST: api/Products
         [ResponseType(typeof(Product))]
         public async Task<IHttpActionResult> PostProduct(Product[] products)
@@ -873,20 +703,6 @@ namespace MarketingServer
             await db.SaveChangesAsync();
             return Ok();
         }
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool ProductExists(string id)
-        //{
-        //    return db.Products.Count(e => e.ID == id) > 0;
-        //}
     }
 
 

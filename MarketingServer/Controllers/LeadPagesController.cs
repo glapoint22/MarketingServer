@@ -80,41 +80,6 @@ namespace MarketingServer.Controllers
             return Ok(leadPage);
         }
 
-        // PUT: api/LeadPages/5
-        //[ResponseType(typeof(void))]
-        //public async Task<IHttpActionResult> PutLeadPage(string id, LeadPage leadPage)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    if (id != leadPage.ID)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    db.Entry(leadPage).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await db.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!LeadPageExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return StatusCode(HttpStatusCode.NoContent);
-        //}
-
         // POST: api/LeadPages
         [HttpPost]
         public HttpResponseMessage PostLead()
@@ -126,34 +91,5 @@ namespace MarketingServer.Controllers
             return Request.CreateResponse(HttpStatusCode.OK, postedFile.FileName);
         }
         
-        // DELETE: api/LeadPages/5
-        //[ResponseType(typeof(LeadPage))]
-        //public async Task<IHttpActionResult> DeleteLeadPage(string id)
-        //{
-        //    LeadPage leadPage = await db.LeadPages.FindAsync(id);
-        //    if (leadPage == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    db.LeadPages.Remove(leadPage);
-        //    await db.SaveChangesAsync();
-
-        //    return Ok(leadPage);
-        //}
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
-
-        //private bool LeadPageExists(string id)
-        //{
-        //    return db.LeadPages.Count(e => e.ID == id) > 0;
-        //}
     }
 }

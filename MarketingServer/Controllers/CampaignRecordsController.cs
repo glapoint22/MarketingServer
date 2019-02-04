@@ -13,12 +13,6 @@ namespace MarketingServer.Controllers
     {
         private MarketingEntities db = new MarketingEntities();
 
-        // GET: api/CampaignRecords
-        //public IQueryable<CampaignRecord> GetCampaignRecords()
-        //{
-        //    return db.CampaignRecords;
-        //}
-
         // GET: api/CampaignRecords/5
         [ResponseType(typeof(CampaignRecord))]
         public async Task<IHttpActionResult> GetCampaignRecord(string subscriptionID)
@@ -99,30 +93,6 @@ namespace MarketingServer.Controllers
             return CreatedAtRoute("DefaultApi", new { id = campaignRecord.SubscriptionID }, campaignRecord);
         }
 
-        // DELETE: api/CampaignRecords/5
-        //[ResponseType(typeof(CampaignRecord))]
-        //public async Task<IHttpActionResult> DeleteCampaignRecord(string id)
-        //{
-        //    CampaignRecord campaignRecord = await db.CampaignRecords.FindAsync(id);
-        //    if (campaignRecord == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    db.CampaignRecords.Remove(campaignRecord);
-        //    await db.SaveChangesAsync();
-
-        //    return Ok(campaignRecord);
-        //}
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        db.Dispose();
-        //    }
-        //    base.Dispose(disposing);
-        //}
 
         private bool CampaignRecordExists(string id)
         {
