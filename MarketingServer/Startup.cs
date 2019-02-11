@@ -23,7 +23,7 @@ namespace MarketingServer
             {
                 TokenEndpointPath = new PathString("/api/Token"),
                 Provider = new ApplicationOAuthProvider(),
-                AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(2),
+                AccessTokenExpireTimeSpan = TimeSpan.FromHours(1),
                 RefreshTokenProvider = new ApplicationRefreshTokenProvider(),
                 
                 // In production mode set AllowInsecureHttp = false
