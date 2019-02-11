@@ -121,6 +121,7 @@ namespace MarketingServer.Controllers
 
         // PUT: api/Categories/5
         [ResponseType(typeof(void))]
+        [HttpPut]
         public async Task<IHttpActionResult> PutCategory(Category[] categories)
         {
             if (!ModelState.IsValid)

@@ -219,6 +219,7 @@
     <Compile Include="Controllers\NichesController.cs" />
     <Compile Include="Controllers\NotificationsController.cs" />
     <Compile Include="Controllers\SubscriptionsController.cs" />
+    <Compile Include="Controllers\TimeController.cs" />
     <Compile Include="Customer.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
@@ -303,7 +304,7 @@
     <Content Include="Marketing.edmx.diagram">
       <DependentUpon>Marketing.edmx</DependentUpon>
     </Content>
-    <None Include="Properties\PublishProfiles\fdsafaa.pubxml" />
+    <None Include="Properties\PublishProfiles\Niche Shack.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

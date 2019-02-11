@@ -110,7 +110,7 @@ namespace MarketingServer.Controllers
                 ).SingleAsync();
 
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
-                //await mail.Send();
+                await mail.Send();
 
                 response.Content = new ObjectContent<object>(new
                 {

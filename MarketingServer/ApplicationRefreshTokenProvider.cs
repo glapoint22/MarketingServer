@@ -15,7 +15,7 @@ namespace MarketingServer
 
             // Set the token properties
             context.Ticket.Properties.IssuedUtc = DateTime.UtcNow;
-            context.Ticket.Properties.ExpiresUtc = DateTime.UtcNow.AddDays(14);
+            context.Ticket.Properties.ExpiresUtc = DateTime.UtcNow.AddMinutes(2);
 
             // Create the token object to store in the database
             RefreshToken token = new RefreshToken()

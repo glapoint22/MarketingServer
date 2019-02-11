@@ -142,7 +142,7 @@ namespace MarketingServer.Controllers
             if (email == null) return NotFound();
 
             Mail mail = new Mail(email.id, campaignEmail.customer, email.subject, email.body, await Mail.GetRelatedProducts(email.nicheId, email.id, campaignEmail.customer.ID, campaignEmail.productId));
-            //await mail.Send();
+            await mail.Send();
             return Ok();
         }
     }
