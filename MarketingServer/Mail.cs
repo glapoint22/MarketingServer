@@ -15,8 +15,8 @@ namespace MarketingServer
     public class Mail
     {
         private SmtpClient smtpClient = new SmtpClient();
-        public string from;
-        public string to;
+        public MailAddress from;
+        public MailAddress to;
         public string subject;
         public string body;
 
@@ -52,13 +52,16 @@ namespace MarketingServer
             // Set the email properties
             this.subject = subject;
             this.body = string.Format(body, customer.Name, emailId, customer.ID, domain);
-            to = customer.Email;
-            from = mailSettings.Smtp.Network.UserName;
+            to = new MailAddress(customer.Email);
+            from = new MailAddress(mailSettings.Smtp.Network.UserName, mailSettings.Smtp.From);
+            
         }
 
         public async Task Send()
         {
-            MailMessage mailMessage = new MailMessage(from, to, subject, body);
+            MailMessage mailMessage = new MailMessage(from, to);
+            mailMessage.Subject = subject;
+            mailMessage.Body = body;
             mailMessage.IsBodyHtml = true;
             await smtpClient.SendMailAsync(mailMessage);
         }
