@@ -14,6 +14,14 @@ namespace MarketingServer
         [AllowAnonymous]
         public async Task<IHttpActionResult> GetProductBanners()
         {
+            string sessionId;
+            string customerId = null;
+
+            sessionId = Session.GetSessionID(Request.Headers);
+
+            if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+
+
             var productBanners = await db.ProductBanners
                 .AsNoTracking()
                 .Where(x => x.Selected)
@@ -24,7 +32,7 @@ namespace MarketingServer
                     {
                         id = x.Product.ID,
                         name = x.Product.Name,
-                        hopLink = x.Product.HopLink
+                        hopLink = x.Product.HopLink + (customerId != null ? "?tid=" + customerId + x.Product.ID : "")
                     }
                 })
                 .ToListAsync();
