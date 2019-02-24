@@ -60,6 +60,8 @@ namespace MarketingServer.Controllers
                 {
                     return response;
                 }
+
+                isExistingCustomer = true;
             }
             else
             {
@@ -119,6 +121,7 @@ namespace MarketingServer.Controllers
                     {
                         email = customer.Email,
                         name = customer.Name,
+                        isExistingCustomer = isExistingCustomer
                     },
                 }, new JsonMediaTypeFormatter());
             }
