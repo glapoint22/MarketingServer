@@ -9,6 +9,8 @@ using System.Web.Http;
 using MarketingServer;
 using System.Net.Http;
 using System.Net.Http.Formatting;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MarketingServer.Controllers
 {
@@ -36,12 +38,57 @@ namespace MarketingServer.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<HttpResponseMessage> Post(SubscriptionInfo subscriptionInfo)
+        public async Task<HttpResponseMessage> Get(string parameters)
         {
+            ResponseContent content;
             HttpResponseMessage response = new HttpResponseMessage();
+            string sessionId;
+
+            byte[] bytes = Convert.FromBase64String(parameters);
+            using (MemoryStream ms = new MemoryStream(bytes, 0, bytes.Length))
+            {
+                ms.Write(bytes, 0, bytes.Length);
+                ms.Position = 0;
+                 content = (ResponseContent)new BinaryFormatter().Deserialize(ms);
+            }
+
+            Customer customer = await db.Customers.FindAsync(content.customerId);
+
+            if(customer == null)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
+
+
+            sessionId = Guid.NewGuid().ToString("N");
+
+            customer.SessionID = Hashing.GetHash(sessionId);
+
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            Session.SetSessionID(sessionId, Request, ref response);
+
+
+            response.Content = new ObjectContent<ResponseContent>(content, new JsonMediaTypeFormatter());
+
+            return response;
+        }
+
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
+        {
+            //HttpResponseMessage response = new HttpResponseMessage();
             bool isExistingCustomer = false;
             Customer customer = null;
-            string sessionId = null;
+            ResponseContent content;
+            //string sessionId = null;
 
             //if (subscriptionInfo.email == null)
             //{
@@ -69,10 +116,10 @@ namespace MarketingServer.Controllers
             string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
             if (id != null) isExistingCustomer = true;
 
-            if (subscriptionInfo.leadMagnet == null) sessionId = Guid.NewGuid().ToString("N");
+            //if (subscriptionInfo.leadMagnet == null) sessionId = Guid.NewGuid().ToString("N");
 
             //Set the customer
-            customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
+            customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email);
             //}
 
 
@@ -114,30 +161,39 @@ namespace MarketingServer.Controllers
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
                 //await mail.Send();
 
-                response.Content = new ObjectContent<object>(new
+                content = new ResponseContent
                 {
-                    //leadMagnet = subscriptionInfo.leadMagnet,
-                    customer = new
-                    {
-                        email = customer.Email
-                        //name = customer.Name,
-                        //isExistingCustomer = isExistingCustomer
-                    },
-                }, new JsonMediaTypeFormatter());
+                    customerId = customer.ID,
+                    customerName = customer.Name,
+                    email = customer.Email,
+                    isExistingCustomer = isExistingCustomer,
+                    leadMagnet = subscriptionInfo.leadMagnet
+                };
+
+
+
+
+
+
+
+                
+
+
+
+
             }
             else
             {
-                response.Content = new ObjectContent<object>(new
+                content = new ResponseContent
                 {
-                    customer = new
-                    {
-                        id = customer.ID,
-                        name = customer.Name,
-                        isExistingCustomer = isExistingCustomer
-                    }
-                }, new JsonMediaTypeFormatter());
 
-                Session.SetSessionID(sessionId, Request, ref response);
+                    customerId = customer.ID,
+                    customerName = customer.Name,
+                    isExistingCustomer = isExistingCustomer
+
+                };
+
+                //Session.SetSessionID(sessionId, Request, ref response);
             }
 
 
@@ -154,9 +210,11 @@ namespace MarketingServer.Controllers
                 }
             }
 
-
-            return response;
-
+            using (MemoryStream ms = new MemoryStream())
+            {
+                new BinaryFormatter().Serialize(ms, content);
+                return Ok(Convert.ToBase64String(ms.ToArray()));
+            }
         }
 
         [AllowAnonymous]
@@ -241,7 +299,7 @@ namespace MarketingServer.Controllers
             return subscription;
         }
 
-        private async Task<Customer> SetCustomer(string id, string name, string email, string sessionId)
+        private async Task<Customer> SetCustomer(string id, string name, string email)
         {
             Customer customer;
 
@@ -254,8 +312,7 @@ namespace MarketingServer.Controllers
                     Email = email,
                     Name = name,
                     EmailSendFrequency = 3,
-                    EmailSentDate = DateTime.Today,
-                    SessionID = Hashing.GetHash(sessionId)
+                    EmailSentDate = DateTime.Today
                 };
 
                 //Add the new customer to the database
@@ -264,7 +321,6 @@ namespace MarketingServer.Controllers
             else
             {
                 customer = await db.Customers.FindAsync(id);
-                if(sessionId != null) customer.SessionID = Hashing.GetHash(sessionId);
             }
 
             return customer;
@@ -342,4 +398,14 @@ public struct UpdatedSubscription
     public string subscriptionId;
     public bool isSubscribed;
     public int nicheId;
+}
+
+[Serializable]
+public struct ResponseContent
+{
+    public string customerId;
+    public string customerName;
+    public string email;
+    public string leadMagnet;
+    public bool isExistingCustomer;
 }

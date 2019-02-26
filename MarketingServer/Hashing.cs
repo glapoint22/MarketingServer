@@ -17,8 +17,6 @@ namespace MarketingServer
 
         public static string GetHash(string input)
         {
-            if (input == null) return null;
-
             HashAlgorithm hashAlgorithm = new SHA256CryptoServiceProvider();
 
             byte[] byteValue = System.Text.Encoding.UTF8.GetBytes(input);
