@@ -19,18 +19,18 @@ namespace MarketingServer.Controllers
         [AllowAnonymous]
         public async Task<IHttpActionResult> Get()
         {
-            string sessionId;
+            //string sessionId;
             Customer customer = null;
 
-            sessionId = Session.GetSessionID(Request.Headers);
+            //sessionId = Session.GetSessionID(Request.Headers);
 
-            if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+            //if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
 
 
-            if (customer == null)
-            {
-                return Ok();
-            }
+            //if (customer == null)
+            //{
+            //    return Ok();
+            //}
 
             return Ok(await GetPreferences(customer));
         }
@@ -41,39 +41,39 @@ namespace MarketingServer.Controllers
             HttpResponseMessage response = new HttpResponseMessage();
             bool isExistingCustomer = false;
             Customer customer = null;
-            string sessionId;
+            string sessionId = null;
 
-            if (subscriptionInfo.email == null)
-            {
-                sessionId = Session.GetSessionID(Request.Headers);
+            //if (subscriptionInfo.email == null)
+            //{
+            //    sessionId = Session.GetSessionID(Request.Headers);
 
-                if (sessionId == null)
-                {
-                    return response;
-                }
-
-
-                customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+            //    if (sessionId == null)
+            //    {
+            //        return response;
+            //    }
 
 
-                if (customer == null)
-                {
-                    return response;
-                }
+            //    customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
 
-                isExistingCustomer = true;
-            }
-            else
-            {
-                //See if we have an existing customer
-                string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
-                if (id != null) isExistingCustomer = true;
 
-                sessionId = Guid.NewGuid().ToString("N");
+            //    if (customer == null)
+            //    {
+            //        return response;
+            //    }
 
-                //Set the customer
-                customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
-            }
+            //    isExistingCustomer = true;
+            //}
+            //else
+            //{
+            //See if we have an existing customer
+            string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
+            if (id != null) isExistingCustomer = true;
+
+            if (subscriptionInfo.leadMagnet == null) sessionId = Guid.NewGuid().ToString("N");
+
+            //Set the customer
+            customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email, sessionId);
+            //}
 
 
 
@@ -112,16 +112,16 @@ namespace MarketingServer.Controllers
                 ).SingleAsync();
 
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
-                await mail.Send();
+                //await mail.Send();
 
                 response.Content = new ObjectContent<object>(new
                 {
-                    leadMagnet = subscriptionInfo.leadMagnet,
+                    //leadMagnet = subscriptionInfo.leadMagnet,
                     customer = new
                     {
-                        email = customer.Email,
-                        name = customer.Name,
-                        isExistingCustomer = isExistingCustomer
+                        email = customer.Email
+                        //name = customer.Name,
+                        //isExistingCustomer = isExistingCustomer
                     },
                 }, new JsonMediaTypeFormatter());
             }
@@ -137,6 +137,7 @@ namespace MarketingServer.Controllers
                     }
                 }, new JsonMediaTypeFormatter());
 
+                Session.SetSessionID(sessionId, Request, ref response);
             }
 
 
@@ -153,8 +154,6 @@ namespace MarketingServer.Controllers
                 }
             }
 
-
-            if (subscriptionInfo.email != null) Session.SetSessionID(sessionId, Request, ref response);
 
             return response;
 
@@ -265,7 +264,7 @@ namespace MarketingServer.Controllers
             else
             {
                 customer = await db.Customers.FindAsync(id);
-                customer.SessionID = Hashing.GetHash(sessionId);
+                if(sessionId != null) customer.SessionID = Hashing.GetHash(sessionId);
             }
 
             return customer;
