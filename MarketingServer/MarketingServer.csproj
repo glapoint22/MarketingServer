@@ -285,6 +285,7 @@
     <Compile Include="RefreshToken.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="Serialization.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Subscription.cs">

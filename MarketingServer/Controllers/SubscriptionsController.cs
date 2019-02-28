@@ -9,8 +9,6 @@ using System.Web.Http;
 using MarketingServer;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MarketingServer.Controllers
 {
@@ -19,46 +17,41 @@ namespace MarketingServer.Controllers
         private MarketingEntities db = new MarketingEntities();
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> Get()
+        public async Task<IHttpActionResult> Get(string customerId)
         {
-            //string sessionId;
-            Customer customer = null;
+            string id = Serialization.Deserialize<string>(customerId);
 
-            //sessionId = Session.GetSessionID(Request.Headers);
-
-            //if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
-
-
-            //if (customer == null)
-            //{
-            //    return Ok();
-            //}
+            Customer customer = await db.Customers.FindAsync(id);
 
             return Ok(await GetPreferences(customer));
         }
 
         [AllowAnonymous]
-        public async Task<HttpResponseMessage> Get(string parameters)
+        [Route("api/Subscriptions/Content")]
+        public async Task<HttpResponseMessage> GetContent(string parameters)
         {
             ResponseContent content;
             HttpResponseMessage response = new HttpResponseMessage();
             string sessionId;
 
-            byte[] bytes = Convert.FromBase64String(parameters);
-            using (MemoryStream ms = new MemoryStream(bytes, 0, bytes.Length))
+            try
             {
-                ms.Write(bytes, 0, bytes.Length);
-                ms.Position = 0;
-                 content = (ResponseContent)new BinaryFormatter().Deserialize(ms);
+                content = Serialization.Deserialize<ResponseContent>(parameters);
             }
-
-            Customer customer = await db.Customers.FindAsync(content.customerId);
-
-            if(customer == null)
+            catch (Exception)
             {
+
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
+            
+
+            Customer customer = await db.Customers.FindAsync(content.customerId);
+
+            if (customer == null)
+            {
+                return new HttpResponseMessage(HttpStatusCode.BadRequest);
+            }
 
             sessionId = Guid.NewGuid().ToString("N");
 
@@ -84,45 +77,16 @@ namespace MarketingServer.Controllers
         [AllowAnonymous]
         public async Task<IHttpActionResult> Post(SubscriptionInfo subscriptionInfo)
         {
-            //HttpResponseMessage response = new HttpResponseMessage();
             bool isExistingCustomer = false;
             Customer customer = null;
             ResponseContent content;
-            //string sessionId = null;
 
-            //if (subscriptionInfo.email == null)
-            //{
-            //    sessionId = Session.GetSessionID(Request.Headers);
-
-            //    if (sessionId == null)
-            //    {
-            //        return response;
-            //    }
-
-
-            //    customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
-
-
-            //    if (customer == null)
-            //    {
-            //        return response;
-            //    }
-
-            //    isExistingCustomer = true;
-            //}
-            //else
-            //{
             //See if we have an existing customer
             string id = await db.Customers.AsNoTracking().Where(c => c.Email == subscriptionInfo.email).Select(c => c.ID).FirstOrDefaultAsync();
             if (id != null) isExistingCustomer = true;
 
-            //if (subscriptionInfo.leadMagnet == null) sessionId = Guid.NewGuid().ToString("N");
-
             //Set the customer
             customer = await SetCustomer(id, subscriptionInfo.name, subscriptionInfo.email);
-            //}
-
-
 
             if (subscriptionInfo.leadMagnet != null)
             {
@@ -167,33 +131,22 @@ namespace MarketingServer.Controllers
                     customerName = customer.Name,
                     email = customer.Email,
                     isExistingCustomer = isExistingCustomer,
-                    leadMagnet = subscriptionInfo.leadMagnet
+                    leadMagnet = subscriptionInfo.leadMagnet,
+                    serializedCustomerId = Serialization.Serialize(customer.ID)
                 };
-
-
-
-
-
-
-
-                
-
-
-
-
             }
             else
             {
                 content = new ResponseContent
                 {
-
                     customerId = customer.ID,
                     customerName = customer.Name,
-                    isExistingCustomer = isExistingCustomer
-
+                    isExistingCustomer = isExistingCustomer,
+                    productId = subscriptionInfo.productId,
+                    productName = subscriptionInfo.productName,
+                    hoplink = subscriptionInfo.hoplink,
+                    serializedCustomerId = Serialization.Serialize(customer.ID)
                 };
-
-                //Session.SetSessionID(sessionId, Request, ref response);
             }
 
 
@@ -210,11 +163,9 @@ namespace MarketingServer.Controllers
                 }
             }
 
-            using (MemoryStream ms = new MemoryStream())
-            {
-                new BinaryFormatter().Serialize(ms, content);
-                return Ok(Convert.ToBase64String(ms.ToArray()));
-            }
+           
+            return Ok(Serialization.Serialize(content));
+            
         }
 
         [AllowAnonymous]
@@ -384,6 +335,9 @@ public struct SubscriptionInfo
     public string email;
     public int nicheId;
     public string leadMagnet;
+    public string productId;
+    public string hoplink;
+    public string productName;
 }
 
 public struct Preferences
@@ -408,4 +362,8 @@ public struct ResponseContent
     public string email;
     public string leadMagnet;
     public bool isExistingCustomer;
+    public string productId;
+    public string hoplink;
+    public string productName;
+    public string serializedCustomerId;
 }
