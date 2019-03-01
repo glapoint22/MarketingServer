@@ -72,17 +72,28 @@ namespace MarketingServer.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetMail(string emailId)
+        public async Task<IHttpActionResult> GetMail(string id)
         {
-            //string sessionId;
-            Customer customer = null;
+            EmailParameter emailParameter;
 
-            //sessionId = Session.GetSessionID(Request.Headers);
+            try
+            {
+                emailParameter = Serialization.Deserialize<EmailParameter>(id);
+            }
+            catch (System.Exception)
+            {
 
-            //if (sessionId != null) customer = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).FirstOrDefaultAsync();
+                return BadRequest();
+            }
 
-            //if (customer != null)
-            //{
+            Customer customer = await db.Customers.FindAsync(emailParameter.customerId);
+
+            if(customer == null) return BadRequest();
+
+
+            string emailId = emailParameter.emailId;
+            
+
             // Search email campaigns for this email id
             var email = await db.EmailCampaigns
                     .AsNoTracking()
@@ -117,11 +128,6 @@ namespace MarketingServer.Controllers
                 // Make a new mail instance
                 Mail mail = new Mail(emailId, customer, "", email.body, await Mail.GetRelatedProducts(email.nicheId, emailId, customer.ID, email.productId));
                 return Ok(mail.body);
-            //}
-            //else
-            //{
-            //    return Ok();
-            //}
         }
 
         [HttpPost]

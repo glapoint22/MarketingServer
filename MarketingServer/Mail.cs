@@ -9,6 +9,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data.Entity;
+using System;
 
 namespace MarketingServer
 {
@@ -27,8 +28,8 @@ namespace MarketingServer
             MailSettingsSectionGroup mailSettings = configurationFile.GetSectionGroup("system.net/mailSettings") as MailSettingsSectionGroup;
 
             // Get the domain name
-            //string domain = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority;
-            string domain = "http://www.nicheshack.com";
+            string domain = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority;
+            //string domain = "http://www.nicheshack.com";
 
             // Remove summary from the body
             body = Regex.Replace(body, @"summary=""[a-zA-Z0-9-.]+""", "");
@@ -49,9 +50,15 @@ namespace MarketingServer
             // Add the footer
             body = Regex.Replace(body, emailEndPattern, AddFooter());
 
+            EmailParameter emailParameter = new EmailParameter
+            {
+                emailId = emailId,
+                customerId = customer.ID
+            };
+
             // Set the email properties
             this.subject = subject;
-            this.body = string.Format(body, customer.Name, emailId, customer.ID, domain);
+            this.body = string.Format(body, customer.Name, HttpUtility.UrlEncode(Serialization.Serialize(emailParameter)), customer.ID, domain, HttpUtility.UrlEncode(Serialization.Serialize(customer.ID)));
             to = new MailAddress(customer.Email);
             from = new MailAddress(mailSettings.Smtp.Network.UserName, mailSettings.Smtp.From);
             
@@ -216,4 +223,11 @@ namespace MarketingServer
                 .ToListAsync();
         }
     }
+}
+
+[Serializable]
+public struct EmailParameter
+{
+    public string emailId;
+    public string customerId;
 }

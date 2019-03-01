@@ -19,9 +19,22 @@ namespace MarketingServer.Controllers
         [AllowAnonymous]
         public async Task<IHttpActionResult> Get(string customerId)
         {
-            string id = Serialization.Deserialize<string>(customerId);
+            string id;
+
+            try
+            {
+                id = Serialization.Deserialize<string>(customerId);
+            }
+            catch (Exception)
+            {
+
+                return BadRequest();
+            }
+
 
             Customer customer = await db.Customers.FindAsync(id);
+
+            if (customer == null) return BadRequest();
 
             return Ok(await GetPreferences(customer));
         }
@@ -44,7 +57,7 @@ namespace MarketingServer.Controllers
                 return new HttpResponseMessage(HttpStatusCode.BadRequest);
             }
 
-            
+
 
             Customer customer = await db.Customers.FindAsync(content.customerId);
 
@@ -123,7 +136,7 @@ namespace MarketingServer.Controllers
                 ).SingleAsync();
 
                 Mail mail = new Mail(email.id, customer, email.subject, email.body, await Mail.GetRelatedProducts(subscriptionInfo.nicheId, email.id, customer.ID, string.Empty));
-                //await mail.Send();
+                await mail.Send();
 
                 content = new ResponseContent
                 {
@@ -163,9 +176,9 @@ namespace MarketingServer.Controllers
                 }
             }
 
-           
+
             return Ok(Serialization.Serialize(content));
-            
+
         }
 
         [AllowAnonymous]
