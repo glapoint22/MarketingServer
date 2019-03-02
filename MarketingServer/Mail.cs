@@ -28,8 +28,8 @@ namespace MarketingServer
             MailSettingsSectionGroup mailSettings = configurationFile.GetSectionGroup("system.net/mailSettings") as MailSettingsSectionGroup;
 
             // Get the domain name
-            string domain = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority;
-            //string domain = "http://www.nicheshack.com";
+            //string domain = HttpContext.Current.Request.Url.Scheme + "://" + HttpContext.Current.Request.Url.Authority;
+            string domain = "https://mail.nicheshack.com";
 
             // Remove summary from the body
             body = Regex.Replace(body, @"summary=""[a-zA-Z0-9-.]+""", "");
