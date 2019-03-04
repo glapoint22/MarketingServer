@@ -67,6 +67,10 @@ namespace MarketingServer.Controllers
                 }
             )
             .ToListAsync();
+#if !DEBUG
+     // Remove any unused images in the images directory
+    FileManager.DeleteUnusedFiles(await FileManager.GetDBImages(), "~/Images/");
+#endif
 
             return Ok(categories);
         }

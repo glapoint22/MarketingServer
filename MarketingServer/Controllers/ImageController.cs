@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
@@ -24,7 +19,7 @@ namespace MarketingServer
             string imageName = filePath.Substring(imageIndex);
             int imageExt = imageName.IndexOf(".");
 
-            string newImageName = Guid.NewGuid().ToString("N") + imageName.Substring(imageExt);
+            string newImageName = (HttpContext.Current.Request.Form.Count > 0 ? HttpContext.Current.Request.Form[0].Substring(0, 1).ToLower() + "_" : "") + Guid.NewGuid().ToString("N") + imageName.Substring(imageExt);
 
             filePath = filePath.Substring(0, imageIndex) + newImageName;
 
@@ -44,34 +39,6 @@ namespace MarketingServer
         public void DeleteImage(string itemIds)
         {
             DeleteImageFile(itemIds);
-        }
-
-        public static async Task<List<string>> GetDBImages()
-        {
-            MarketingEntities db = new MarketingEntities();
-            List<string> images = new List<string>();
-
-            // Get a list of images in the database
-            images.AddRange(await db.Categories.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
-            images.AddRange(await db.Niches.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
-            images.AddRange(await db.Products.AsNoTracking().Where(x => x.Image != null).Select(x => x.Image).ToListAsync());
-            images.AddRange(await db.CategoryImages.AsNoTracking().Select(x => x.Name).ToListAsync());
-            images.AddRange(await db.ProductBanners.AsNoTracking().Select(x => x.Name).ToListAsync());
-
-            // Get the images from emails and leads
-            List<string> bodies = await db.LeadMagnetEmails.AsNoTracking().Select(x => x.Body).ToListAsync();
-            bodies.AddRange(await db.EmailCampaigns.AsNoTracking().Select(x => x.Body).ToListAsync());
-            bodies.AddRange(await db.LeadPages.AsNoTracking().Select(x => x.Body).ToListAsync());
-            foreach (string body in bodies)
-            {
-                MatchCollection matchList = Regex.Matches(body, @"(?:\/Images\/)([a-z0-9]+\.(jpg|jpeg|gif|png|bmp|tiff|tga|svg))");
-                if (matchList.Count > 0)
-                {
-                    images.AddRange(matchList.Cast<Match>().Select(match => match.Groups[1].Value).ToList());
-                }
-            }
-
-            return images;
         }
     }
 }

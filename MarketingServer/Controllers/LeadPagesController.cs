@@ -41,7 +41,8 @@ namespace MarketingServer.Controllers
                                 .ToList(),
                         leadPages = z.LeadPages
                                 .Where(a => a.NicheID == z.ID)
-                                .Select(a => new {
+                                .Select(a => new
+                                {
                                     id = a.ID,
                                     title = a.Title,
                                     body = a.Body,
@@ -53,6 +54,14 @@ namespace MarketingServer.Controllers
                 }
             )
             .ToListAsync();
+
+#if !DEBUG
+     // Remove any unused images in the images directory
+    FileManager.DeleteUnusedFiles(await FileManager.GetDBImages(), "~/Images/");
+
+    // Remove any unused files in the downloads directory
+    FileManager.DeleteUnusedFiles(await db.LeadPages.AsNoTracking().Select(x => x.LeadMagnet).ToListAsync(), "~/Downloads/");      
+#endif
 
             return Ok(categories);
         }
@@ -90,6 +99,6 @@ namespace MarketingServer.Controllers
 
             return Request.CreateResponse(HttpStatusCode.OK, postedFile.FileName);
         }
-        
+
     }
 }

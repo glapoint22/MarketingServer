@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using MarketingServer;
-using System.Web;
-using System.IO;
 
 namespace MarketingServer.Controllers
 {
@@ -109,12 +107,7 @@ namespace MarketingServer.Controllers
             .ToListAsync();
 
             // Remove any unused images in the images directory
-            DeleteUnusedFiles(await ImageController.GetDBImages(), "~/Images/");
-
-
-            // Remove any unused files in the downloads directory
-            DeleteUnusedFiles(await db.LeadPages.AsNoTracking().Select(x => x.LeadMagnet).ToListAsync(), "~/Downloads/");
-
+            FileManager.DeleteUnusedFiles(await FileManager.GetDBImages(), "~/Images/");
 
             return Ok(categories);
         }
@@ -240,24 +233,6 @@ namespace MarketingServer.Controllers
 
             await db.SaveChangesAsync();
             return Ok();
-        }
-
-
-        public static void DeleteUnusedFiles(List<string> dbFiles, string directory)
-        {
-            // Get all files in the directory
-            string dir = HttpContext.Current.Server.MapPath(directory);
-            string[] files = Directory.GetFiles(dir);
-
-            // Delete any file that is not in the database
-            foreach (string file in files)
-            {
-                string fileName = Path.GetFileName(file);
-                if (dbFiles.FindIndex(x => x == fileName) == -1)
-                {
-                    File.Delete(file);
-                }
-            }
         }
     }
 }

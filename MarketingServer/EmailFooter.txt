@@ -16,7 +16,7 @@
                                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 175px;">
                                         <tr>
 											<td>
-												<a href="{3}" target="_blank"><img src="{3}/Assets/logo.png" width="175" style="width: 100%; display: block;"></a>
+												<a href="https://www.nicheshack.com" target="_blank"><img src="https://www.nicheshack.com/Assets/logo.png" width="175" style="width: 100%; display: block;"></a>
                                             </td>
                                         </tr>
                                     </table>
@@ -42,7 +42,7 @@
                                                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
                                                         <tr>
                                                             <td>
-                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/twitter.png" width="33" style="width: 100%; display: block;"></a>
+                                                                <a href="https://www.twitter.com/" target="_blank"><img src="{3}/Assets/twitter.png" width="33" style="width: 100%; display: block;"></a>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -66,7 +66,7 @@
                                                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
                                                         <tr>
                                                             <td>
-                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/instagram.png" width="33" style="width: 100%; display: block;"></a>
+                                                                <a href="https://www.instagram.com/" target="_blank"><img src="{3}/Assets/instagram.png" width="33" style="width: 100%; display: block;"></a>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -90,7 +90,7 @@
                                                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
                                                         <tr>
                                                             <td>
-                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/facebook.png" width="33" style="width: 100%; display: block;"></a>
+                                                                <a href="https://www.facebook.com/" target="_blank"><img src="{3}/Assets/facebook.png" width="33" style="width: 100%; display: block;"></a>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -114,7 +114,7 @@
                                                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 33px;">
                                                         <tr>
                                                             <td>
-                                                                <a href="{3}" target="_blank"><img src="{3}/Assets/pinterest.png" width="33" style="width: 100%; display: block;"></a>
+                                                                <a href="https://www.pinterest.com/" target="_blank"><img src="{3}/Assets/pinterest.png" width="33" style="width: 100%; display: block;"></a>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -154,7 +154,7 @@
                             <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="{3}/?id={1}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;"><a href="{3}/preferences?p={4}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
+                            <td style="text-align: center;"><a href="https://www.nicheshack.com/preferences?p={4}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
                         </tr>
                     </table>
                     <!--[if (gte mso 9)|(IE)]></td></tr></table><![endif]-->
