@@ -151,7 +151,7 @@
                             <td style="text-align: center;"><span style="color: rgb(240, 240, 240); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;"><br></span></td>
                         </tr>
                         <tr>
-                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="https://mail/nicheshack.com/?id={1}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
+                            <td style="text-align: center;"><span style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;">Trouble viewing this email? </span><a href="{3}/?id={1}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">View online</a></td>
                         </tr>
                         <tr>
                             <td style="text-align: center;"><a href="{3}/preferences?p={4}" style="color: rgb(214, 214, 214); font-size: 14px; font-family: &quot;Times New Roman&quot;, Times, serif;" target="_blank">Manage email subscriptions</a></td>
