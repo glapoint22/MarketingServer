@@ -200,9 +200,6 @@
     <Compile Include="Category.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
-    <Compile Include="CategoryImage.cs">
-      <DependentUpon>Marketing.tt</DependentUpon>
-    </Compile>
     <Compile Include="Client.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

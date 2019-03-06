@@ -17,7 +17,6 @@ namespace MarketingServer
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Category()
         {
-            this.CategoryImages = new HashSet<CategoryImage>();
             this.Niches = new HashSet<Nich>();
         }
     
@@ -26,8 +25,6 @@ namespace MarketingServer
         public string Icon { get; set; }
         public bool Featured { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CategoryImage> CategoryImages { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Nich> Niches { get; set; }
     }

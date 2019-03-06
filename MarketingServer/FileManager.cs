@@ -37,7 +37,7 @@ namespace MarketingServer
             images.AddRange(await db.Categories.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
             images.AddRange(await db.Niches.AsNoTracking().Where(x => x.Icon != null).Select(x => x.Icon).ToListAsync());
             images.AddRange(await db.Products.AsNoTracking().Where(x => x.Image != null).Select(x => x.Image).ToListAsync());
-            images.AddRange(await db.CategoryImages.AsNoTracking().Select(x => x.Name).ToListAsync());
+            //images.AddRange(await db.CategoryImages.AsNoTracking().Select(x => x.Name).ToListAsync());
             images.AddRange(await db.ProductBanners.AsNoTracking().Select(x => x.Name).ToListAsync());
 
             // Get the images from emails and leads

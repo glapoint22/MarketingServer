@@ -26,15 +26,6 @@
           <Property Name="Icon" Type="varchar" MaxLength="255" />
           <Property Name="Featured" Type="bit" Nullable="false" />
         </EntityType>
-        <EntityType Name="CategoryImages">
-          <Key>
-            <PropertyRef Name="CategoryID" />
-            <PropertyRef Name="Name" />
-          </Key>
-          <Property Name="CategoryID" Type="int" Nullable="false" />
-          <Property Name="Name" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="Selected" Type="bit" Nullable="false" />
-        </EntityType>
         <EntityType Name="Clients">
           <Key>
             <PropertyRef Name="ID" />
@@ -202,20 +193,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Principal>
             <Dependent Role="CampaignRecords">
               <PropertyRef Name="SubscriptionID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK__CategoryI__Categ__4119A21D">
-          <End Role="Categories" Type="Self.Categories" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="CategoryImages" Type="Self.CategoryImages" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Categories">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="CategoryImages">
-              <PropertyRef Name="CategoryID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -390,7 +367,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
         <EntityContainer Name="MarketingModelStoreContainer">
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecords" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Categories" EntityType="Self.Categories" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImages" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Clients" EntityType="Self.Clients" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Customers" EntityType="Self.Customers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaigns" Schema="dbo" store:Type="Tables" />
@@ -419,10 +395,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
             <End Role="Subscriptions" EntitySet="Subscriptions" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
-          </AssociationSet>
-          <AssociationSet Name="FK__CategoryI__Categ__4119A21D" Association="Self.FK__CategoryI__Categ__4119A21D">
-            <End Role="Categories" EntitySet="Categories" />
-            <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
           <AssociationSet Name="FK__EmailCamp__Produ__53385258" Association="Self.FK__EmailCamp__Produ__53385258">
             <End Role="Products" EntitySet="Products" />
@@ -500,18 +472,7 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Icon" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="Featured" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="CategoryImages" Relationship="Self.FK__CategoryI__Categ__4119A21D" FromRole="Categories" ToRole="CategoryImages" />
           <NavigationProperty Name="Niches" Relationship="Self.FK__Niches__Category__40257DE4" FromRole="Categories" ToRole="Niches" />
-        </EntityType>
-        <EntityType Name="CategoryImage">
-          <Key>
-            <PropertyRef Name="CategoryID" />
-            <PropertyRef Name="Name" />
-          </Key>
-          <Property Name="CategoryID" Type="Int32" Nullable="false" />
-          <Property Name="Name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Selected" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Category" Relationship="Self.FK__CategoryI__Categ__4119A21D" FromRole="CategoryImages" ToRole="Categories" />
         </EntityType>
         <EntityType Name="Client">
           <Key>
@@ -706,20 +667,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK__CategoryI__Categ__4119A21D">
-          <End Role="Categories" Type="Self.Category" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Role="CategoryImages" Type="Self.CategoryImage" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Categories">
-              <PropertyRef Name="ID" />
-            </Principal>
-            <Dependent Role="CategoryImages">
-              <PropertyRef Name="CategoryID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK__Niches__Category__40257DE4">
           <End Role="Categories" Type="Self.Category" Multiplicity="1">
             <OnDelete Action="Cascade" />
@@ -891,7 +838,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
         <EntityContainer Name="MarketingEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="CampaignRecords" EntityType="Self.CampaignRecord" />
           <EntitySet Name="Categories" EntityType="Self.Category" />
-          <EntitySet Name="CategoryImages" EntityType="Self.CategoryImage" />
           <EntitySet Name="Clients" EntityType="Self.Client" />
           <EntitySet Name="Customers" EntityType="Self.Customer" />
           <EntitySet Name="EmailCampaigns" EntityType="Self.EmailCampaign" />
@@ -914,10 +860,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
           <AssociationSet Name="FK__CampaignR__Subsc__703EA55A" Association="Self.FK__CampaignR__Subsc__703EA55A">
             <End Role="Subscriptions" EntitySet="Subscriptions" />
             <End Role="CampaignRecords" EntitySet="CampaignRecords" />
-          </AssociationSet>
-          <AssociationSet Name="FK__CategoryI__Categ__4119A21D" Association="Self.FK__CategoryI__Categ__4119A21D">
-            <End Role="Categories" EntitySet="Categories" />
-            <End Role="CategoryImages" EntitySet="CategoryImages" />
           </AssociationSet>
           <AssociationSet Name="FK__Niches__Category__40257DE4" Association="Self.FK__Niches__Category__40257DE4">
             <End Role="Categories" EntitySet="Categories" />
@@ -993,15 +935,6 @@ warning 6002: The table/view 'Marketing.dbo.PriceRange' does not have a primary 
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Icon" ColumnName="Icon" />
                 <ScalarProperty Name="Featured" ColumnName="Featured" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="CategoryImages">
-            <EntityTypeMapping TypeName="MarketingModel.CategoryImage">
-              <MappingFragment StoreEntitySet="CategoryImages">
-                <ScalarProperty Name="CategoryID" ColumnName="CategoryID" />
-                <ScalarProperty Name="Name" ColumnName="Name" />
-                <ScalarProperty Name="Selected" ColumnName="Selected" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
