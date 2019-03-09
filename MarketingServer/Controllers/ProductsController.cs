@@ -257,14 +257,14 @@ namespace MarketingServer
 
 
             //Category
-            if (category > 0)
+            if (category > -1)
             {
                 query = query.Where(x => x.Nich.CategoryID == category);
             }
 
 
             //Niche
-            if (nicheId > 0)
+            if (nicheId > -1)
             {
                 query = query.Where(x => x.NicheID == nicheId);
             }
@@ -440,7 +440,7 @@ namespace MarketingServer
         }
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = 0, string query = "", int nicheId = 0, int page = 1, string filter = "")
+        public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = -1, string query = "", int nicheId = -1, int page = 1, string filter = "")
         {
             int currentPage;
             string sessionId;
