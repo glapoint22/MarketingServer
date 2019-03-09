@@ -32,7 +32,7 @@ namespace MarketingServer
                     {
                         id = x.Product.ID,
                         name = x.Product.Name,
-                        hopLink = x.Product.HopLink + (customerId != null ? "?tid=" + customerId + x.Product.ID : "")
+                        hopLink = x.Product.HopLink + (customerId != null ? (x.Product.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.Product.ID : "")
                     }
                 })
                 .ToListAsync();

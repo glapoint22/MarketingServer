@@ -94,7 +94,7 @@ namespace MarketingServer
                         {
                             id = z.ID,
                             name = z.Name,
-                            hopLink = z.HopLink + (customerId != null ? "?tid=" + customerId + z.ID : ""),
+                            hopLink = z.HopLink + (customerId != null ? (z.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + z.ID : ""),
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
@@ -126,7 +126,7 @@ namespace MarketingServer
                         {
                             id = z.ID,
                             name = z.Name,
-                            hopLink = z.HopLink + "?tid=" + customerId + z.ID,
+                            hopLink = z.HopLink + (z.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + z.ID,
                             description = z.Description,
                             image = z.Image,
                             price = z.Price,
@@ -209,7 +209,7 @@ namespace MarketingServer
                     nicheId = x.NicheID,
                     id = x.ID,
                     name = x.Name,
-                    hopLink = x.HopLink + (customerId != null ? "?tid=" + customerId + x.ID : ""),
+                    hopLink = x.HopLink + (customerId != null ? (x.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.ID : ""),
                     description = x.Description,
                     image = x.Image,
                     price = x.Price,
@@ -468,7 +468,7 @@ namespace MarketingServer
                     {
                         id = x.ID,
                         name = x.Name,
-                        hopLink = x.HopLink + (customerId != null ? "?tid=" + customerId + x.ID : ""),
+                        hopLink = x.HopLink + (customerId != null ? (x.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.ID : ""),
                         description = x.Description,
                         image = x.Image,
                         price = x.Price,
