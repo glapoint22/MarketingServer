@@ -243,7 +243,7 @@ namespace MarketingServer
         }
 
 
-        IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
+        IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges)
         {
             IQueryable<Product> query = db.Products;
             char separator = '^';
@@ -276,72 +276,65 @@ namespace MarketingServer
                 Match result;
 
                 //Price Filter
-                if (filterExclude != "Price")
+                result = Regex.Match(queryFilters, GetRegExPattern("Price"));
+                if (result.Length > 0)
                 {
-                    result = Regex.Match(queryFilters, GetRegExPattern("Price"));
-                    if (result.Length > 0)
+                    string[] priceRangeArray = result.Groups[2].Value.Split(separator);
+                    List<PriceRange> priceRangeList = priceRanges
+                        .Where(x => priceRangeArray.Contains(x.Label))
+                        .Select(x => new PriceRange
+                        {
+                            Min = x.Min,
+                            Max = x.Max
+                        }).ToList();
+
+                    foreach (string price in priceRangeArray)
                     {
-                        string[] priceRangeArray = result.Groups[2].Value.Split(separator);
-                        List<PriceRange> priceRangeList = priceRanges
-                            .Where(x => priceRangeArray.Contains(x.Label))
-                            .Select(x => new PriceRange
-                            {
-                                Min = x.Min,
-                                Max = x.Max
-                            }).ToList();
-
-                        foreach (string price in priceRangeArray)
+                        result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
+                        if (result.Length > 0)
                         {
-                            result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
-                            if (result.Length > 0)
+                            PriceRange range = new PriceRange
                             {
-                                PriceRange range = new PriceRange
-                                {
-                                    Min = double.Parse(result.Groups[1].Value),
-                                    Max = double.Parse(result.Groups[2].Value),
-                                };
-                                priceRangeList.Add(range);
-                            }
+                                Min = double.Parse(result.Groups[1].Value),
+                                Max = double.Parse(result.Groups[2].Value),
+                            };
+                            priceRangeList.Add(range);
                         }
-
-                        Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
-
-                        foreach (PriceRange priceRange in priceRangeList)
-                        {
-                            PriceRange temp = priceRange;
-                            predicate = predicate.Or(x => x.Price >= temp.Min && x.Price <= temp.Max);
-                        }
-
-                        query = query.Where(predicate);
                     }
-                }
 
+                    Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
+
+                    foreach (PriceRange priceRange in priceRangeList)
+                    {
+                        PriceRange temp = priceRange;
+                        predicate = predicate.Or(x => x.Price >= temp.Min && x.Price <= temp.Max);
+                    }
+
+                    query = query.Where(predicate);
+                }
 
 
                 //Custom Filters
                 foreach (Filter currentFilter in filterList)
                 {
-                    if (filterExclude != currentFilter.Name)
+                    result = Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name));
+
+                    if (result.Length > 0)
                     {
-                        result = Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name));
+                        //Get the options chosen from this filter
+                        string[] optionsArray = result.Groups[2].Value.Split(separator);
 
-                        if (result.Length > 0)
-                        {
-                            //Get the options chosen from this filter
-                            string[] optionsArray = result.Groups[2].Value.Split(separator);
+                        //Get a list of ids from the options array
+                        List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
 
-                            //Get a list of ids from the options array
-                            List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
-
-                            //Set the query
-                            query = query
-                                .Where(x => x.ProductFilters
-                                    .Where(z => optionIdList.Contains(z.FilterLabelID))
-                                    .Select(z => z.ProductID)
-                                    .ToList()
-                                    .Contains(x.ID)
-                                );
-                        }
+                        //Set the query
+                        query = query
+                            .Where(x => x.ProductFilters
+                                .Where(z => optionIdList.Contains(z.FilterLabelID))
+                                .Select(z => z.ProductID)
+                                .ToList()
+                                .Contains(x.ID)
+                            );
                     }
                 }
             }
@@ -355,24 +348,23 @@ namespace MarketingServer
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
 
-        private async Task<List<FilterData>> GetFilters(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges)
+        private async Task<List<FilterData>> GetFilters(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, int productCount)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
             FilterData filter;
-            string exclude = "";
-
 
             //Create labels for the price filter
             labels = new List<Label>();
-            if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0) exclude = "Price";
 
-            IQueryable<Product> query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude);
+            IQueryable<Product> query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges);
 
             foreach (PriceRange priceRange in priceRanges)
             {
+                string priceLabel = Regex.Replace(priceRange.Label, @"\$", @"\$");
+
                 int count = await query.CountAsync(x => x.Price >= priceRange.Min && x.Price <= priceRange.Max);
-                if (count > 0)
+                if ((count > 0 && count != productCount) || Regex.Match(queryFilters, @"(?:\||\^)" + priceLabel).Length > 0)
                 {
                     Label label = new Label
                     {
@@ -398,10 +390,8 @@ namespace MarketingServer
             {
                 //Create the labels for the current filter
                 labels = new List<Label>();
-                exclude = "";
-                if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0) exclude = currentFilter.Name;
 
-                query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude);
+                query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges);
 
                 foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
                 {
@@ -412,7 +402,7 @@ namespace MarketingServer
                         .Contains(x.ID)
                     );
                     //If the count is greater than zero, create the label
-                    if (count > 0)
+                    if ((count > 0 && count != productCount) || Regex.Match(queryFilters, filterLabel.Name).Length > 0)
                     {
                         Label label = new Label
                         {
@@ -507,7 +497,7 @@ namespace MarketingServer
                         .ToList()
                     })
                     .ToListAsync(),
-                filters = await GetFilters(query, category, nicheId, filter, filterList, priceRanges)
+                filters = await GetFilters(query, category, nicheId, filter, filterList, priceRanges, products.Count)
 
             };
 
@@ -596,7 +586,7 @@ namespace MarketingServer
                     foreach (ProductFilter productFilter in product.ProductFilters)
                     {
                         if (!(dbProductFilters.Count(x => x.ID == productFilter.ID) > 0))
-                        {   
+                        {
                             db.Entry(productFilter).State = EntityState.Added;
                         }
                     }
