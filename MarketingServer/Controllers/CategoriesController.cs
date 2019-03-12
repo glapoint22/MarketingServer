@@ -25,14 +25,8 @@ namespace MarketingServer.Controllers
                     name = x.Name,
                     featured = x.Featured,
                     icon = x.Icon,
-                    //categoryImage = x.CategoryImages
-                    //    .Where(c => c.Selected)
-                    //    .Select(c => new {
-                    //        categoryId = c.CategoryID,
-                    //        name = c.Name
-                    //    })
-                    //    .FirstOrDefault(),
                     niches = x.Niches
+                        .OrderBy(z => z.Name)
                         .Select(z => new {
                             id = z.ID,
                             name = z.Name,
@@ -57,13 +51,6 @@ namespace MarketingServer.Controllers
                     name = x.Name,
                     featured = x.Featured,
                     icon = x.Icon,
-                    //categoryImages = x.CategoryImages
-                    //    .Select(c => new
-                    //    {
-                    //        name = c.Name,
-                    //        isSelected = c.Selected
-                    //    })
-                    //    .ToList(),
                     niches = x.Niches
                         .Select(z => new
                         {
@@ -124,37 +111,6 @@ namespace MarketingServer.Controllers
 
             foreach (Category category in categories)
             {
-                // Get a list of category images for this category that is stored in the database
-                //List<CategoryImage> dbCategoryImages = await db.CategoryImages.AsNoTracking().Where(x => x.CategoryID == category.ID).ToListAsync();
-                
-                // Check to see if any category images have been deleted
-                //foreach (CategoryImage dbCategoryImage in dbCategoryImages)
-                //{
-                //    if(!category.CategoryImages.Select(x => x.Name).ToList().Contains(dbCategoryImage.Name))
-                //    {
-                //        db.CategoryImages.Attach(dbCategoryImage);
-                //        db.CategoryImages.Remove(dbCategoryImage);
-                //        ImageController.DeleteImageFile(dbCategoryImage.Name);
-                //    }
-                //}
-
-                // Check to see if any category images need to be added or have been modified
-                //foreach (CategoryImage categoryImage in category.CategoryImages)
-                //{
-                //    if (!(dbCategoryImages.Count(x => x.Name == categoryImage.Name) > 0))
-                //    {
-                //        db.Entry(categoryImage).State = EntityState.Added;
-                //    }
-                //    else
-                //    {
-                //        CategoryImage dbCategoryImage = dbCategoryImages.FirstOrDefault(x => x.Name == categoryImage.Name);
-                //        if (dbCategoryImage.Selected != categoryImage.Selected)
-                //        {
-                //            db.Entry(categoryImage).State = EntityState.Modified;
-                //        }
-                //    }
-                //}
-
                 // Check to see if this category has been modified
                 Category dbCategory = db.Categories.AsNoTracking().FirstOrDefault(x => x.ID == category.ID);
 
@@ -211,7 +167,6 @@ namespace MarketingServer.Controllers
 
                 // Add category images to the list
                 if (category.Icon != null) imagesToDelete.Add(category.Icon);
-                //category.CategoryImages.ToList().ForEach(x => imagesToDelete.Add(x.Name));
 
                 // Add niche and product images to the list
                 category.Niches.ToList().ForEach(x =>
