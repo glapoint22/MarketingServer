@@ -700,7 +700,6 @@ namespace MarketingServer
     {
         public string name;
         public int productCount;
-        public bool @checked;
     }
 
     public struct FilterData
