@@ -467,6 +467,7 @@ namespace MarketingServer
             IQueryable<Product> productsQuery = BuildQuery(query, category, nicheId, filter, filterList, priceRanges);
             List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
 
+
             var data = new
             {
                 totalProducts = products.Count(),
@@ -474,6 +475,7 @@ namespace MarketingServer
                 products = await productsQuery
                     .AsNoTracking()
                     .OrderBy(sort, query)
+                    .ThenBy(x => x.Name)
                     .Select(x => new
                     {
                         id = x.ID,
