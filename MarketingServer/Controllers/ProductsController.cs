@@ -242,117 +242,7 @@ namespace MarketingServer
             };
         }
 
-
-        IQueryable<Product> BuildQuery(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
-        {
-            IQueryable<Product> query = db.Products;
-            char separator = '^';
-
-            //Search words
-            if (searchWords != string.Empty)
-            {
-                string[] searchWordsArray = searchWords.Split(' ');
-                query = query.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
-            }
-
-
-            //Category
-            if (category > -1)
-            {
-                query = query.Where(x => x.Nich.CategoryID == category);
-            }
-
-
-            //Niche
-            if (nicheId > -1)
-            {
-                query = query.Where(x => x.NicheID == nicheId);
-            }
-
-
-            //Filters
-            if (queryFilters != string.Empty)
-            {
-                Match result;
-
-                if (filterExclude != "Price")
-                {
-                    //Price Filter
-                    result = Regex.Match(queryFilters, GetRegExPattern("Price"));
-                    if (result.Length > 0)
-                    {
-                        string[] priceRangeArray = result.Groups[2].Value.Split(separator);
-                        List<PriceRange> priceRangeList = priceRanges
-                            .Where(x => priceRangeArray.Contains(x.Label))
-                            .Select(x => new PriceRange
-                            {
-                                Min = x.Min,
-                                Max = x.Max
-                            }).ToList();
-
-                        foreach (string price in priceRangeArray)
-                        {
-                            result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
-                            if (result.Length > 0)
-                            {
-                                PriceRange range = new PriceRange
-                                {
-                                    Min = double.Parse(result.Groups[1].Value),
-                                    Max = double.Parse(result.Groups[2].Value),
-                                };
-                                priceRangeList.Add(range);
-                            }
-                        }
-
-                        Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
-
-                        foreach (PriceRange priceRange in priceRangeList)
-                        {
-                            PriceRange temp = priceRange;
-                            predicate = predicate.Or(x => x.Price >= temp.Min && x.Price < temp.Max);
-                        }
-
-                        query = query.Where(predicate);
-                    }
-                }
-
-
-
-                //Custom Filters
-                foreach (Filter currentFilter in filterList)
-                {
-                    if (filterExclude != currentFilter.Name)
-                    {
-                        result = Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name));
-
-                        if (result.Length > 0)
-                        {
-                            //Get the options chosen from this filter
-                            string[] optionsArray = result.Groups[2].Value.Split(separator);
-
-                            //Get a list of ids from the options array
-                            List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
-
-                            //Set the query
-                            query = query
-                                .Where(x => x.ProductFilters
-                                    .Where(z => optionIdList.Contains(z.FilterLabelID))
-                                    .Select(z => z.ProductID)
-                                    .ToList()
-                                    .Contains(x.ID)
-                                );
-                        }
-                    }
-
-
-                }
-            }
-
-
-            return query;
-        }
-
-        private string GetRegExPattern(string filterName)
+        public static string GetRegExPattern(string filterName)
         {
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
@@ -368,11 +258,9 @@ namespace MarketingServer
             labels = new List<Label>();
             if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0) exclude = "Price";
 
-            IQueryable<Product> query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude);
-
             foreach (PriceRange priceRange in priceRanges)
             {
-                int count = await query.CountAsync(x => x.Price >= priceRange.Min && x.Price < priceRange.Max);
+                int count = await db.Products.Where(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude).CountAsync(x => x.Price >= priceRange.Min && x.Price < priceRange.Max);
                 if (count > 0)
                 {
                     if (count != productCount || exclude == "Price")
@@ -406,11 +294,9 @@ namespace MarketingServer
                 exclude = "";
                 if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0) exclude = currentFilter.Name;
 
-                query = BuildQuery(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude);
-
                 foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
                 {
-                    int count = await query.CountAsync(x => x.ProductFilters
+                    int count = await db.Products.Where(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude).CountAsync(x => x.ProductFilters
                         .Where(z => z.FilterLabelID == filterLabel.ID)
                         .Select(z => z.ProductID)
                         .ToList()
@@ -464,9 +350,8 @@ namespace MarketingServer
 
             List<PriceRange> priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
             List<Filter> filterList = await db.Filters.AsNoTracking().ToListAsync();
-            IQueryable<Product> productsQuery = BuildQuery(query, category, nicheId, filter, filterList, priceRanges);
+            IQueryable<Product> productsQuery = db.Products.Where(query, category, nicheId, filter, filterList, priceRanges);
             List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
-
 
             var data = new
             {
