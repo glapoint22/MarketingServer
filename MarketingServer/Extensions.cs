@@ -41,7 +41,7 @@ namespace MarketingServer
             if (searchWords != string.Empty)
             {
                 string[] searchWordsArray = searchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.All(z => x.Name.Contains(z)));
+                source = source.Where(x => searchWordsArray.Any(z => x.Name.Contains(z)));
             }
 
 
