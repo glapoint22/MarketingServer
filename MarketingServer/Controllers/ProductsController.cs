@@ -275,14 +275,18 @@ namespace MarketingServer
                 }
             }
 
-            //Create the price filter
-            filter = new FilterData
+            if(labels.Count > 0)
             {
-                caption = "Price",
-                labels = labels
-            };
+                //Create the price filter
+                filter = new FilterData
+                {
+                    caption = "Price",
+                    labels = labels
+                };
 
-            filters.Add(filter);
+                filters.Add(filter);
+            }
+           
 
 
 
