@@ -247,7 +247,7 @@ namespace MarketingServer
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
 
-        private async Task<List<FilterData>> GetFilters(string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, int productCount)
+        private List<FilterData> GetFilters(string searchWords, int category, int nicheId, string queryFilters, IEnumerable<dynamic> products)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
@@ -258,12 +258,12 @@ namespace MarketingServer
             labels = new List<Label>();
             if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0) exclude = "Price";
 
-            foreach (PriceRange priceRange in priceRanges)
+            foreach (PriceRange priceRange in DbTables.priceRanges)
             {
-                int count = await db.Products.Where(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude).CountAsync(x => x.Price >= priceRange.Min && x.Price < priceRange.Max);
+                int count = products.Count(x => x.price >= priceRange.Min && x.price < priceRange.Max);
                 if (count > 0)
                 {
-                    if (count != productCount || exclude == "Price")
+                    if (count != products.Count() || exclude == "Price")
                     {
                         Label label = new Label
                         {
@@ -290,51 +290,51 @@ namespace MarketingServer
 
 
 
-            foreach (Filter currentFilter in filterList)
-            {
-                //Create the labels for the current filter
-                labels = new List<Label>();
+            //foreach (Filter currentFilter in DbTables.filterList)
+            //{
+            //    //Create the labels for the current filter
+            //    labels = new List<Label>();
 
-                exclude = "";
-                if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0) exclude = currentFilter.Name;
+            //    exclude = "";
+            //    if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0) exclude = currentFilter.Name;
 
-                foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
-                {
-                    int count = await db.Products.Where(searchWords, category, nicheId, queryFilters, filterList, priceRanges, exclude).CountAsync(x => x.ProductFilters
-                        .Where(z => z.FilterLabelID == filterLabel.ID)
-                        .Select(z => z.ProductID)
-                        .ToList()
-                        .Contains(x.ID)
-                    );
-                    //If the count is greater than zero, create the label
-                    if (count > 0)
-                    {
-                        if (count != productCount || exclude == currentFilter.Name)
-                        {
-                            Label label = new Label
-                            {
-                                name = filterLabel.Name,
-                                productCount = count,
-                            };
-                            labels.Add(label);
-                        }
+            //    foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
+            //    {
+            //        int count = products.Count(x => x.ProductFilters
+            //            .Where(z => z.FilterLabelID == filterLabel.ID)
+            //            .Select(z => z.ProductID)
+            //            .ToList()
+            //            .Contains(x.ID)
+            //        );
+            //        //If the count is greater than zero, create the label
+            //        if (count > 0)
+            //        {
+            //            if (count != products.Count() || exclude == currentFilter.Name)
+            //            {
+            //                Label label = new Label
+            //                {
+            //                    name = filterLabel.Name,
+            //                    productCount = count,
+            //                };
+            //                labels.Add(label);
+            //            }
 
 
-                    }
-                }
+            //        }
+            //    }
 
-                //If there are any labels, create the filter
-                if (labels.Count > 0)
-                {
-                    filter = new FilterData
-                    {
-                        caption = currentFilter.Name,
-                        labels = labels
-                    };
+            //    //If there are any labels, create the filter
+            //    if (labels.Count > 0)
+            //    {
+            //        filter = new FilterData
+            //        {
+            //            caption = currentFilter.Name,
+            //            labels = labels
+            //        };
 
-                    filters.Add(filter);
-                }
-            }
+            //        filters.Add(filter);
+            //    }
+            //}
 
             return filters;
         }
@@ -346,71 +346,153 @@ namespace MarketingServer
             string sessionId;
             string customerId = null;
 
-            sessionId = Session.GetSessionID(Request.Headers);
+            //sessionId = Session.GetSessionID(Request.Headers);
 
-            if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
+            //if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
             if (query == null) query = "";
 
-            List<PriceRange> priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
-            List<Filter> filterList = await db.Filters.AsNoTracking().ToListAsync();
-            IQueryable<Product> productsQuery = db.Products.Where(query, category, nicheId, filter, filterList, priceRanges);
-            List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
+            //List<PriceRange> priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
+            //List<Filter> filterList = await db.Filters.AsNoTracking().ToListAsync();
+            //IQueryable<Product> productsQuery = db.Products.Where(query, category, nicheId, filter, filterList, priceRanges);
+            //List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
+
+
+
+            //var data = new
+            //{
+            //    totalProducts = products.Count(),
+            //    page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
+            //    products = await productsQuery
+            //        .AsNoTracking()
+            //        .OrderBy(sort, query)
+            //        .ThenBy(x => x.Name)
+            //        .Select(x => new
+            //        {
+            //            id = x.ID,
+            //            name = x.Name,
+            //            hopLink = x.HopLink + (customerId != null ? (x.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.ID : ""),
+            //            description = x.Description,
+            //            image = x.Image,
+            //            price = x.Price,
+            //            videos = db.ProductVideos
+            //                .Where(y => y.ProductID == x.ID)
+            //                .Select(y => y.Url)
+            //                .ToList()
+            //        })
+            //        .Skip((currentPage - 1) * limit)
+            //        .Take(limit)
+            //        .ToListAsync(),
+            //    categories = await db.Categories
+            //        .AsNoTracking()
+            //        .Where(x => x.Niches
+            //            .Where(z => products
+            //                .Contains(z.ID)
+            //            )
+            //            .Select(y => y.CategoryID)
+            //            .ToList()
+            //            .Contains(x.ID)
+            //        )
+            //        .Select(x => new
+            //        {
+            //            id = x.ID,
+            //            name = x.Name,
+            //            niches = x.Niches
+            //            .Where(z => products
+            //                .Contains(z.ID)
+            //            )
+            //            .Select(c => new
+            //            {
+            //                productCount = productsQuery.Count(a => a.NicheID == c.ID),
+            //                id = c.ID,
+            //                name = c.Name
+            //            })
+            //            .ToList()
+            //        })
+            //        .ToListAsync(),
+            //    filters = await GetFilters(query, category, nicheId, filter, filterList, priceRanges, products.Count)
+
+            //};
+
+
+
+            //var categories = await db.Categories.Select(x => new {
+            //    id = x.ID,
+            //    name = x.Name,
+            //    niches = x.Niches.Select(n => new {
+            //        id = n.ID,
+            //        name = n.Name,
+            //        categoryId = x.ID
+
+            //    }).ToList()
+            //}).ToListAsync();
+
+            //var niches = categories.SelectMany(x => x.niches).ToList();
+
+
+
+
+
+
+
+
+
+
+            var products = await db.Products
+                .AsNoTracking()
+                .Where(query, category, nicheId, filter)
+                .OrderBy(sort, query)
+                .ThenBy(x => x.Name)
+                .Select(x => new
+                {
+                    id = x.ID,
+                    name = x.Name,
+                    image = x.Image,
+                    price = x.Price,
+                    nicheId = x.NicheID,
+                }).ToListAsync();
+
+
+            
+
+            var productNiches = products.Select(p => p.nicheId).ToList();
+
+
+            
+
+
 
             var data = new
             {
                 totalProducts = products.Count(),
                 page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
-                products = await productsQuery
-                    .AsNoTracking()
-                    .OrderBy(sort, query)
-                    .ThenBy(x => x.Name)
-                    .Select(x => new
-                    {
-                        id = x.ID,
-                        name = x.Name,
-                        hopLink = x.HopLink + (customerId != null ? (x.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.ID : ""),
-                        description = x.Description,
-                        image = x.Image,
-                        price = x.Price,
-                        videos = db.ProductVideos
-                            .Where(y => y.ProductID == x.ID)
-                            .Select(y => y.Url)
-                            .ToList()
-                    })
-                    .Skip((currentPage - 1) * limit)
-                    .Take(limit)
-                    .ToListAsync(),
-                categories = await db.Categories
-                    .AsNoTracking()
-                    .Where(x => x.Niches
-                        .Where(z => products
-                            .Contains(z.ID)
-                        )
-                        .Select(y => y.CategoryID)
-                        .ToList()
-                        .Contains(x.ID)
-                    )
-                    .Select(x => new
-                    {
-                        id = x.ID,
-                        name = x.Name,
-                        niches = x.Niches
-                        .Where(z => products
-                            .Contains(z.ID)
-                        )
-                        .Select(c => new
-                        {
-                            productCount = productsQuery.Count(a => a.NicheID == c.ID),
-                            id = c.ID,
-                            name = c.Name
-                        })
-                        .ToList()
-                    })
-                    .ToListAsync(),
-                filters = await GetFilters(query, category, nicheId, filter, filterList, priceRanges, products.Count)
+                products = products
+                            .Skip((currentPage - 1) * limit)
+                            .Take(limit).ToList(),
+                categories = DbTables.categories
+                .Where(x => DbTables.niches
+                // Get category ids from the niches that are associated with the queried products
+                .Where(niche => productNiches.Contains(niche.ID))
+                .Select(niche => niche.CategoryID)
+                .ToList()
 
+                // Get categories from the niche cactegory ids
+                .Contains(x.ID))
+                .Select(a => new
+                {
+                    id = a.ID,
+                    name = a.Name,
+                    niches = a.Niches.Where(w => productNiches.Contains(w.ID))
+                    .Select(c => new {
+                        id = c.ID,
+                        name = c.Name
+                    }).ToList()
+                }).ToList(),
+                filters = GetFilters(query, category, nicheId, filter, products)
             };
+
+           
+
 
             return Ok(data);
         }

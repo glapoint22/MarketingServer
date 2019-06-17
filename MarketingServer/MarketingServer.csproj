@@ -219,6 +219,7 @@
     <Compile Include="Customer.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
+    <Compile Include="DbTables.cs" />
     <Compile Include="EmailCampaign.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>

@@ -32,7 +32,7 @@ namespace MarketingServer
             return sortResult;
         }
 
-        public static IQueryable<Product> Where(this IQueryable<Product> source, string searchWords, int category, int nicheId, string queryFilters, List<Filter> filterList, List<PriceRange> priceRanges, string filterExclude = "")
+        public static IQueryable<Product> Where(this IQueryable<Product> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
         {
             
             char separator = '^';
@@ -71,7 +71,7 @@ namespace MarketingServer
                     if (result.Length > 0)
                     {
                         string[] priceRangeArray = result.Groups[2].Value.Split(separator);
-                        List<PriceRange> priceRangeList = priceRanges
+                        List<PriceRange> priceRangeList = DbTables.priceRanges
                             .Where(x => priceRangeArray.Contains(x.Label))
                             .Select(x => new PriceRange
                             {
@@ -108,7 +108,7 @@ namespace MarketingServer
 
 
                 //Custom Filters
-                foreach (Filter currentFilter in filterList)
+                foreach (Filter currentFilter in DbTables.filterList)
                 {
                     if (filterExclude != currentFilter.Name)
                     {
