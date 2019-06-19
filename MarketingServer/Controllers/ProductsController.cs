@@ -247,31 +247,49 @@ namespace MarketingServer
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
 
-        private List<FilterData> GetFilters(string searchWords, int category, int nicheId, string queryFilters, IEnumerable<dynamic> products)
+        private async Task<List<FilterData>> GetFilters(string searchWords, int category, int nicheId, string queryFilters, IEnumerable<dynamic> products)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
             FilterData filter;
             string exclude = "";
+            IEnumerable<dynamic> queriedProducts;
 
             //Create labels for the price filter
             labels = new List<Label>();
-            if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0) exclude = "Price";
+            if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0)
+            {
+                exclude = "Price";
+                queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
+                .AsNoTracking()
+                .Where(searchWords, category, nicheId, queryFilters, exclude)
+                .Select(x => new
+                {
+                    price = x.Price,
+                }).ToListAsync();
+            }
+            else
+            {
+                queriedProducts = products;
+            }
+               
+
+            
 
             foreach (PriceRange priceRange in DbTables.priceRanges)
             {
-                int count = products.Count(x => x.price >= priceRange.Min && x.price < priceRange.Max);
-                if (count > 0)
+                bool count = queriedProducts.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max);
+                if (count)
                 {
-                    if (count != products.Count() || exclude == "Price")
-                    {
+                    //if (count != products.Count() || exclude == "Price")
+                    //{
                         Label label = new Label
                         {
                             name = priceRange.Label,
-                            productCount = count
+                            //productCount = count
                         };
                         labels.Add(label);
-                    }
+                    //}
                 }
             }
 
@@ -286,55 +304,70 @@ namespace MarketingServer
 
                 filters.Add(filter);
             }
-           
 
 
 
-            //foreach (Filter currentFilter in DbTables.filterList)
-            //{
-            //    //Create the labels for the current filter
-            //    labels = new List<Label>();
 
-            //    exclude = "";
-            //    if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0) exclude = currentFilter.Name;
+            foreach (Filter currentFilter in DbTables.filterList)
+            {
+                //Create the labels for the current filter
+                labels = new List<Label>();
 
-            //    foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
-            //    {
-            //        int count = products.Count(x => x.ProductFilters
-            //            .Where(z => z.FilterLabelID == filterLabel.ID)
-            //            .Select(z => z.ProductID)
-            //            .ToList()
-            //            .Contains(x.ID)
-            //        );
-            //        //If the count is greater than zero, create the label
-            //        if (count > 0)
-            //        {
-            //            if (count != products.Count() || exclude == currentFilter.Name)
-            //            {
-            //                Label label = new Label
-            //                {
-            //                    name = filterLabel.Name,
-            //                    productCount = count,
-            //                };
-            //                labels.Add(label);
-            //            }
+                exclude = "";
+                if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0)
+                {
+                    exclude = currentFilter.Name;
+                    queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
+                    .AsNoTracking()
+                    .Where(searchWords, category, nicheId, queryFilters, exclude)
+                    .Select(x => new
+                    {
+                        id = x.ID,
+                    }).ToListAsync();
+                }
+                else
+                {
+                    queriedProducts = products;
+                }
+                    
+
+                foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
+                {
+                    bool count = queriedProducts.Any(x => DbTables.productFilters
+                        .Where(z => z.FilterLabelID == filterLabel.ID)
+                        .Select(z => z.ProductID)
+                        .ToList()
+                        .Contains(x.id)
+                    );
+                    //If the count is greater than zero, create the label
+                    if (count )
+                    {
+                        //if (count != products.Count() || exclude == currentFilter.Name)
+                        //{
+                            Label label = new Label
+                            {
+                                name = filterLabel.Name,
+                                //productCount = count,
+                            };
+                            labels.Add(label);
+                        //}
 
 
-            //        }
-            //    }
+                    }
+                }
 
-            //    //If there are any labels, create the filter
-            //    if (labels.Count > 0)
-            //    {
-            //        filter = new FilterData
-            //        {
-            //            caption = currentFilter.Name,
-            //            labels = labels
-            //        };
+                //If there are any labels, create the filter
+                if (labels.Count > 0)
+                {
+                    filter = new FilterData
+                    {
+                        caption = currentFilter.Name,
+                        labels = labels
+                    };
 
-            //        filters.Add(filter);
-            //    }
-            //}
+                    filters.Add(filter);
+                }
+            }
 
             return filters;
         }
@@ -433,7 +466,7 @@ namespace MarketingServer
 
 
 
-
+            
 
 
 
@@ -488,7 +521,7 @@ namespace MarketingServer
                         name = c.Name
                     }).ToList()
                 }).ToList(),
-                filters = GetFilters(query, category, nicheId, filter, products)
+                filters = await GetFilters(query, category, nicheId, filter, products)
             };
 
            

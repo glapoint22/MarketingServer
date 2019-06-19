@@ -12,6 +12,8 @@ namespace MarketingServer
         public static List<Nich> niches;
         public static List<PriceRange> priceRanges;
         public static List<Filter> filterList;
+        public static List<ProductFilter> productFilters;
+        public static IEnumerable<Product> products;
 
         public async static void Set()
         {
@@ -21,6 +23,8 @@ namespace MarketingServer
             niches = await db.Niches.AsNoTracking().ToListAsync();
             priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
             filterList = await db.Filters.AsNoTracking().ToListAsync();
+            productFilters = await db.ProductFilters.AsNoTracking().ToListAsync();
+            products = await db.Products.AsNoTracking().ToListAsync();
         }
     }
 }
