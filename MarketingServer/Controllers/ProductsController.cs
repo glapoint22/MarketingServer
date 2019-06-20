@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Net.Http;
+using System.Runtime.Caching;
 
 namespace MarketingServer
 {
@@ -257,21 +258,21 @@ namespace MarketingServer
 
             //Create labels for the price filter
             labels = new List<Label>();
-            if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0)
-            {
-                exclude = "Price";
-                queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
-                .AsNoTracking()
-                .Where(searchWords, category, nicheId, queryFilters, exclude)
-                .Select(x => new
-                {
-                    price = x.Price,
-                }).ToListAsync();
-            }
-            else
-            {
+            //if (Regex.Match(queryFilters, GetRegExPattern("Price")).Length > 0)
+            //{
+            //    exclude = "Price";
+            //    queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
+            //    .AsNoTracking()
+            //    .Where(searchWords, category, nicheId, queryFilters, exclude)
+            //    .Select(x => new
+            //    {
+            //        price = x.Price,
+            //    }).ToListAsync();
+            //}
+            //else
+            //{
                 queriedProducts = products;
-            }
+            //}
                
 
             
@@ -314,21 +315,21 @@ namespace MarketingServer
                 labels = new List<Label>();
 
                 exclude = "";
-                if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0)
-                {
-                    exclude = currentFilter.Name;
-                    queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
-                    .AsNoTracking()
-                    .Where(searchWords, category, nicheId, queryFilters, exclude)
-                    .Select(x => new
-                    {
-                        id = x.ID,
-                    }).ToListAsync();
-                }
-                else
-                {
+                //if (Regex.Match(queryFilters, GetRegExPattern(currentFilter.Name)).Length > 0)
+                //{
+                //    exclude = currentFilter.Name;
+                //    queriedProducts = await db.Products.Where(searchWords, category, nicheId, queryFilters, exclude)
+                //    .AsNoTracking()
+                //    .Where(searchWords, category, nicheId, queryFilters, exclude)
+                //    .Select(x => new
+                //    {
+                //        id = x.ID,
+                //    }).ToListAsync();
+                //}
+                //else
+                //{
                     queriedProducts = products;
-                }
+                //}
                     
 
                 foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
@@ -466,13 +467,12 @@ namespace MarketingServer
 
 
 
-            
 
 
+            string key = query + category + nicheId + sort + filter;
 
 
-            var products = await db.Products
-                .AsNoTracking()
+            var products = DbTables.products
                 .Where(query, category, nicheId, filter)
                 .OrderBy(sort, query)
                 .ThenBy(x => x.Name)
@@ -483,12 +483,12 @@ namespace MarketingServer
                     image = x.Image,
                     price = x.Price,
                     nicheId = x.NicheID,
-                }).ToListAsync();
+                }).ToArray();
 
-
+            //Caching.Add("Foo", products);
             
 
-            var productNiches = products.Select(p => p.nicheId).ToList();
+            var productNiches = products.Select(p => p.nicheId).ToArray();
 
 
             
@@ -497,8 +497,8 @@ namespace MarketingServer
 
             var data = new
             {
-                totalProducts = products.Count(),
-                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
+                totalProducts = products.Length,
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Length / limit) ? page : 1,
                 products = products
                             .Skip((currentPage - 1) * limit)
                             .Take(limit).ToList(),
@@ -521,7 +521,7 @@ namespace MarketingServer
                         name = c.Name
                     }).ToList()
                 }).ToList(),
-                filters = await GetFilters(query, category, nicheId, filter, products)
+                //filters = await GetFilters(query, category, nicheId, filter, products)
             };
 
            
@@ -749,5 +749,30 @@ namespace MarketingServer
         public string image;
         public double price;
         public List<string> videos;
+    }
+}
+
+
+
+public class Caching
+{
+    private static readonly ObjectCache Cache = MemoryCache.Default;
+
+    public static T Get<T>(string key) where T : class
+    {
+        try
+        {
+            return (T)Cache[key];
+        }
+        catch (Exception)
+        {
+
+            return null;
+        }
+    }
+
+    public static void Add<T>(string key, T item) where T : class
+    {
+        Cache.Add(key, item, DateTimeOffset.Now.AddHours(1));
     }
 }

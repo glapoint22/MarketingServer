@@ -9,9 +9,9 @@ namespace MarketingServer
 {
     public static class Extensions
     {
-        public static IOrderedQueryable<Product> OrderBy(this IQueryable<Product> source, string sort, string query)
+        public static IOrderedEnumerable<Product> OrderBy(this IEnumerable<Product> source, string sort, string query)
         {
-            IOrderedQueryable<Product> sortResult = null;
+            IOrderedEnumerable<Product> sortResult = null;
 
             switch (sort)
             {
@@ -32,7 +32,7 @@ namespace MarketingServer
             return sortResult;
         }
 
-        public static IQueryable<Product> Where(this IQueryable<Product> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
+        public static IEnumerable<Product> Where(this IEnumerable<Product> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
         {
             
             char separator = '^';
@@ -79,8 +79,10 @@ namespace MarketingServer
                                 Max = x.Max
                             }).ToList();
 
-                        foreach (string price in priceRangeArray)
+                        for(int i = 0; i < priceRangeArray.Length; i++)
                         {
+                            string price = priceRangeArray[i];
+
                             result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
                             if (result.Length > 0)
                             {
@@ -95,21 +97,24 @@ namespace MarketingServer
 
                         Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
 
-                        foreach (PriceRange priceRange in priceRangeList)
+                        for(int i = 0; i < priceRangeList.Count(); i++)
                         {
+                            PriceRange priceRange = priceRangeList[i];
                             PriceRange temp = priceRange;
                             predicate = predicate.Or(x => x.Price >= temp.Min && x.Price < temp.Max);
                         }
 
-                        source = source.Where(predicate);
+                        source = source.Where(predicate.Compile());
                     }
                 }
 
 
 
                 //Custom Filters
-                foreach (Filter currentFilter in DbTables.filterList)
+                for(int i = 0; i < DbTables.filterList.Length; i++)
                 {
+                    Filter currentFilter = DbTables.filterList[i];
+
                     if (filterExclude != currentFilter.Name)
                     {
                         result = Regex.Match(queryFilters, ProductsController.GetRegExPattern(currentFilter.Name));
@@ -120,7 +125,7 @@ namespace MarketingServer
                             string[] optionsArray = result.Groups[2].Value.Split(separator);
 
                             //Get a list of ids from the options array
-                            List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
+                            int[] optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToArray();
 
                             //Set the query
                             source = source
