@@ -8,23 +8,34 @@ namespace MarketingServer
 {
     public class DbTables
     {
-        public static List<Category> categories;
-        public static List<Nich> niches;
-        public static List<PriceRange> priceRanges;
+        public static Category[] categories;
+        public static Nich[] niches;
+        public static PriceRange[] priceRanges;
         public static Filter[] filterList;
-        public static List<ProductFilter> productFilters;
-        public static List<Product> products;
+        public static ProductFilter[] productFilters;
+        public static QueriedProduct[] queriedProducts;
+        //public static Product[] products;
 
         public async static void Set()
         {
             MarketingEntities db = new MarketingEntities();
 
-            categories = await db.Categories.AsNoTracking().ToListAsync();
-            niches = await db.Niches.AsNoTracking().ToListAsync();
-            priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
+            categories = await db.Categories.AsNoTracking().ToArrayAsync();
+            niches = await db.Niches.AsNoTracking().ToArrayAsync();
+            priceRanges = await db.PriceRanges.AsNoTracking().ToArrayAsync();
             filterList = await db.Filters.AsNoTracking().ToArrayAsync();
-            productFilters = await db.ProductFilters.AsNoTracking().ToListAsync();
-            products = await db.Products.AsNoTracking().ToListAsync();
+            productFilters = await db.ProductFilters.AsNoTracking().ToArrayAsync();
+            Product[] products = await db.Products.AsNoTracking().ToArrayAsync();
+
+            queriedProducts = products.Select(x => new QueriedProduct
+            {
+                id = x.ID,
+                name = x.Name,
+                image = x.Image,
+                price = x.Price,
+                nicheId = x.NicheID,
+                categoryId = x.Nich.CategoryID
+            }).ToArray();
         }
     }
 }

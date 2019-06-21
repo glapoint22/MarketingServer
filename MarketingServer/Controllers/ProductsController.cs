@@ -248,13 +248,13 @@ namespace MarketingServer
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
 
-        private async Task<List<FilterData>> GetFilters(string searchWords, int category, int nicheId, string queryFilters, IEnumerable<dynamic> products)
+        private List<FilterData> GetFilters(string searchWords, int category, int nicheId, string queryFilters, QueriedProduct[] queriedProducts)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
             FilterData filter;
             string exclude = "";
-            IEnumerable<dynamic> queriedProducts;
+            //IEnumerable<dynamic> queriedProducts;
 
             //Create labels for the price filter
             labels = new List<Label>();
@@ -271,30 +271,30 @@ namespace MarketingServer
             //}
             //else
             //{
-                queriedProducts = products;
+            //queriedProducts = products;
             //}
-               
 
-            
+
+
 
             foreach (PriceRange priceRange in DbTables.priceRanges)
             {
-                bool count = queriedProducts.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max);
+                bool count = db.Products.Any(x => x.Price >= priceRange.Min && x.Price < priceRange.Max);
                 if (count)
                 {
                     //if (count != products.Count() || exclude == "Price")
                     //{
-                        Label label = new Label
-                        {
-                            name = priceRange.Label,
-                            //productCount = count
-                        };
-                        labels.Add(label);
+                    Label label = new Label
+                    {
+                        name = priceRange.Label,
+                        //productCount = count
+                    };
+                    labels.Add(label);
                     //}
                 }
             }
 
-            if(labels.Count > 0)
+            if (labels.Count > 0)
             {
                 //Create the price filter
                 filter = new FilterData
@@ -328,29 +328,29 @@ namespace MarketingServer
                 //}
                 //else
                 //{
-                    queriedProducts = products;
+                //queriedProducts = products;
                 //}
-                    
+
 
                 foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
                 {
-                    bool count = queriedProducts.Any(x => DbTables.productFilters
+                    bool count = db.Products.Any(x => x.ProductFilters
                         .Where(z => z.FilterLabelID == filterLabel.ID)
                         .Select(z => z.ProductID)
                         .ToList()
-                        .Contains(x.id)
+                        .Contains(x.ID)
                     );
                     //If the count is greater than zero, create the label
-                    if (count )
+                    if (count)
                     {
                         //if (count != products.Count() || exclude == currentFilter.Name)
                         //{
-                            Label label = new Label
-                            {
-                                name = filterLabel.Name,
-                                //productCount = count,
-                            };
-                            labels.Add(label);
+                        Label label = new Label
+                        {
+                            name = filterLabel.Name,
+                            //productCount = count,
+                        };
+                        labels.Add(label);
                         //}
 
 
@@ -374,162 +374,163 @@ namespace MarketingServer
         }
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = -1, string query = "", int nicheId = -1, int page = 1, string filter = "")
+        public IHttpActionResult GetProductsFromSearch(string sort, int limit, int category = -1, string query = "", int nicheId = -1, int page = 1, string filter = "")
         {
             int currentPage;
-            string sessionId;
-            string customerId = null;
+            //string sessionId;
+            //string customerId = null;
 
             //sessionId = Session.GetSessionID(Request.Headers);
 
             //if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
-            if (query == null) query = "";
-
-            //List<PriceRange> priceRanges = await db.PriceRanges.AsNoTracking().ToListAsync();
-            //List<Filter> filterList = await db.Filters.AsNoTracking().ToListAsync();
-            //IQueryable<Product> productsQuery = db.Products.Where(query, category, nicheId, filter, filterList, priceRanges);
-            //List<int> products = await productsQuery.AsNoTracking().Select(a => a.NicheID).ToListAsync();
-
-
-
-            //var data = new
-            //{
-            //    totalProducts = products.Count(),
-            //    page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Count() / limit) ? page : 1,
-            //    products = await productsQuery
-            //        .AsNoTracking()
-            //        .OrderBy(sort, query)
-            //        .ThenBy(x => x.Name)
-            //        .Select(x => new
-            //        {
-            //            id = x.ID,
-            //            name = x.Name,
-            //            hopLink = x.HopLink + (customerId != null ? (x.HopLink.IndexOf("?") == -1 ? "?" : "&") + "tid=" + customerId + x.ID : ""),
-            //            description = x.Description,
-            //            image = x.Image,
-            //            price = x.Price,
-            //            videos = db.ProductVideos
-            //                .Where(y => y.ProductID == x.ID)
-            //                .Select(y => y.Url)
-            //                .ToList()
-            //        })
-            //        .Skip((currentPage - 1) * limit)
-            //        .Take(limit)
-            //        .ToListAsync(),
-            //    categories = await db.Categories
-            //        .AsNoTracking()
-            //        .Where(x => x.Niches
-            //            .Where(z => products
-            //                .Contains(z.ID)
-            //            )
-            //            .Select(y => y.CategoryID)
-            //            .ToList()
-            //            .Contains(x.ID)
-            //        )
-            //        .Select(x => new
-            //        {
-            //            id = x.ID,
-            //            name = x.Name,
-            //            niches = x.Niches
-            //            .Where(z => products
-            //                .Contains(z.ID)
-            //            )
-            //            .Select(c => new
-            //            {
-            //                productCount = productsQuery.Count(a => a.NicheID == c.ID),
-            //                id = c.ID,
-            //                name = c.Name
-            //            })
-            //            .ToList()
-            //        })
-            //        .ToListAsync(),
-            //    filters = await GetFilters(query, category, nicheId, filter, filterList, priceRanges, products.Count)
-
-            //};
-
-
-
-            //var categories = await db.Categories.Select(x => new {
-            //    id = x.ID,
-            //    name = x.Name,
-            //    niches = x.Niches.Select(n => new {
-            //        id = n.ID,
-            //        name = n.Name,
-            //        categoryId = x.ID
-
-            //    }).ToList()
-            //}).ToListAsync();
-
-            //var niches = categories.SelectMany(x => x.niches).ToList();
-
-
-
-
-
-
-
-            string key = query + category + nicheId + sort + filter;
-
-
-            var products = DbTables.products
-                .Where(query, category, nicheId, filter)
-                .OrderBy(sort, query)
-                .ThenBy(x => x.Name)
-                .Select(x => new
-                {
-                    id = x.ID,
-                    name = x.Name,
-                    image = x.Image,
-                    price = x.Price,
-                    nicheId = x.NicheID,
-                }).ToArray();
-
-            //Caching.Add("Foo", products);
-            
-
-            var productNiches = products.Select(p => p.nicheId).ToArray();
-
-
-            
-
-
+            QueriedProduct[] queriedProducts = GetQueriedProducts(query, category, nicheId, filter);
+            int[] productNiches = queriedProducts.Select(p => p.nicheId).Distinct().ToArray();
+            int[] productCategories = queriedProducts.Select(p => p.categoryId).Distinct().ToArray();
 
             var data = new
             {
-                totalProducts = products.Length,
-                page = currentPage = page > 0 && page <= Math.Ceiling((double)products.Length / limit) ? page : 1,
-                products = products
+                totalProducts = queriedProducts.Length,
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)queriedProducts.Length / limit) ? page : 1,
+                products = queriedProducts
+                            .OrderBy(sort, query)
+                            .ThenBy(x => x.name)
                             .Skip((currentPage - 1) * limit)
-                            .Take(limit).ToList(),
+                            .Take(limit)
+                            .Select(x => new
+                            {
+                                name = x.name,
+                                image = x.image,
+                                price = x.price
+                            })
+                            .ToArray(),
                 categories = DbTables.categories
-                .Where(x => DbTables.niches
-                // Get category ids from the niches that are associated with the queried products
-                .Where(niche => productNiches.Contains(niche.ID))
-                .Select(niche => niche.CategoryID)
-                .ToList()
-
-                // Get categories from the niche cactegory ids
-                .Contains(x.ID))
+                .Where(x => productCategories.Contains(x.ID))
                 .Select(a => new
                 {
                     id = a.ID,
                     name = a.Name,
                     niches = a.Niches.Where(w => productNiches.Contains(w.ID))
-                    .Select(c => new {
+                    .Select(c => new
+                    {
                         id = c.ID,
                         name = c.Name
-                    }).ToList()
-                }).ToList(),
-                //filters = await GetFilters(query, category, nicheId, filter, products)
+                    }).ToArray()
+                }).ToArray(),
+                filters = GetFilters(query, category, nicheId, filter, queriedProducts)
             };
-
-           
-
 
             return Ok(data);
         }
 
+
+        private QueriedProduct[] GetQueriedProducts(string searchWords, int category, int nicheId, string filter)
+        {
+            string key = searchWords + category + nicheId + filter;
+
+            QueriedProduct[] queriedProducts = Caching.Get<QueriedProduct[]>(key);
+
+
+
+            if (queriedProducts == null)
+            {
+                // No cache to grab from
+                if (   (searchWords.Length > 0 && category == -1 && nicheId == -1 && filter.Length == 0)  || (searchWords.Length == 0 && category >= 0 && nicheId == -1 && filter.Length == 0))
+                {
+                    return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                }
+
+
+                // Grab cache from just search words
+                else if (searchWords.Length > 0 && category >= 0 && nicheId == -1 && filter.Length == 0)
+                {
+                    return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + "-1" + nicheId + filter), searchWords, category, nicheId, filter, key);
+                }
+
+
+                // Grab cache from just category
+                else if (searchWords.Length == 0 && category >= 0 && nicheId >= 0 && filter.Length == 0)
+                {
+                    return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + category + "-1" + filter), searchWords, category, nicheId, filter, key);
+
+                }
+
+
+                // Grab cache from category then try search words
+                else if (searchWords.Length > 0 && category >= 0 && nicheId >= 0 && filter.Length == 0)
+                {
+                    queriedProducts = Caching.Get<QueriedProduct[]>(searchWords + category + "-1" + filter);
+
+                    if (queriedProducts == null)
+                    {
+                        return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + "-1-1" + filter), searchWords, category, nicheId, filter, key);
+                    }
+                    else
+                    {
+                        return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                    }
+                }
+
+
+
+                else if (searchWords.Length > 0 && category == -1 && nicheId == -1 && filter.Length > 0)
+                {
+
+                    var result = Regex.Match(filter, @"([\w\s]+)(?:\|)");
+
+                    return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                }
+
+
+
+
+
+
+
+                else if (searchWords.Length > 0 && category >= 0 && nicheId == -1 && filter.Length > 0)
+                {
+
+                }
+                else if (searchWords.Length == 0 && category >= 0 && nicheId == -1 && filter.Length > 0)
+                {
+
+                }
+                else if (searchWords.Length == 0 && category >= 0 && nicheId >= 0 && filter.Length > 0)
+                {
+
+                }
+                else if (searchWords.Length > 0 && category >= 0 && nicheId >= 0 && filter.Length > 0)
+                {
+
+                }
+
+            }
+
+
+
+            return queriedProducts;
+        }
+
+
+        private QueriedProduct[] QueryProducts(QueriedProduct[] queriedProducts, string query, int category, int nicheId, string filter, string key)
+        {
+            if (queriedProducts == null)
+            {
+                queriedProducts = DbTables.queriedProducts
+                .Where(query, category, nicheId, filter)
+                .ToArray();
+            }
+            else
+            {
+                queriedProducts = queriedProducts
+                .Where(query, category, nicheId, filter)
+                .ToArray();
+            }
+
+            Caching.Add(key, queriedProducts);
+
+            return queriedProducts;
+        }
 
         // PUT: api/Products/5
         [ResponseType(typeof(void))]
@@ -749,6 +750,16 @@ namespace MarketingServer
         public string image;
         public double price;
         public List<string> videos;
+    }
+
+    public struct QueriedProduct
+    {
+        public string id;
+        public string name;
+        public string image;
+        public double price;
+        public int categoryId;
+        public int nicheId;
     }
 }
 

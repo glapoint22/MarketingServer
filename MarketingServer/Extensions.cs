@@ -9,30 +9,30 @@ namespace MarketingServer
 {
     public static class Extensions
     {
-        public static IOrderedEnumerable<Product> OrderBy(this IEnumerable<Product> source, string sort, string query)
+        public static IOrderedEnumerable<QueriedProduct> OrderBy(this IEnumerable<QueriedProduct> source, string sort, string query)
         {
-            IOrderedEnumerable<Product> sortResult = null;
+            IOrderedEnumerable<QueriedProduct> sortResult = null;
 
             switch (sort)
             {
                 case "relevance":
-                    sortResult = source.OrderBy(x => x.Name.StartsWith(query) ? (x.Name == query ? 0 : 1) : 2);
+                    sortResult = source.OrderBy(x => x.name.StartsWith(query) ? (x.name == query ? 0 : 1) : 2);
                     break;
                 case "price-asc":
-                    sortResult = source.OrderBy(x => x.Price);
+                    sortResult = source.OrderBy(x => x.price);
                     break;
                 case "price-desc":
-                    sortResult = source.OrderByDescending(x => x.Price);
+                    sortResult = source.OrderByDescending(x => x.price);
                     break;
                 default:
-                    sortResult = source.OrderBy(x => x.Price);
+                    sortResult = source.OrderBy(x => x.price);
                     break;
             }
 
             return sortResult;
         }
 
-        public static IEnumerable<Product> Where(this IEnumerable<Product> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
+        public static IEnumerable<QueriedProduct> Where(this IEnumerable<QueriedProduct> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
         {
             
             char separator = '^';
@@ -41,21 +41,21 @@ namespace MarketingServer
             if (searchWords != string.Empty)
             {
                 string[] searchWordsArray = searchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.Any(z => x.Name.Contains(z)));
+                source = source.Where(x => searchWordsArray.Any(z => x.name.Contains(z)));
             }
 
 
             //Category
             if (category > -1)
             {
-                source = source.Where(x => x.Nich.CategoryID == category);
+                source = source.Where(x => x.categoryId == category);
             }
 
 
             //Niche
             if (nicheId > -1)
             {
-                source = source.Where(x => x.NicheID == nicheId);
+                source = source.Where(x => x.nicheId == nicheId);
             }
 
 
@@ -95,13 +95,13 @@ namespace MarketingServer
                             }
                         }
 
-                        Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
+                        Expression<Func<QueriedProduct, bool>> predicate = ExpressionBuilder.False<QueriedProduct>();
 
                         for(int i = 0; i < priceRangeList.Count(); i++)
                         {
                             PriceRange priceRange = priceRangeList[i];
                             PriceRange temp = priceRange;
-                            predicate = predicate.Or(x => x.Price >= temp.Min && x.Price < temp.Max);
+                            predicate = predicate.Or(x => x.price >= temp.Min && x.price < temp.Max);
                         }
 
                         source = source.Where(predicate.Compile());
@@ -129,11 +129,11 @@ namespace MarketingServer
 
                             //Set the query
                             source = source
-                                .Where(x => x.ProductFilters
+                                .Where(x => DbTables.productFilters
                                     .Where(z => optionIdList.Contains(z.FilterLabelID))
                                     .Select(z => z.ProductID)
                                     .ToList()
-                                    .Contains(x.ID)
+                                    .Contains(x.id)
                                 );
                         }
                     }
