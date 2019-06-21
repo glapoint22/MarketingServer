@@ -13,7 +13,7 @@ namespace MarketingServer
         public static PriceRange[] priceRanges;
         public static Filter[] filterList;
         public static ProductFilter[] productFilters;
-        public static QueriedProduct[] queriedProducts;
+        public static CachedProduct[] cachedProducts;
         //public static Product[] products;
 
         public async static void Set()
@@ -27,7 +27,7 @@ namespace MarketingServer
             productFilters = await db.ProductFilters.AsNoTracking().ToArrayAsync();
             Product[] products = await db.Products.AsNoTracking().ToArrayAsync();
 
-            queriedProducts = products.Select(x => new QueriedProduct
+            cachedProducts = products.Select(x => new CachedProduct
             {
                 id = x.ID,
                 name = x.Name,

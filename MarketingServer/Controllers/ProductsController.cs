@@ -248,7 +248,7 @@ namespace MarketingServer
             return "(" + filterName + "\\|)([a-zA-Z0-9`~!@#$%^&*()\\-_+={[}\\]\\:;\"\'<,>.?/\\s]+)";
         }
 
-        private List<FilterData> GetFilters(string searchWords, int category, int nicheId, string queryFilters, QueriedProduct[] queriedProducts)
+        private List<FilterData> GetFilters(string searchWords, int category, int nicheId, string queryFilters, CachedProduct[] cachedProducts)
         {
             List<FilterData> filters = new List<FilterData>();
             List<Label> labels;
@@ -377,6 +377,7 @@ namespace MarketingServer
         public IHttpActionResult GetProductsFromSearch(string sort, int limit, int category = -1, string query = "", int nicheId = -1, int page = 1, string filter = "")
         {
             int currentPage;
+            QueryParams queryParams = new QueryParams(query, category, nicheId, filter);
             //string sessionId;
             //string customerId = null;
 
@@ -384,15 +385,15 @@ namespace MarketingServer
 
             //if (sessionId != null) customerId = await db.Customers.AsNoTracking().Where(x => x.SessionID == sessionId).Select(x => x.ID).FirstOrDefaultAsync();
 
-            QueriedProduct[] queriedProducts = GetQueriedProducts(query, category, nicheId, filter);
-            int[] productNiches = queriedProducts.Select(p => p.nicheId).Distinct().ToArray();
-            int[] productCategories = queriedProducts.Select(p => p.categoryId).Distinct().ToArray();
+            CachedProduct[] cachedProducts = GetCachedProducts(queryParams);
+            int[] productNiches = cachedProducts.Select(p => p.nicheId).Distinct().ToArray();
+            int[] productCategories = cachedProducts.Select(p => p.categoryId).Distinct().ToArray();
 
             var data = new
             {
-                totalProducts = queriedProducts.Length,
-                page = currentPage = page > 0 && page <= Math.Ceiling((double)queriedProducts.Length / limit) ? page : 1,
-                products = queriedProducts
+                totalProducts = cachedProducts.Length,
+                page = currentPage = page > 0 && page <= Math.Ceiling((double)cachedProducts.Length / limit) ? page : 1,
+                products = cachedProducts
                             .OrderBy(sort, query)
                             .ThenBy(x => x.name)
                             .Skip((currentPage - 1) * limit)
@@ -417,68 +418,146 @@ namespace MarketingServer
                         name = c.Name
                     }).ToArray()
                 }).ToArray(),
-                filters = GetFilters(query, category, nicheId, filter, queriedProducts)
+                filters = GetFilters(query, category, nicheId, filter, cachedProducts)
             };
 
             return Ok(data);
         }
 
 
-        private QueriedProduct[] GetQueriedProducts(string searchWords, int category, int nicheId, string filter)
+        private CachedProduct[] GetCachedProducts(QueryParams queryParams)
         {
-            string key = searchWords + category + nicheId + filter;
+            string key = queryParams.searchWords + queryParams.categoryId + queryParams.nicheId + queryParams.filters;
 
-            QueriedProduct[] queriedProducts = Caching.Get<QueriedProduct[]>(key);
+            // First try finding the cached products from the key
+            CachedProduct[] cachedProducts = Caching.Get<CachedProduct[]>(key);
 
 
-
-            if (queriedProducts == null)
+            // If cached products were not found
+            if (cachedProducts == null)
             {
-                // No cache to grab from
-                if (   (searchWords.Length > 0 && category == -1 && nicheId == -1 && filter.Length == 0)  || (searchWords.Length == 0 && category >= 0 && nicheId == -1 && filter.Length == 0))
+                // No cache to go back to
+                if ((queryParams.searchWords.Length > 0 && queryParams.categoryId == -1 && queryParams.nicheId == -1 && queryParams.filters.Length == 0)
+                    || (queryParams.searchWords.Length == 0 && queryParams.categoryId >= 0 && queryParams.nicheId == -1 && queryParams.filters.Length == 0))
                 {
-                    return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                    return QueryProducts(cachedProducts, queryParams, key);
                 }
 
 
                 // Grab cache from just search words
-                else if (searchWords.Length > 0 && category >= 0 && nicheId == -1 && filter.Length == 0)
+                else if (queryParams.searchWords.Length > 0 && queryParams.categoryId >= 0 && queryParams.nicheId == -1 && queryParams.filters.Length == 0)
                 {
-                    return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + "-1" + nicheId + filter), searchWords, category, nicheId, filter, key);
+                    return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.searchWords + "-1-1"), queryParams, key);
                 }
 
 
-                // Grab cache from just category
-                else if (searchWords.Length == 0 && category >= 0 && nicheId >= 0 && filter.Length == 0)
-                {
-                    return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + category + "-1" + filter), searchWords, category, nicheId, filter, key);
 
+
+                // Try to grab cache from just category
+                else if (queryParams.searchWords.Length == 0 && queryParams.categoryId >= 0 && queryParams.nicheId >= 0 && queryParams.filters.Length == 0)
+                {
+                    return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.categoryId + "-1"), queryParams, key);
                 }
 
 
-                // Grab cache from category then try search words
-                else if (searchWords.Length > 0 && category >= 0 && nicheId >= 0 && filter.Length == 0)
-                {
-                    queriedProducts = Caching.Get<QueriedProduct[]>(searchWords + category + "-1" + filter);
 
-                    if (queriedProducts == null)
+
+                // Try to grab cache from search words & category then try just search words
+                else if (queryParams.searchWords.Length > 0 && queryParams.categoryId >= 0 && queryParams.nicheId >= 0 && queryParams.filters.Length == 0)
+                {
+                    // Cache from search words & category
+                    cachedProducts = Caching.Get<CachedProduct[]>(queryParams.searchWords + queryParams.categoryId + "-1");
+
+                    // If no cache found, try grabbing cache from just search words
+                    if (cachedProducts == null)
                     {
-                        return QueryProducts(Caching.Get<QueriedProduct[]>(searchWords + "-1-1" + filter), searchWords, category, nicheId, filter, key);
+                        return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.searchWords + "-1-1"), queryParams, key);
                     }
                     else
                     {
-                        return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                        return QueryProducts(cachedProducts, queryParams, key);
                     }
                 }
 
 
 
-                else if (searchWords.Length > 0 && category == -1 && nicheId == -1 && filter.Length > 0)
+
+                // Grab cache from filters then try search words
+                else if (queryParams.searchWords.Length > 0 && queryParams.categoryId == -1 && queryParams.nicheId == -1 && queryParams.filters.Length > 0)
                 {
+                    // First try grabbing cache from filters
+                    cachedProducts = GetCachedProductsWithFilters(queryParams.filters, cachedProducts, queryParams.searchWords + "-1-1");
 
-                    var result = Regex.Match(filter, @"([\w\s]+)(?:\|)");
+                    // If no cache found, try grabbing cache from just search words
+                    if (cachedProducts == null)
+                    {
+                        cachedProducts = Caching.Get<CachedProduct[]>(queryParams.searchWords + "-1-1");
+                    }
 
-                    return QueryProducts(queriedProducts, searchWords, category, nicheId, filter, key);
+                    return QueryProducts(cachedProducts, queryParams, key);
+                }
+
+
+
+
+                // Grab cache from filters then try just category id
+                else if (queryParams.searchWords.Length == 0 && queryParams.categoryId >= 0 && queryParams.nicheId == -1 && queryParams.filters.Length > 0)
+                {
+                    cachedProducts = GetCachedProductsWithFilters(queryParams.filters, cachedProducts, queryParams.categoryId + "-1");
+
+                    // If no cache found, try grabbing cache from category id
+                    if (cachedProducts == null)
+                    {
+                        return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.categoryId + "-1"), queryParams, key);
+                    }
+
+                    return QueryProducts(cachedProducts, queryParams, key);
+                }
+
+
+
+
+                // Grab cache from filters then try search words & categoryId then just search words
+                else if (queryParams.searchWords.Length > 0 && queryParams.categoryId >= 0 && queryParams.nicheId == -1 && queryParams.filters.Length > 0)
+                {
+                    // First try grabbing cache from filters
+                    cachedProducts = GetCachedProductsWithFilters(queryParams.filters, cachedProducts, queryParams.searchWords + queryParams.categoryId + "-1");
+
+                    // If no cache found, try grabbing cache from search words & categoryId
+                    if (cachedProducts == null)
+                    {
+                        cachedProducts = Caching.Get<CachedProduct[]>(queryParams.searchWords + queryParams.categoryId + "-1");
+                        // If no cache found, try grabbing cache from just search words
+                        if (cachedProducts == null)
+                        {
+                            return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.searchWords + "-1-1"), queryParams, key);
+                        }
+                    }
+                    return QueryProducts(cachedProducts, queryParams, key);
+                }
+
+
+                
+
+
+                //Grab cache from filters then try category id & niche id. Then try just category id
+                else if (queryParams.searchWords.Length == 0 && queryParams.categoryId >= 0 && queryParams.nicheId >= 0 && queryParams.filters.Length > 0)
+                {
+                    cachedProducts = GetCachedProductsWithFilters(queryParams.filters, cachedProducts, queryParams.categoryId.ToString() + queryParams.nicheId.ToString());
+
+                    // If no cache found, try grabbing cache from category id & niche id
+                    if (cachedProducts == null)
+                    {
+                        cachedProducts = Caching.Get<CachedProduct[]>(queryParams.categoryId.ToString() + queryParams.nicheId.ToString());
+
+                        // If no cache found, try grabbing cache from just category id
+                        if (cachedProducts == null)
+                        {
+                            return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.categoryId + "-1"), queryParams, key);
+                        }
+                    }
+
+                    return QueryProducts(cachedProducts, queryParams, key);
                 }
 
 
@@ -486,50 +565,88 @@ namespace MarketingServer
 
 
 
-
-                else if (searchWords.Length > 0 && category >= 0 && nicheId == -1 && filter.Length > 0)
+                // Grab cache from filters then try search words, category id, & niche id. Then try search words & category id. Then try just search words
+                else if (queryParams.searchWords.Length > 0 && queryParams.categoryId >= 0 && queryParams.nicheId >= 0 && queryParams.filters.Length > 0)
                 {
+                    cachedProducts = GetCachedProductsWithFilters(queryParams.filters, cachedProducts, queryParams.searchWords + queryParams.categoryId + queryParams.nicheId);
 
-                }
-                else if (searchWords.Length == 0 && category >= 0 && nicheId == -1 && filter.Length > 0)
-                {
+                    // If no cache found, try grabbing cache from search words, category id, & niche id
+                    if (cachedProducts == null)
+                    {
+                        cachedProducts = Caching.Get<CachedProduct[]>(queryParams.searchWords + queryParams.categoryId + queryParams.nicheId);
 
-                }
-                else if (searchWords.Length == 0 && category >= 0 && nicheId >= 0 && filter.Length > 0)
-                {
+                        // If no cache found, try grabbing cache from search words & category id
+                        if(cachedProducts == null)
+                        {
+                            cachedProducts = Caching.Get<CachedProduct[]>(queryParams.searchWords + queryParams.categoryId + "-1");
 
-                }
-                else if (searchWords.Length > 0 && category >= 0 && nicheId >= 0 && filter.Length > 0)
-                {
-
+                            // If no cache found, try grabbing cache from just search words
+                            if (cachedProducts == null)
+                            {
+                                return QueryProducts(Caching.Get<CachedProduct[]>(queryParams.searchWords + "-1-1"), queryParams, key);
+                            }
+                        }
+                    }
+                    return QueryProducts(cachedProducts, queryParams, key);
                 }
 
             }
 
-
-
-            return queriedProducts;
+            return cachedProducts;
         }
 
 
-        private QueriedProduct[] QueryProducts(QueriedProduct[] queriedProducts, string query, int category, int nicheId, string filter, string key)
+
+        private CachedProduct[] GetCachedProductsWithFilters(string filters, CachedProduct[] cachedProducts, string tempKey)
         {
-            if (queriedProducts == null)
+            // These are the filters in the query params put into a collection
+            MatchCollection filterCollection = Regex.Matches(filters, @"([\w\s]+\|[$0-9a-zA-Z\-^\s]+\|)");
+
+            if (filterCollection.Count == 1)
             {
-                queriedProducts = DbTables.queriedProducts
-                .Where(query, category, nicheId, filter)
+                // Return null because there are no filters to go back to
+                return null;
+            }
+            else
+            {
+                // Loop through the collection to find out if we have any cached products with these filters
+                for (int i = filterCollection.Count - 2; i > -1; i--)
+                {
+                    string filterString = string.Empty;
+                    for (int j = 0; j < i + 1; j++)
+                    {
+                        filterString += filterCollection[j];
+                    }
+
+                    // Get the cached products with these filter(s)
+                    cachedProducts = Caching.Get<CachedProduct[]>(tempKey + filterString);
+                    if (cachedProducts != null) break;
+                }
+            }
+            return cachedProducts;
+        }
+
+
+        private CachedProduct[] QueryProducts(CachedProduct[] cachedProducts, QueryParams queryParams, string key)
+        {
+            // No cached products were found so query from DbTables
+            if (cachedProducts == null)
+            {
+                cachedProducts = DbTables.cachedProducts
+                .Where(queryParams)
                 .ToArray();
             }
             else
             {
-                queriedProducts = queriedProducts
-                .Where(query, category, nicheId, filter)
+                // Query from the cached products
+                cachedProducts = cachedProducts
+                .Where(queryParams)
                 .ToArray();
             }
 
-            Caching.Add(key, queriedProducts);
+            Caching.Add(key, cachedProducts);
 
-            return queriedProducts;
+            return cachedProducts;
         }
 
         // PUT: api/Products/5
@@ -752,7 +869,7 @@ namespace MarketingServer
         public List<string> videos;
     }
 
-    public struct QueriedProduct
+    public struct CachedProduct
     {
         public string id;
         public string name;
@@ -760,6 +877,22 @@ namespace MarketingServer
         public double price;
         public int categoryId;
         public int nicheId;
+    }
+
+    public struct QueryParams
+    {
+        public string searchWords;
+        public int categoryId;
+        public int nicheId;
+        public string filters;
+
+        public QueryParams(string searchWords, int categoryId, int nicheId, string filters)
+        {
+            this.searchWords = searchWords;
+            this.categoryId = categoryId;
+            this.nicheId = nicheId;
+            this.filters = filters;
+        }
     }
 }
 

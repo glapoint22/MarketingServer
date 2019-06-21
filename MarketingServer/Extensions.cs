@@ -9,14 +9,14 @@ namespace MarketingServer
 {
     public static class Extensions
     {
-        public static IOrderedEnumerable<QueriedProduct> OrderBy(this IEnumerable<QueriedProduct> source, string sort, string query)
+        public static IOrderedEnumerable<CachedProduct> OrderBy(this IEnumerable<CachedProduct> source, string sort, string searchWords)
         {
-            IOrderedEnumerable<QueriedProduct> sortResult = null;
+            IOrderedEnumerable<CachedProduct> sortResult = null;
 
             switch (sort)
             {
                 case "relevance":
-                    sortResult = source.OrderBy(x => x.name.StartsWith(query) ? (x.name == query ? 0 : 1) : 2);
+                    sortResult = source.OrderBy(x => x.name.StartsWith(searchWords) ? (x.name == searchWords ? 0 : 1) : 2);
                     break;
                 case "price-asc":
                     sortResult = source.OrderBy(x => x.price);
@@ -32,110 +32,102 @@ namespace MarketingServer
             return sortResult;
         }
 
-        public static IEnumerable<QueriedProduct> Where(this IEnumerable<QueriedProduct> source, string searchWords, int category, int nicheId, string queryFilters, string filterExclude = "")
+        public static IEnumerable<CachedProduct> Where(this IEnumerable<CachedProduct> source, QueryParams queryParams)
         {
-            
+
             char separator = '^';
 
             //Search words
-            if (searchWords != string.Empty)
+            if (queryParams.searchWords != string.Empty)
             {
-                string[] searchWordsArray = searchWords.Split(' ');
+                string[] searchWordsArray = queryParams.searchWords.Split(' ');
                 source = source.Where(x => searchWordsArray.Any(z => x.name.Contains(z)));
             }
 
 
             //Category
-            if (category > -1)
+            if (queryParams.categoryId >= 0)
             {
-                source = source.Where(x => x.categoryId == category);
+                source = source.Where(x => x.categoryId == queryParams.categoryId);
             }
 
 
             //Niche
-            if (nicheId > -1)
+            if (queryParams.nicheId >= 0)
             {
-                source = source.Where(x => x.nicheId == nicheId);
+                source = source.Where(x => x.nicheId == queryParams.nicheId);
             }
 
 
             //Filters
-            if (queryFilters != string.Empty)
+            if (queryParams.filters != string.Empty)
             {
                 Match result;
 
-                if (filterExclude != "Price")
+                //Price Filter
+                result = Regex.Match(queryParams.filters, ProductsController.GetRegExPattern("Price"));
+                if (result.Length > 0)
                 {
-                    //Price Filter
-                    result = Regex.Match(queryFilters, ProductsController.GetRegExPattern("Price"));
-                    if (result.Length > 0)
+                    string[] priceRangeArray = result.Groups[2].Value.Split(separator);
+                    List<PriceRange> priceRangeList = DbTables.priceRanges
+                        .Where(x => priceRangeArray.Contains(x.Label))
+                        .Select(x => new PriceRange
+                        {
+                            Min = x.Min,
+                            Max = x.Max
+                        }).ToList();
+
+                    for (int i = 0; i < priceRangeArray.Length; i++)
                     {
-                        string[] priceRangeArray = result.Groups[2].Value.Split(separator);
-                        List<PriceRange> priceRangeList = DbTables.priceRanges
-                            .Where(x => priceRangeArray.Contains(x.Label))
-                            .Select(x => new PriceRange
-                            {
-                                Min = x.Min,
-                                Max = x.Max
-                            }).ToList();
+                        string price = priceRangeArray[i];
 
-                        for(int i = 0; i < priceRangeArray.Length; i++)
+                        result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
+                        if (result.Length > 0)
                         {
-                            string price = priceRangeArray[i];
-
-                            result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
-                            if (result.Length > 0)
+                            PriceRange range = new PriceRange
                             {
-                                PriceRange range = new PriceRange
-                                {
-                                    Min = double.Parse(result.Groups[1].Value),
-                                    Max = double.Parse(result.Groups[2].Value),
-                                };
-                                priceRangeList.Add(range);
-                            }
+                                Min = double.Parse(result.Groups[1].Value),
+                                Max = double.Parse(result.Groups[2].Value),
+                            };
+                            priceRangeList.Add(range);
                         }
-
-                        Expression<Func<QueriedProduct, bool>> predicate = ExpressionBuilder.False<QueriedProduct>();
-
-                        for(int i = 0; i < priceRangeList.Count(); i++)
-                        {
-                            PriceRange priceRange = priceRangeList[i];
-                            PriceRange temp = priceRange;
-                            predicate = predicate.Or(x => x.price >= temp.Min && x.price < temp.Max);
-                        }
-
-                        source = source.Where(predicate.Compile());
                     }
+
+                    Expression<Func<CachedProduct, bool>> predicate = ExpressionBuilder.False<CachedProduct>();
+
+                    for (int i = 0; i < priceRangeList.Count(); i++)
+                    {
+                        PriceRange priceRange = priceRangeList[i];
+                        PriceRange temp = priceRange;
+                        predicate = predicate.Or(x => x.price >= temp.Min && x.price < temp.Max);
+                    }
+
+                    source = source.Where(predicate.Compile());
                 }
 
 
-
                 //Custom Filters
-                for(int i = 0; i < DbTables.filterList.Length; i++)
+                for (int i = 0; i < DbTables.filterList.Length; i++)
                 {
                     Filter currentFilter = DbTables.filterList[i];
+                    result = Regex.Match(queryParams.filters, ProductsController.GetRegExPattern(currentFilter.Name));
 
-                    if (filterExclude != currentFilter.Name)
+                    if (result.Length > 0)
                     {
-                        result = Regex.Match(queryFilters, ProductsController.GetRegExPattern(currentFilter.Name));
+                        //Get the options chosen from this filter
+                        string[] optionsArray = result.Groups[2].Value.Split(separator);
 
-                        if (result.Length > 0)
-                        {
-                            //Get the options chosen from this filter
-                            string[] optionsArray = result.Groups[2].Value.Split(separator);
+                        //Get a list of ids from the options array
+                        int[] optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToArray();
 
-                            //Get a list of ids from the options array
-                            int[] optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToArray();
-
-                            //Set the query
-                            source = source
-                                .Where(x => DbTables.productFilters
-                                    .Where(z => optionIdList.Contains(z.FilterLabelID))
-                                    .Select(z => z.ProductID)
-                                    .ToList()
-                                    .Contains(x.id)
-                                );
-                        }
+                        //Set the query
+                        source = source
+                            .Where(x => DbTables.productFilters
+                                .Where(z => optionIdList.Contains(z.FilterLabelID))
+                                .Select(z => z.ProductID)
+                                .ToList()
+                                .Contains(x.id)
+                            );
                     }
                 }
             }
