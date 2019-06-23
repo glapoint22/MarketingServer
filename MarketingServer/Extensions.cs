@@ -9,30 +9,30 @@ namespace MarketingServer
 {
     public static class Extensions
     {
-        public static IOrderedEnumerable<CachedProduct> OrderBy(this IEnumerable<CachedProduct> source, string sort, string searchWords)
+        public static IOrderedQueryable<Product> OrderBy(this IQueryable<Product> source, QueryParams queryParams)
         {
-            IOrderedEnumerable<CachedProduct> sortResult = null;
+            IOrderedQueryable<Product> sortResult = null;
 
-            switch (sort)
+            switch (queryParams.sort)
             {
                 case "relevance":
-                    sortResult = source.OrderBy(x => x.name.StartsWith(searchWords) ? (x.name == searchWords ? 0 : 1) : 2);
+                    sortResult = source.OrderBy(x => x.Name.StartsWith(queryParams.searchWords) ? (x.Name == queryParams.searchWords ? 0 : 1) : 2);
                     break;
                 case "price-asc":
-                    sortResult = source.OrderBy(x => x.price);
+                    sortResult = source.OrderBy(x => x.Price);
                     break;
                 case "price-desc":
-                    sortResult = source.OrderByDescending(x => x.price);
+                    sortResult = source.OrderByDescending(x => x.Price);
                     break;
                 default:
-                    sortResult = source.OrderBy(x => x.price);
+                    sortResult = source.OrderBy(x => x.Price);
                     break;
             }
 
             return sortResult;
         }
 
-        public static IEnumerable<CachedProduct> Where(this IEnumerable<CachedProduct> source, QueryParams queryParams)
+        public static IQueryable<Product> Where(this IQueryable<Product> source, QueryParams queryParams)
         {
 
             char separator = '^';
@@ -41,31 +41,31 @@ namespace MarketingServer
             if (queryParams.searchWords != string.Empty)
             {
                 string[] searchWordsArray = queryParams.searchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.Any(z => x.name.Contains(z)));
+                source = source.Where(x => searchWordsArray.Any(z => x.Name.Contains(z)));
             }
 
 
             //Category
             if (queryParams.categoryId >= 0)
             {
-                source = source.Where(x => x.categoryId == queryParams.categoryId);
+                source = source.Where(x => x.Nich.CategoryID == queryParams.categoryId);
             }
 
 
             //Niche
             if (queryParams.nicheId >= 0)
             {
-                source = source.Where(x => x.nicheId == queryParams.nicheId);
+                source = source.Where(x => x.NicheID == queryParams.nicheId);
             }
 
 
             //Filters
-            if (queryParams.filters != string.Empty)
+            if (queryParams.filters.Length > 0)
             {
                 Match result;
 
                 //Price Filter
-                result = Regex.Match(queryParams.filters, ProductsController.GetRegExPattern("Price"));
+                result = queryParams.filters.GetFilter("Price");
                 if (result.Length > 0)
                 {
                     string[] priceRangeArray = result.Groups[2].Value.Split(separator);
@@ -93,16 +93,16 @@ namespace MarketingServer
                         }
                     }
 
-                    Expression<Func<CachedProduct, bool>> predicate = ExpressionBuilder.False<CachedProduct>();
+                    Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
 
                     for (int i = 0; i < priceRangeList.Count(); i++)
                     {
                         PriceRange priceRange = priceRangeList[i];
                         PriceRange temp = priceRange;
-                        predicate = predicate.Or(x => x.price >= temp.Min && x.price < temp.Max);
+                        predicate = predicate.Or(x => x.Price >= temp.Min && x.Price < temp.Max);
                     }
 
-                    source = source.Where(predicate.Compile());
+                    source = source.Where(predicate);
                 }
 
 
@@ -110,7 +110,8 @@ namespace MarketingServer
                 for (int i = 0; i < DbTables.filterList.Length; i++)
                 {
                     Filter currentFilter = DbTables.filterList[i];
-                    result = Regex.Match(queryParams.filters, ProductsController.GetRegExPattern(currentFilter.Name));
+                    result = queryParams.filters.GetFilter(currentFilter.Name);
+
 
                     if (result.Length > 0)
                     {
@@ -122,11 +123,11 @@ namespace MarketingServer
 
                         //Set the query
                         source = source
-                            .Where(x => DbTables.productFilters
+                            .Where(x => x.ProductFilters
                                 .Where(z => optionIdList.Contains(z.FilterLabelID))
                                 .Select(z => z.ProductID)
                                 .ToList()
-                                .Contains(x.id)
+                                .Contains(x.ID)
                             );
                     }
                 }
