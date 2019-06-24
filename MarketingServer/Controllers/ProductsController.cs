@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Net.Http;
-using System.Runtime.Caching;
 
 namespace MarketingServer
 {
@@ -244,166 +243,25 @@ namespace MarketingServer
         }
 
 
-        private async Task<List<FilterData>> GetFilters(CachedProduct[] cachedProducts, QueryParams queryParams)
-        {
-            List<FilterData> filters = new List<FilterData>();
-            List<Label> labels;
-            FilterData filter;
-            CachedProduct[] products;
-
-            //Create labels for the price filter
-            labels = new List<Label>();
-
-
-            if (queryParams.filters.Contains("Price"))
-            {
-                QueryParams tempParams = new QueryParams();
-                queryParams.Copy(tempParams);
-
-                tempParams.filters.RemoveFilter("Price");
-                string key = tempParams.GetKey();
-
-                products = Caching.Get<CachedProduct[]>(key);
-
-                if (products == null)
-                {
-                    products = await QueryProducts(queryParams, key);
-                }
-            }
-            else
-            {
-                products = cachedProducts;
-            }
-
-
-
-
-            //foreach (PriceRange priceRange in DbTables.priceRanges)
-            for(int i = 0; i < DbTables.priceRanges.Length; i++)
-            {
-                PriceRange priceRange = DbTables.priceRanges[i];
-
-                bool contains = products.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max);
-                if (contains)
-                {
-                    Label label = new Label
-                    {
-                        name = priceRange.Label,
-                    };
-                    labels.Add(label);
-                }
-            }
-
-            if (labels.Count > 0)
-            {
-                //Create the price filter
-                filter = new FilterData
-                {
-                    caption = "Price",
-                    labels = labels
-                };
-
-                filters.Add(filter);
-            }
-
-
-
-
-            //foreach (Filter currentFilter in DbTables.filterList)
-            for(int i = 0; i < DbTables.filterList.Length; i++)
-            {
-                Filter currentFilter = DbTables.filterList[i];
-
-                //Create the labels for the current filter
-                labels = new List<Label>();
-
-                if (queryParams.filters.Contains(currentFilter.Name))
-                {
-                    QueryParams tempParams = new QueryParams();
-                    queryParams.Copy(tempParams);
-
-                    tempParams.filters.RemoveFilter(currentFilter.Name);
-                    string key = tempParams.GetKey();
-
-                    products = Caching.Get<CachedProduct[]>(key);
-
-                    if (products == null)
-                    {
-                        products = await QueryProducts(queryParams, key);
-                    }
-                }
-                else
-                {
-                    products = cachedProducts;
-                }
-
-                FilterLabel[] filterLabels = currentFilter.FilterLabels.ToArray();
-
-                for(int w = 0; w < filterLabels.Length; w++)
-                //foreach (FilterLabel filterLabel in currentFilter.FilterLabels)
-                {
-                    FilterLabel filterLabel = filterLabels[w];
-                    //bool contains = products.Any(x => DbTables.productFilters
-                    //    .Where(z => z.FilterLabelID == filterLabel.ID)
-                    //    .Select(z => z.ProductID)
-                    //    .ToList()
-                    //    .Contains(x.id)
-                    //);
-
-
-                    var dic = DbTables.productFilters
-                        .Where(z => z.FilterLabelID == filterLabel.ID)
-                        .Select(z => z.ProductID).ToDictionary(x => x);
-
-                    for(int j = 0; j < products.Length; j++)
-                    {
-                        if (dic.ContainsKey(products[j].id))
-                        {
-                            Label label = new Label
-                            {
-                                name = filterLabel.Name,
-                            };
-                            labels.Add(label);
-                            break;
-
-                        }
-                    }
-
-                    
-                }
-
-                //If there are any labels, create the filter
-                if (labels.Count > 0)
-                {
-                    filter = new FilterData
-                    {
-                        caption = currentFilter.Name,
-                        labels = labels
-                    };
-
-                    filters.Add(filter);
-                }
-            }
-
-            return filters;
-        }
-
         [AllowAnonymous]
         public async Task<IHttpActionResult> GetProductsFromSearch(string sort, int limit, int category = -1, string query = "", int nicheId = -1, int page = 1, string filter = "")
         {
             int currentPage;
             QueryParams queryParams = new QueryParams(query, category, nicheId, sort, filter);
 
+            // Get the key
             string key = queryParams.GetKey();
 
             // First try finding the cached products from the key
             CachedProduct[] cachedProducts = Caching.Get<CachedProduct[]>(key);
 
+            // If there is no cache, then grab the products from the database
             if (cachedProducts == null) cachedProducts = await QueryProducts(queryParams, key);
 
-
-            int[] productNiches = cachedProducts.Select(p => p.nicheId).Distinct().ToArray();
+            // Get arrays of categories and niches from these products 
             int[] productCategories = cachedProducts.Select(p => p.categoryId).Distinct().ToArray();
+            int[] productNiches = cachedProducts.Select(p => p.nicheId).Distinct().ToArray();
+            
 
             var data = new
             {
@@ -438,6 +296,137 @@ namespace MarketingServer
             return Ok(data);
         }
 
+        private async Task<List<FilterData>> GetFilters(CachedProduct[] cachedProducts, QueryParams queryParams)
+        {
+            List<FilterData> filters = new List<FilterData>();
+            List<Label> labels;
+            FilterData filter;
+            CachedProduct[] products;
+            labels = new List<Label>();
+
+            // If the query params contains the price filter
+            if (queryParams.filters.Contains("Price"))
+            {
+                // Temporarily remove the price filter so we can query products without the price
+                QueryParams tempParams = queryParams;
+                tempParams.filters.RemoveFilter("Price");
+
+                // See if we have cached products
+                string key = tempParams.GetKey();
+                products = Caching.Get<CachedProduct[]>(key);
+
+                // If no cache, get the products from the database
+                if (products == null)
+                {
+                    products = await QueryProducts(tempParams, key);
+                }
+            }
+            else
+            {
+                // Grab the products from cache
+                products = cachedProducts;
+            }
+
+
+            for (int i = 0; i < DbTables.priceRanges.Length; i++)
+            {
+                PriceRange priceRange = DbTables.priceRanges[i];
+
+                // Do the products contain this price range? If so, create a label
+                if (products.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max))
+                {
+                    Label label = new Label
+                    {
+                        name = priceRange.Label,
+                    };
+                    labels.Add(label);
+                }
+            }
+
+            // If we have any labels, create the price filter
+            if (labels.Count > 0)
+            {
+                filter = new FilterData
+                {
+                    caption = "Price",
+                    labels = labels
+                };
+
+                filters.Add(filter);
+            }
+
+
+            // Iterate through each filter
+            for (int i = 0; i < DbTables.filterList.Length; i++)
+            {
+                Filter currentFilter = DbTables.filterList[i];
+                labels = new List<Label>();
+
+
+                // If the query params contains the current filter
+                if (queryParams.filters.Contains(currentFilter.Name))
+                {
+                    // Temporarily remove this filter so we can query products without it
+                    QueryParams tempParams = queryParams;
+                    tempParams.filters.RemoveFilter(currentFilter.Name);
+
+                    // See if we have cached products
+                    string key = tempParams.GetKey();
+                    products = Caching.Get<CachedProduct[]>(key);
+
+                    if (products == null)
+                    {
+                        products = await QueryProducts(tempParams, key);
+                    }
+                }
+                else
+                {
+                    products = cachedProducts;
+                }
+
+                // Iterate through each label
+                FilterLabel[] filterLabels = currentFilter.FilterLabels.ToArray();
+                for (int index = 0; index < filterLabels.Length; index++)
+                {
+                    FilterLabel filterLabel = filterLabels[index];
+
+                    // Create a dictionary of all products using this filter option for fast lookup
+                    Dictionary<string, string> productsDictionary = DbTables.productFilters
+                        .Where(z => z.FilterLabelID == filterLabel.ID)
+                        .Select(z => z.ProductID).ToDictionary(x => x);
+
+
+                    // Loop through each product from the query and see if it is in the dictionary of products
+                    for (int j = 0; j < products.Length; j++)
+                    {
+                        // See if the dictionary contains this product. If so, this means this product is using this filter option
+                        if (productsDictionary.ContainsKey(products[j].id))
+                        {
+                            Label label = new Label
+                            {
+                                name = filterLabel.Name,
+                            };
+                            labels.Add(label);
+                            break;
+                        }
+                    }
+                }
+
+                //If there are any labels, create the filter
+                if (labels.Count > 0)
+                {
+                    filter = new FilterData
+                    {
+                        caption = currentFilter.Name,
+                        labels = labels
+                    };
+
+                    filters.Add(filter);
+                }
+            }
+
+            return filters;
+        }
 
 
         private async Task<CachedProduct[]> QueryProducts(QueryParams queryParams, string key)
@@ -728,15 +717,9 @@ namespace MarketingServer
             paramList.Add(nicheId.ToString());
             paramList.AddRange(filters.GetFilterList());
 
-            return searchWords + categoryId + nicheId + filters.GetFilterString();
-        }
-
-        public void Copy(QueryParams destination)
-        {
-            destination.searchWords = searchWords;
-            destination.categoryId = categoryId;
-            destination.nicheId = nicheId;
-            destination.filters = new QueryFilters(filters.GetFilterString());
+            // Sort the param list
+            string[] sorted = paramList.OrderBy(x => x).ToArray();
+            return string.Join("", sorted);
         }
     }
 
@@ -770,13 +753,33 @@ namespace MarketingServer
 
         public List<string> GetFilterList()
         {
-            return Regex.Matches(filters, GetPattern(@"[\w\s]+")).Cast<Match>().Select(x => x.Value).ToList();
-        }
+            // Create a list of the filters
+            List<string> filterList = Regex.Matches(filters, GetPattern(@"[\w\s]+")).Cast<Match>().Select(x => x.Value).ToList();
 
 
-        public string GetFilterString()
-        {
-            return filters;
+            for(int i = 0; i < filterList.Count; i++)
+            {
+                // Get a list of all the options for this filter
+                List<string> filterOptionList = Regex.Matches(filterList[i], @"([$0-9a-zA-Z\-\s\[\]]+)").Cast<Match>().Select(x => x.Value).ToList();
+
+                // Remove the first index which is the option name
+                string optionName = filterOptionList[0];
+                filterOptionList.Remove(filterOptionList[0]);
+
+                // Order the options
+                List<string> ordered = filterOptionList.OrderBy(x => x).ToList();
+
+                // Piece together the current filter with the sorted options
+                filterList[i] = optionName + "|";
+                for(int j = 0; j < ordered.Count; j++)
+                {
+                    filterList[i] += ordered[j];
+                    if (j != ordered.Count - 1) filterList[i] += "^";
+                }
+                filterList[i] += "|";
+            }
+
+            return filterList;
         }
 
         public bool Contains(string filter)
@@ -788,30 +791,5 @@ namespace MarketingServer
         {
             filters = Regex.Replace(filters, GetPattern(filter), "");
         }
-    }
-}
-
-
-
-public class Caching
-{
-    private static readonly ObjectCache Cache = MemoryCache.Default;
-
-    public static T Get<T>(string key) where T : class
-    {
-        try
-        {
-            return (T)Cache[key];
-        }
-        catch (Exception)
-        {
-
-            return null;
-        }
-    }
-
-    public static void Add<T>(string key, T item) where T : class
-    {
-        Cache.Add(key, item, DateTimeOffset.Now.AddHours(1));
     }
 }

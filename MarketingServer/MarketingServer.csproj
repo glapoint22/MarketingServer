@@ -193,6 +193,7 @@
     <Compile Include="ApplicationRefreshTokenProvider.cs" />
     <Compile Include="ApplicationUserManager.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Caching.cs" />
     <Compile Include="Campaign.cs" />
     <Compile Include="CampaignEmail.cs" />
     <Compile Include="CampaignRecord.cs">
