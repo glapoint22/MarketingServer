@@ -81,6 +81,14 @@ namespace MarketingServer
             return Ok(productId);
         }
 
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> GetProduct(string name)
+        {
+            var product = await db.Products.Where(x => x.Name.ToLower() == name).Select(x => x.Name).FirstOrDefaultAsync();
+
+            return Ok(product);
+        }
+
         private async Task<ProductGroup> GetFeaturedProducts(string customerId)
         {
             return new ProductGroup
