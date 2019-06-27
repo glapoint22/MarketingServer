@@ -82,9 +82,9 @@ namespace MarketingServer
         }
 
         [AllowAnonymous]
-        public async Task<IHttpActionResult> GetProduct(string name)
+        public async Task<IHttpActionResult> GetProduct(string urlTitle)
         {
-            var product = await db.Products.Where(x => x.Name.ToLower() == name).Select(x => x.Name).FirstOrDefaultAsync();
+            var product = await db.Products.AsNoTracking().Where(x => x.Name.ToLower() == urlTitle).Select(x => x.Name).FirstOrDefaultAsync();
 
             return Ok(product);
         }
