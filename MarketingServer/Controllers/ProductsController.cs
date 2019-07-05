@@ -723,6 +723,7 @@ namespace MarketingServer
             paramList.Add(searchWords);
             paramList.Add(categoryId.ToString());
             paramList.Add(nicheId.ToString());
+            paramList.Add(sort);
             paramList.AddRange(filters.GetFilterList());
 
             // Sort the param list
