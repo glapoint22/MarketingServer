@@ -313,27 +313,27 @@ namespace MarketingServer
             labels = new List<Label>();
 
             // If the query params contains the price filter
-            if (queryParams.filters.Contains("Price"))
-            {
-                // Temporarily remove the price filter so we can query products without the price
-                QueryParams tempParams = queryParams;
-                tempParams.filters.RemoveFilter("Price");
+            //if (queryParams.filters.Contains("Price"))
+            //{
+            //    // Temporarily remove the price filter so we can query products without the price
+            //    QueryParams tempParams = queryParams;
+            //    tempParams.filters.RemoveFilter("Price");
 
-                // See if we have cached products
-                string key = tempParams.GetKey();
-                products = Caching.Get<CachedProduct[]>(key);
+            //    // See if we have cached products
+            //    string key = tempParams.GetKey();
+            //    products = Caching.Get<CachedProduct[]>(key);
 
-                // If no cache, get the products from the database
-                if (products == null)
-                {
-                    products = await QueryProducts(tempParams, key);
-                }
-            }
-            else
-            {
+            //    // If no cache, get the products from the database
+            //    if (products == null)
+            //    {
+            //        products = await QueryProducts(tempParams, key);
+            //    }
+            //}
+            //else
+            //{
                 // Grab the products from cache
                 products = cachedProducts;
-            }
+            //}
 
 
             for (int i = 0; i < DbTables.priceRanges.Length; i++)
@@ -363,6 +363,9 @@ namespace MarketingServer
                 filters.Add(filter);
             }
 
+            int[] foo = DbTables.productFilters.Where(x => cachedProducts.Select(z => z.id).Contains(x.ProductID)).Select(x => x.FilterLabelID).Distinct().ToArray();
+
+            List<int> selectedOptions = queryParams.filters.GetSelectedOptions();
 
             // Iterate through each filter
             for (int i = 0; i < DbTables.filterList.Length; i++)
@@ -372,52 +375,77 @@ namespace MarketingServer
 
 
                 // If the query params contains the current filter
-                if (queryParams.filters.Contains(currentFilter.Name))
-                {
-                    // Temporarily remove this filter so we can query products without it
-                    QueryParams tempParams = queryParams;
-                    tempParams.filters.RemoveFilter(currentFilter.Name);
+                //if (queryParams.filters.Contains(currentFilter.Name))
+                //{
+                //    // Temporarily remove this filter so we can query products without it
+                //    QueryParams tempParams = queryParams;
+                //    tempParams.filters.RemoveFilter(currentFilter.Name);
 
-                    // See if we have cached products
-                    string key = tempParams.GetKey();
-                    products = Caching.Get<CachedProduct[]>(key);
+                //    // See if we have cached products
+                //    string key = tempParams.GetKey();
+                //    products = Caching.Get<CachedProduct[]>(key);
 
-                    if (products == null)
-                    {
-                        products = await QueryProducts(tempParams, key);
-                    }
-                }
-                else
-                {
-                    products = cachedProducts;
-                }
+                //    if (products == null)
+                //    {
+                //        products = await QueryProducts(tempParams, key);
+                //    }
+                //}
+                //else
+                //{
+                //    products = cachedProducts;
+                //}
+
+
+               
+
+
+
 
                 // Iterate through each label
-                FilterLabel[] filterLabels = currentFilter.FilterLabels.ToArray();
+                var filterLabels = currentFilter.FilterLabels.Select(x => new { id = x.ID, name = x.Name}).ToArray();
                 for (int index = 0; index < filterLabels.Length; index++)
                 {
-                    FilterLabel filterLabel = filterLabels[index];
+                    var filterLabel = filterLabels[index];
 
                     // Create a dictionary of all products using this filter option for fast lookup
-                    Dictionary<string, string> productsDictionary = DbTables.productFilters
-                        .Where(z => z.FilterLabelID == filterLabel.ID)
-                        .Select(z => z.ProductID).ToDictionary(x => x);
+                    //Dictionary<string, string> productsDictionary = DbTables.productFilters
+                    //    .Where(z => z.FilterLabelID == filterLabel.ID)
+                    //    .Select(z => z.ProductID).ToDictionary(x => x);
 
 
                     // Loop through each product from the query and see if it is in the dictionary of products
-                    for (int j = 0; j < products.Length; j++)
+                    //for (int j = 0; j < products.Length; j++)
+                    //{
+                    // See if the dictionary contains this product. If so, this means this product is using this filter option
+                    //if (productsDictionary.ContainsKey(products[j].id))
+
+                    bool b = true;
+
+                    for(int j = 0; j < selectedOptions.Count(); j++)
                     {
-                        // See if the dictionary contains this product. If so, this means this product is using this filter option
-                        if (productsDictionary.ContainsKey(products[j].id))
+                        int selected = selectedOptions[j];
+                       b = await db.ProductFilters.AnyAsync(x => db.ProductFilters.Where(z => z.FilterLabelID == filterLabel.id).Select(z => z.ProductID).Contains(x.ProductID) && x.FilterLabelID == selected);
+                        if (!b)
+                        {
+                            break;
+                        }
+                            
+                    }
+
+                    
+                    
+                    
+
+                    if (foo.Contains(filterLabel.id) && b)
                         {
                             Label label = new Label
                             {
-                                name = filterLabel.Name,
+                                name = filterLabel.name,
                             };
                             labels.Add(label);
-                            break;
+                            //break;
                         }
-                    }
+                    //}
                 }
 
                 //If there are any labels, create the filter
@@ -799,6 +827,26 @@ namespace MarketingServer
         public void RemoveFilter(string filter)
         {
             filters = Regex.Replace(filters, GetPattern(filter), "");
+        }
+
+        public List<int> GetSelectedOptions()
+        {
+            List<int> selectedOptions = new List<int>();
+
+            MatchCollection matches = Regex.Matches(filters, GetPattern(@"[\w\s]+"));
+            foreach(Match match in matches)
+            {
+                //Get the options chosen from this filter
+                string[] optionsArray = match.Groups[2].Value.Split('^');
+
+                Filter currentFilter = DbTables.filterList.Where(x => x.Name == match.Groups[1].Value).FirstOrDefault();
+
+                //Get a list of ids from the options array
+                List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
+                selectedOptions.AddRange(optionIdList);
+            }
+
+            return selectedOptions;
         }
     }
 }
