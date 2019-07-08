@@ -62,7 +62,15 @@ namespace MarketingServer
                 if (queryParams.filters.Contains("Price"))
                 {
                     PriceRangeOption priceRange = queryParams.filters.GetPriceRange();
-                    productsQuery = productsQuery.Where(x => x.Price >= priceRange.min && x.Price < priceRange.max);
+
+                    if(priceRange.min == priceRange.max)
+                    {
+                        productsQuery = productsQuery.Where(x => x.Price == priceRange.min);
+                    }
+                    else
+                    {
+                        productsQuery = productsQuery.Where(x => x.Price >= priceRange.min && x.Price < priceRange.max);
+                    }
                 }
 
 

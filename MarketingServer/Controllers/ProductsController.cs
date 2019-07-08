@@ -312,11 +312,7 @@ namespace MarketingServer
 
 
             // Price filter
-            if (queryParams.filters.Contains("Price"))
-            {
-                filterOptions.Add(queryParams.filters.GetPriceRange());
-            }
-            else
+            if (!queryParams.filters.Contains("Price"))
             {
                 for (int i = 0; i < DbTables.priceRanges.Length; i++)
                 {
