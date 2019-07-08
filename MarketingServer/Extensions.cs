@@ -31,109 +31,59 @@ namespace MarketingServer
             return sortResult;
         }
 
-        public static IQueryable<Product> Where(this IQueryable<Product> source, QueryParams queryParams)
+        public static IQueryable<Product> Where(this IQueryable<Product> productsQuery, QueryParams queryParams)
         {
-
-            char separator = '^';
-
             //Search words
             if (queryParams.searchWords != string.Empty)
             {
                 string[] searchWordsArray = queryParams.searchWords.Split(' ');
-                source = source.Where(x => searchWordsArray.Any(z => x.Name.ToLower().Contains(z.ToLower())));
+                productsQuery = productsQuery.Where(x => searchWordsArray.Any(z => x.Name.ToLower().Contains(z.ToLower())));
             }
 
 
             //Category
             if (queryParams.categoryId >= 0)
             {
-                source = source.Where(x => x.Nich.CategoryID == queryParams.categoryId);
+                productsQuery = productsQuery.Where(x => x.Nich.CategoryID == queryParams.categoryId);
             }
 
 
             //Niche
             if (queryParams.nicheId >= 0)
             {
-                source = source.Where(x => x.NicheID == queryParams.nicheId);
+                productsQuery = productsQuery.Where(x => x.NicheID == queryParams.nicheId);
             }
 
 
             //Filters
             if (queryParams.filters.Length > 0)
             {
-                Match result;
-
                 //Price Filter
-                result = queryParams.filters.GetFilter("Price");
-                if (result.Length > 0)
+                if (queryParams.filters.Contains("Price"))
                 {
-                    string[] priceRangeArray = result.Groups[2].Value.Split(separator);
-                    List<PriceRange> priceRangeList = DbTables.priceRanges
-                        .Where(x => priceRangeArray.Contains(x.Label))
-                        .Select(x => new PriceRange
-                        {
-                            Min = x.Min,
-                            Max = x.Max
-                        }).ToList();
-
-                    for (int i = 0; i < priceRangeArray.Length; i++)
-                    {
-                        string price = priceRangeArray[i];
-
-                        result = Regex.Match(price, @"\[(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)\]");
-                        if (result.Length > 0)
-                        {
-                            PriceRange range = new PriceRange
-                            {
-                                Min = double.Parse(result.Groups[1].Value),
-                                Max = double.Parse(result.Groups[2].Value),
-                            };
-                            priceRangeList.Add(range);
-                        }
-                    }
-
-                    Expression<Func<Product, bool>> predicate = ExpressionBuilder.False<Product>();
-
-                    for (int i = 0; i < priceRangeList.Count(); i++)
-                    {
-                        PriceRange priceRange = priceRangeList[i];
-                        PriceRange temp = priceRange;
-                        predicate = predicate.Or(x => x.Price >= temp.Min && x.Price < temp.Max);
-                    }
-
-                    source = source.Where(predicate);
+                    PriceRangeOption priceRange = queryParams.filters.GetPriceRange();
+                    productsQuery = productsQuery.Where(x => x.Price >= priceRange.min && x.Price < priceRange.max);
                 }
 
 
-                //Custom Filters
-                for (int i = 0; i < DbTables.filterList.Length; i++)
+                // Custom filters
+                List<SelectedFilterOptions> selectedFilterOptions = queryParams.filters.GetSelectedOptions();
+
+                // Include the selected filters in the query
+                for (int i = 0; i < selectedFilterOptions.Count(); i++)
                 {
-                    Filter currentFilter = DbTables.filterList[i];
-                    result = queryParams.filters.GetFilter(currentFilter.Name);
-
-
-                    if (result.Length > 0)
-                    {
-                        //Get the options chosen from this filter
-                        string[] optionsArray = result.Groups[2].Value.Split(separator);
-
-                        //Get a list of ids from the options array
-                        int[] optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToArray();
-
-                        //Set the query
-                        source = source
-                            .Where(x => x.ProductFilters
-                                .Where(z => optionIdList.Contains(z.FilterLabelID))
-                                .Select(z => z.ProductID)
-                                .ToList()
-                                .Contains(x.ID)
-                            );
-                    }
+                    int[] selectedOptions = selectedFilterOptions[i].options;
+                    productsQuery = productsQuery
+                        .Where(x => x.ProductFilters
+                            .Where(z => selectedOptions.Contains(z.FilterLabelID))
+                            .Select(z => z.ProductID)
+                            .ToList()
+                            .Contains(x.ID)
+                        );
                 }
             }
 
-
-            return source;
+            return productsQuery;
         }
     }
 }

@@ -269,7 +269,7 @@ namespace MarketingServer
             // Get arrays of categories and niches from these products 
             int[] productCategories = cachedProducts.Select(p => p.categoryId).Distinct().ToArray();
             int[] productNiches = cachedProducts.Select(p => p.nicheId).Distinct().ToArray();
-            
+
 
             var data = new
             {
@@ -298,163 +298,87 @@ namespace MarketingServer
                         name = c.Name
                     }).ToArray()
                 }).ToArray(),
-                filters = await GetFilters(cachedProducts, queryParams)
+                filters = GetFilters(cachedProducts, queryParams)
             };
 
             return Ok(data);
         }
 
-        private async Task<List<FilterData>> GetFilters(CachedProduct[] cachedProducts, QueryParams queryParams)
+        private List<FilterData> GetFilters(CachedProduct[] cachedProducts, QueryParams queryParams)
         {
             List<FilterData> filters = new List<FilterData>();
-            List<Label> labels;
             FilterData filter;
-            CachedProduct[] products;
-            labels = new List<Label>();
-
-            // If the query params contains the price filter
-            //if (queryParams.filters.Contains("Price"))
-            //{
-            //    // Temporarily remove the price filter so we can query products without the price
-            //    QueryParams tempParams = queryParams;
-            //    tempParams.filters.RemoveFilter("Price");
-
-            //    // See if we have cached products
-            //    string key = tempParams.GetKey();
-            //    products = Caching.Get<CachedProduct[]>(key);
-
-            //    // If no cache, get the products from the database
-            //    if (products == null)
-            //    {
-            //        products = await QueryProducts(tempParams, key);
-            //    }
-            //}
-            //else
-            //{
-                // Grab the products from cache
-                products = cachedProducts;
-            //}
+            List<IFilterOption> filterOptions = new List<IFilterOption>();
 
 
-            for (int i = 0; i < DbTables.priceRanges.Length; i++)
+            // Price filter
+            if (queryParams.filters.Contains("Price"))
             {
-                PriceRange priceRange = DbTables.priceRanges[i];
-
-                // Do the products contain this price range? If so, create a label
-                if (products.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max))
+                filterOptions.Add(queryParams.filters.GetPriceRange());
+            }
+            else
+            {
+                for (int i = 0; i < DbTables.priceRanges.Length; i++)
                 {
-                    Label label = new Label
+                    PriceRange priceRange = DbTables.priceRanges[i];
+
+                    // Do the products contain this price range? If so, create an option
+                    if (cachedProducts.Any(x => x.price >= priceRange.Min && x.price < priceRange.Max))
                     {
-                        name = priceRange.Label,
-                    };
-                    labels.Add(label);
+                        PriceRangeOption filterOption = new PriceRangeOption
+                        {
+                            min = priceRange.Min,
+                            max = priceRange.Max
+                        };
+                        filterOptions.Add(filterOption);
+                    }
                 }
             }
 
-            // If we have any labels, create the price filter
-            if (labels.Count > 0)
+            filter = new FilterData
             {
-                filter = new FilterData
-                {
-                    caption = "Price",
-                    labels = labels
-                };
+                caption = "Price",
+                options = filterOptions
+            };
 
-                filters.Add(filter);
-            }
+            filters.Add(filter);
 
-            int[] foo = DbTables.productFilters.Where(x => cachedProducts.Select(z => z.id).Contains(x.ProductID)).Select(x => x.FilterLabelID).Distinct().ToArray();
 
-            List<int> selectedOptions = queryParams.filters.GetSelectedOptions();
+            // Custom filters
+
+            // Get the filter options from these products
+            int[] filterOptionsArray = DbTables.productFilters.Where(x => cachedProducts.Select(z => z.id).Contains(x.ProductID)).Select(x => x.FilterLabelID).Distinct().ToArray();
 
             // Iterate through each filter
             for (int i = 0; i < DbTables.filterList.Length; i++)
             {
                 Filter currentFilter = DbTables.filterList[i];
-                labels = new List<Label>();
+                filterOptions = new List<IFilterOption>();
 
-
-                // If the query params contains the current filter
-                //if (queryParams.filters.Contains(currentFilter.Name))
-                //{
-                //    // Temporarily remove this filter so we can query products without it
-                //    QueryParams tempParams = queryParams;
-                //    tempParams.filters.RemoveFilter(currentFilter.Name);
-
-                //    // See if we have cached products
-                //    string key = tempParams.GetKey();
-                //    products = Caching.Get<CachedProduct[]>(key);
-
-                //    if (products == null)
-                //    {
-                //        products = await QueryProducts(tempParams, key);
-                //    }
-                //}
-                //else
-                //{
-                //    products = cachedProducts;
-                //}
-
-
-               
-
-
-
-
-                // Iterate through each label
-                var filterLabels = currentFilter.FilterLabels.Select(x => new { id = x.ID, name = x.Name}).ToArray();
-                for (int index = 0; index < filterLabels.Length; index++)
+                // Iterate through each option
+                var options = currentFilter.FilterLabels.Select(x => new { id = x.ID, name = x.Name }).ToArray();
+                for (int index = 0; index < options.Length; index++)
                 {
-                    var filterLabel = filterLabels[index];
-
-                    // Create a dictionary of all products using this filter option for fast lookup
-                    //Dictionary<string, string> productsDictionary = DbTables.productFilters
-                    //    .Where(z => z.FilterLabelID == filterLabel.ID)
-                    //    .Select(z => z.ProductID).ToDictionary(x => x);
+                    var filterOption = options[index];
 
 
-                    // Loop through each product from the query and see if it is in the dictionary of products
-                    //for (int j = 0; j < products.Length; j++)
-                    //{
-                    // See if the dictionary contains this product. If so, this means this product is using this filter option
-                    //if (productsDictionary.ContainsKey(products[j].id))
-
-                    bool b = true;
-
-                    for(int j = 0; j < selectedOptions.Count(); j++)
+                    if (filterOptionsArray.Contains(filterOption.id))
                     {
-                        int selected = selectedOptions[j];
-                       b = await db.ProductFilters.AnyAsync(x => db.ProductFilters.Where(z => z.FilterLabelID == filterLabel.id).Select(z => z.ProductID).Contains(x.ProductID) && x.FilterLabelID == selected);
-                        if (!b)
+                        FilterOption option = new FilterOption
                         {
-                            break;
-                        }
-                            
+                            name = filterOption.name,
+                        };
+                        filterOptions.Add(option);
                     }
-
-                    
-                    
-                    
-
-                    if (foo.Contains(filterLabel.id) && b)
-                        {
-                            Label label = new Label
-                            {
-                                name = filterLabel.name,
-                            };
-                            labels.Add(label);
-                            //break;
-                        }
-                    //}
                 }
 
-                //If there are any labels, create the filter
-                if (labels.Count > 0)
+                //If there are any options, create the filter
+                if (filterOptions.Count > 0)
                 {
                     filter = new FilterData
                     {
                         caption = currentFilter.Name,
-                        labels = labels
+                        options = filterOptions
                     };
 
                     filters.Add(filter);
@@ -471,7 +395,7 @@ namespace MarketingServer
                 .Where(queryParams)
                 .OrderBy(queryParams)
                 .ThenBy(x => x.Name)
-                .Select(x => new 
+                .Select(x => new
                 {
                     id = x.ID,
                     name = x.Name,
@@ -689,16 +613,20 @@ namespace MarketingServer
     }
 
 
-    public struct Label
+    public struct FilterOption : IFilterOption
     {
         public string name;
-        public int productCount;
+    }
+    public struct PriceRangeOption : IFilterOption
+    {
+        public double min;
+        public double max;
     }
 
     public struct FilterData
     {
         public string caption;
-        public List<Label> labels;
+        public List<IFilterOption> options;
     }
 
     public class ProductGroup
@@ -775,7 +703,7 @@ namespace MarketingServer
 
         private string GetPattern(string filter)
         {
-            return "(" + filter + @")\|([$0-9a-zA-Z\-^\s\[\]]+)\|";
+            return "(" + filter + @")\|([$0-9a-zA-Z\-^\s\[\],\.]+)\|";
         }
 
         public QueryFilters(string filters)
@@ -783,7 +711,7 @@ namespace MarketingServer
             this.filters = filters;
         }
 
-        public Match GetFilter(string filter)
+        private Match GetFilter(string filter)
         {
             return Regex.Match(filters, GetPattern(filter));
         }
@@ -794,7 +722,7 @@ namespace MarketingServer
             List<string> filterList = Regex.Matches(filters, GetPattern(@"[\w\s]+")).Cast<Match>().Select(x => x.Value).ToList();
 
 
-            for(int i = 0; i < filterList.Count; i++)
+            for (int i = 0; i < filterList.Count; i++)
             {
                 // Get a list of all the options for this filter
                 List<string> filterOptionList = Regex.Matches(filterList[i], @"([$0-9a-zA-Z\-\s\[\]]+)").Cast<Match>().Select(x => x.Value).ToList();
@@ -808,7 +736,7 @@ namespace MarketingServer
 
                 // Piece together the current filter with the sorted options
                 filterList[i] = optionName + "|";
-                for(int j = 0; j < ordered.Count; j++)
+                for (int j = 0; j < ordered.Count; j++)
                 {
                     filterList[i] += ordered[j];
                     if (j != ordered.Count - 1) filterList[i] += "^";
@@ -824,29 +752,46 @@ namespace MarketingServer
             return GetFilter(filter).Length > 0;
         }
 
-        public void RemoveFilter(string filter)
-        {
-            filters = Regex.Replace(filters, GetPattern(filter), "");
-        }
 
-        public List<int> GetSelectedOptions()
+        public List<SelectedFilterOptions> GetSelectedOptions()
         {
-            List<int> selectedOptions = new List<int>();
+            List<SelectedFilterOptions> selectedFilterOptions = new List<SelectedFilterOptions>();
 
             MatchCollection matches = Regex.Matches(filters, GetPattern(@"[\w\s]+"));
-            foreach(Match match in matches)
+            foreach (Match match in matches)
             {
-                //Get the options chosen from this filter
-                string[] optionsArray = match.Groups[2].Value.Split('^');
+                if (match.Groups[1].Value != "Price")
+                {
+                    //Get the options chosen from this filter
+                    string[] optionsArray = match.Groups[2].Value.Split('^');
 
-                Filter currentFilter = DbTables.filterList.Where(x => x.Name == match.Groups[1].Value).FirstOrDefault();
+                    Filter currentFilter = DbTables.filterList.Where(x => x.Name == match.Groups[1].Value).FirstOrDefault();
 
-                //Get a list of ids from the options array
-                List<int> optionIdList = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToList();
-                selectedOptions.AddRange(optionIdList);
+                    selectedFilterOptions.Add(new SelectedFilterOptions
+                    {
+                        options = currentFilter.FilterLabels.Where(x => optionsArray.Contains(x.Name)).Select(x => x.ID).ToArray()
+                    });
+                }
             }
 
-            return selectedOptions;
+            return selectedFilterOptions;
         }
+
+        public PriceRangeOption GetPriceRange()
+        {
+            Match result = GetFilter("Price");
+
+            result = Regex.Match(result.Groups[2].Value, @"(\d+\.?(?:\d+)?)-(\d+\.?(?:\d+)?)");
+            return new PriceRangeOption
+            {
+                min = float.Parse(result.Groups[1].Value),
+                max = float.Parse(result.Groups[2].Value),
+            };
+        }
+    }
+
+    public struct SelectedFilterOptions
+    {
+        public int[] options;
     }
 }

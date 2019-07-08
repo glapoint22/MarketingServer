@@ -240,6 +240,7 @@
     </Compile>
     <Compile Include="Hashing.cs" />
     <Compile Include="IdentityModels.cs" />
+    <Compile Include="IFilterOption.cs" />
     <Compile Include="LeadMagnetEmail.cs">
       <DependentUpon>Marketing.tt</DependentUpon>
     </Compile>
